@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi_babel import _, BabelMiddleware
 from fastapi.staticfiles import StaticFiles
 from aiogram import types
+import asyncio
 import time
 from app.core.config import settings
 from app.bot.factory import bot, dp
@@ -32,10 +33,15 @@ async def log_requests(request: Request, call_next):
 app.include_router(api_router, prefix="/api/v1")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# Store polling task reference
+_polling_task: asyncio.Task | None = None
+
 @app.on_event("startup")
 async def on_startup():
-    # Configure the webhook on Telegram's servers only if an https URL is provided
-    if settings.WEBHOOK_URL and settings.WEBHOOK_URL.startswith("https://"):
+    global _polling_task
+
+    if settings.use_webhook:
+        # Webhook mode: set webhook on Telegram servers
         try:
             await bot.set_webhook(
                 url=settings.WEBHOOK_URL,
@@ -43,25 +49,57 @@ async def on_startup():
                 drop_pending_updates=True
             )
             webhook_info = await bot.get_webhook_info()
-            logger.info(f"Webhook info: {webhook_info}")
+            logger.info(f"Webhook mode active. Webhook info: {webhook_info}")
         except Exception as e:
             logger.warning(f"Skipping webhook setup (failed): {e}")
     else:
-        logger.info("WEBHOOK_URL not HTTPS or not set — skipping webhook setup on startup.")
+        # Polling mode: start polling in background task
+        logger.info("WEBHOOK_URL not set or not HTTPS — starting bot in POLLING mode.")
+        try:
+            # Delete any existing webhook first
+            await bot.delete_webhook(drop_pending_updates=True)
+        except Exception:
+            pass
+        _polling_task = asyncio.create_task(_start_polling())
 
     await i18n_middleware.core.startup()
     
     # Start the scheduler
     start_scheduler()
 
+
+async def _start_polling():
+    """Run the dispatcher polling in background."""
+    logger.info("Bot polling started...")
+    try:
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    except asyncio.CancelledError:
+        logger.info("Bot polling cancelled.")
+    except Exception as e:
+        logger.error(f"Bot polling error: {e}")
+
+
 @app.on_event("shutdown")
 async def on_shutdown():
-    # Only try to delete webhook if it was set to an HTTPS URL
-    if settings.WEBHOOK_URL and settings.WEBHOOK_URL.startswith("https://"):
+    global _polling_task
+
+    if settings.use_webhook:
+        # Only try to delete webhook if it was set
         try:
             await bot.delete_webhook()
         except Exception:
             logger.warning("Failed to delete webhook on shutdown — ignoring")
+    else:
+        # Stop polling
+        if _polling_task and not _polling_task.done():
+            _polling_task.cancel()
+            try:
+                await _polling_task
+            except asyncio.CancelledError:
+                pass
+        await dp.stop_polling()
+        logger.info("Bot polling stopped.")
+
     await bot.session.close()
     
     # Stop the scheduler
@@ -70,7 +108,7 @@ async def on_shutdown():
 @app.post("/webhook")
 async def bot_webhook(update: dict):
     """
-    Endpoint for Telegram to push updates
+    Endpoint for Telegram to push updates (only used in webhook mode)
     """
     logger.info(f"Update received")
     telegram_update = types.Update(**update)
