@@ -1,0 +1,900 @@
+[
+    {
+        "RegionID": "1735",
+        "RegionName_uz": "Qoraqalpog'iston Respublikasi",
+        "RegionName_ru": "Республика Каракалпакстан",
+        "RegionName_en": "Republic of Karakalpakstan"
+    },
+    {
+        "RegionID": "1735204",
+        "RegionName_uz": "Amudaryinsky district",
+        "RegionName_ru": "Амударьинский район",
+        "RegionName_en": "Amudaryinsky district"
+    },
+    {
+        "RegionID": "1735207",
+        "RegionName_uz": "Beruniy tumani",
+        "RegionName_ru": "Берунийский район",
+        "RegionName_en": "Beruniy district"
+    },
+    {
+        "RegionID": "1735209",
+        "RegionName_uz": "Buzatov tumani",
+        "RegionName_ru": "Бузатауский район",
+        "RegionName_en": "Buzatov district"
+    },
+    {
+        "RegionID": "1735211",
+        "RegionName_uz": "Karazak district",
+        "RegionName_ru": "Караузякский район",
+        "RegionName_en": "Karazak district"
+    },
+    {
+        "RegionID": "1735212",
+        "RegionName_uz": "Kegeyli tumani",
+        "RegionName_ru": "Кегейлийский район",
+        "RegionName_en": "Kegayli district"
+    },
+    {
+        "RegionID": "1735215",
+        "RegionName_uz": "Kungrad district",
+        "RegionName_ru": "Кунградский район",
+        "RegionName_en": "Kungrad district"
+    },
+    {
+        "RegionID": "1735218",
+        "RegionName_uz": "Qonliko'l tumani",
+        "RegionName_ru": "Канлыкульский район",
+        "RegionName_en": "Kanlykul district"
+    },
+    {
+        "RegionID": "1735222",
+        "RegionName_uz": "Muynoq district",
+        "RegionName_ru": "Муйнакский район",
+        "RegionName_en": "Muynak district"
+    },
+    {
+        "RegionID": "1735225",
+        "RegionName_uz": "Nukus district",
+        "RegionName_ru": "Нукусский район",
+        "RegionName_en": "Nukus district"
+    },
+    {
+        "RegionID": "1735228",
+        "RegionName_uz": "Taxiatash tumani",
+        "RegionName_ru": "Тахиаташский район",
+        "RegionName_en": "Taxiatash district"
+    },
+    {
+        "RegionID": "1735230",
+        "RegionNane": "Тахтакупырский район"
+    },
+    {
+        "RegionID": "1735233",
+        "RegionNane": "Турткульский район"
+    },
+    {
+        "RegionID": "1735236",
+        "RegionNane": "Ходжейлийский район"
+    },
+    {
+        "RegionID": "1735240",
+        "RegionNane": "Чимбайский район"
+    },
+    {
+        "RegionID": "1735243",
+        "RegionNane": "Шуманайский район"
+    },
+    {
+        "RegionID": "1735250",
+        "RegionNane": "Элликкалинский район"
+    },
+    {
+        "RegionID": "1735401",
+        "RegionNane": "город Нукус"
+    },
+    {
+        "RegionID": "1703",
+        "RegionNane": "Андижанская область"
+    },
+    {
+        "RegionID": "1703202",
+        "RegionNane": "Алтынкульский район"
+    },
+    {
+        "RegionID": "1703203",
+        "RegionNane": "Андижанский район"
+    },
+    {
+        "RegionID": "1703206",
+        "RegionNane": "Балыкчинский район"
+    },
+    {
+        "RegionID": "1703209",
+        "RegionNane": "Бозский район"
+    },
+    {
+        "RegionID": "1703210",
+        "RegionNane": "Булакбашинский район"
+    },
+    {
+        "RegionID": "1703211",
+        "RegionNane": "Жалакудукский район"
+    },
+    {
+        "RegionID": "1703214",
+        "RegionNane": "Избасканский район"
+    },
+    {
+        "RegionID": "1703217",
+        "RegionNane": "Улугнорский район"
+    },
+    {
+        "RegionID": "1703220",
+        "RegionNane": "Кургантепинский район"
+    },
+    {
+        "RegionID": "1703224",
+        "RegionNane": "Асакинский район"
+    },
+    {
+        "RegionID": "1703227",
+        "RegionNane": "Мархаматский район"
+    },
+    {
+        "RegionID": "1703230",
+        "RegionNane": "Шахриханский район"
+    },
+    {
+        "RegionID": "1703232",
+        "RegionNane": "Пахтаабадский район"
+    },
+    {
+        "RegionID": "1703236",
+        "RegionNane": "Ходжаабадский район"
+    },
+    {
+        "RegionID": "1703401",
+        "RegionNane": "город Андижан"
+    },
+    {
+        "RegionID": "1703408",
+        "RegionNane": "город Ханабад"
+    },
+    {
+        "RegionID": "1706",
+        "RegionNane": "Бухарская область"
+    },
+    {
+        "RegionID": "1706204",
+        "RegionNane": "Алатский район"
+    },
+    {
+        "RegionID": "1706207",
+        "RegionNane": "Бухарский район"
+    },
+    {
+        "RegionID": "1706212",
+        "RegionNane": "Вабкентский район"
+    },
+    {
+        "RegionID": "1706215",
+        "RegionNane": "Гиждуванский район"
+    },
+    {
+        "RegionID": "1706219",
+        "RegionNane": "Каганский район"
+    },
+    {
+        "RegionID": "1706230",
+        "RegionNane": "Каракульский район"
+    },
+    {
+        "RegionID": "1706232",
+        "RegionNane": "Караулбазарский район"
+    },
+    {
+        "RegionID": "1706240",
+        "RegionNane": "Пешкунский район"
+    },
+    {
+        "RegionID": "1706242",
+        "RegionNane": "Ромитанский район"
+    },
+    {
+        "RegionID": "1706246",
+        "RegionNane": "Жондорский район"
+    },
+    {
+        "RegionID": "1706258",
+        "RegionNane": "Шафирканский район"
+    },
+    {
+        "RegionID": "1706401",
+        "RegionNane": "город Бухара"
+    },
+    {
+        "RegionID": "1706403",
+        "RegionNane": "город Каган"
+    },
+    {
+        "RegionID": "1708",
+        "RegionNane": "Джизакская область"
+    },
+    {
+        "RegionID": "1708201",
+        "RegionNane": "Арнасайский район"
+    },
+    {
+        "RegionID": "1708204",
+        "RegionNane": "Бахмальский район"
+    },
+    {
+        "RegionID": "1708209",
+        "RegionNane": "Галляаральский район"
+    },
+    {
+        "RegionID": "1708212",
+        "RegionNane": "Шароф Рашидовский район"
+    },
+    {
+        "RegionID": "1708215",
+        "RegionNane": "Дустликский район"
+    },
+    {
+        "RegionID": "1708218",
+        "RegionNane": "Заминский район"
+    },
+    {
+        "RegionID": "1708220",
+        "RegionNane": "Зарбдорский район"
+    },
+    {
+        "RegionID": "1708223",
+        "RegionNane": "Мирзачульский район"
+    },
+    {
+        "RegionID": "1708225",
+        "RegionNane": "Зафарабадский район"
+    },
+    {
+        "RegionID": "1708228",
+        "RegionNane": "Пахтакорский район"
+    },
+    {
+        "RegionID": "1708235",
+        "RegionNane": "Фаришский район"
+    },
+    {
+        "RegionID": "1708237",
+        "RegionNane": "Янгиабадский район"
+    },
+    {
+        "RegionID": "1708401",
+        "RegionNane": "город Джизак"
+    },
+    {
+        "RegionID": "1710",
+        "RegionNane": "Кашкадарьинская область"
+    },
+    {
+        "RegionID": "1710207",
+        "RegionNane": "Гузарский район"
+    },
+    {
+        "RegionID": "1710212",
+        "RegionNane": "Дехканабадский район"
+    },
+    {
+        "RegionID": "1710220",
+        "RegionNane": "Камашинский район"
+    },
+    {
+        "RegionID": "1710224",
+        "RegionNane": "Каршинский район"
+    },
+    {
+        "RegionID": "1710229",
+        "RegionNane": "Касанский район"
+    },
+    {
+        "RegionID": "1710232",
+        "RegionNane": "Китабский район"
+    },
+    {
+        "RegionID": "1710233",
+        "RegionNane": "Миришкорский район"
+    },
+    {
+        "RegionID": "1710234",
+        "RegionNane": "Мубарекский район"
+    },
+    {
+        "RegionID": "1710235",
+        "RegionNane": "Нишанский район"
+    },
+    {
+        "RegionID": "1710237",
+        "RegionNane": "Касбинский район"
+    },
+    {
+        "RegionID": "1710242",
+        "RegionNane": "Чиракчинский район"
+    },
+    {
+        "RegionID": "1710245",
+        "RegionNane": "Шахрисабзский район"
+    },
+    {
+        "RegionID": "1710250",
+        "RegionNane": "Яккабагский район"
+    },
+    {
+        "RegionID": "1710401",
+        "RegionNane": "город Карши"
+    },
+    {
+        "RegionID": "1710405",
+        "RegionNane": "город Шахрисабз"
+    },
+    {
+        "RegionID": "1712",
+        "RegionNane": "Навоийская область"
+    },
+    {
+        "RegionID": "1712211",
+        "RegionNane": "Канимехский район"
+    },
+    {
+        "RegionID": "1712216",
+        "RegionNane": "Кызылтепинский район"
+    },
+    {
+        "RegionID": "1712230",
+        "RegionNane": "Навбахорский район"
+    },
+    {
+        "RegionID": "1712234",
+        "RegionNane": "Карманинский район"
+    },
+    {
+        "RegionID": "1712238",
+        "RegionNane": "Нуратинский район"
+    },
+    {
+        "RegionID": "1712244",
+        "RegionNane": "Тамдынский район"
+    },
+    {
+        "RegionID": "1712248",
+        "RegionNane": "Учкудукский район"
+    },
+    {
+        "RegionID": "1712251",
+        "RegionNane": "Хатырчинский район"
+    },
+    {
+        "RegionID": "1712401",
+        "RegionNane": "город Навои"
+    },
+    {
+        "RegionID": "1712408",
+        "RegionNane": "город Зарафшан"
+    },
+    {
+        "RegionID": "1712412",
+        "RegionNane": "город Газган"
+    },
+    {
+        "RegionID": "1714",
+        "RegionNane": "Наманганская область"
+    },
+    {
+        "RegionID": "1714204",
+        "RegionNane": "Мингбулакский район"
+    },
+    {
+        "RegionID": "1714207",
+        "RegionNane": "Касансайский район"
+    },
+    {
+        "RegionID": "1714212",
+        "RegionNane": "Наманганский район"
+    },
+    {
+        "RegionID": "1714216",
+        "RegionNane": "Нарынский район"
+    },
+    {
+        "RegionID": "1714219",
+        "RegionNane": "Папский район"
+    },
+    {
+        "RegionID": "1714224",
+        "RegionNane": "Туракурганский район"
+    },
+    {
+        "RegionID": "1714229",
+        "RegionNane": "Уйчинский район"
+    },
+    {
+        "RegionID": "1714234",
+        "RegionNane": "Учкурганский район"
+    },
+    {
+        "RegionID": "1714236",
+        "RegionNane": "Чартакский район"
+    },
+    {
+        "RegionID": "1714237",
+        "RegionNane": "Чустский район"
+    },
+    {
+        "RegionID": "1714242",
+        "RegionNane": "Янгикурганский район"
+    },
+    {
+        "RegionID": "1714401",
+        "RegionNane": "город Наманган"
+    },
+    {
+        "RegionID": "1718",
+        "RegionNane": "Самаркандская область"
+    },
+    {
+        "RegionID": "1718203",
+        "RegionNane": "Акдарьинский район"
+    },
+    {
+        "RegionID": "1718206",
+        "RegionNane": "Булунгурский район"
+    },
+    {
+        "RegionID": "1718209",
+        "RegionNane": "Джамбайский район"
+    },
+    {
+        "RegionID": "1718212",
+        "RegionNane": "Иштыханский район"
+    },
+    {
+        "RegionID": "1718215",
+        "RegionNane": "Каттакурганский район"
+    },
+    {
+        "RegionID": "1718216",
+        "RegionNane": "Кошрабадский район"
+    },
+    {
+        "RegionID": "1718218",
+        "RegionNane": "Нарпайский район"
+    },
+    {
+        "RegionID": "1718224",
+        "RegionNane": "Пайарыкский район"
+    },
+    {
+        "RegionID": "1718227",
+        "RegionNane": "Пастдаргомский район"
+    },
+    {
+        "RegionID": "1718230",
+        "RegionNane": "Пахтачийский район"
+    },
+    {
+        "RegionID": "1718233",
+        "RegionNane": "Самаркандский район"
+    },
+    {
+        "RegionID": "1718235",
+        "RegionNane": "Нурабадский район"
+    },
+    {
+        "RegionID": "1718236",
+        "RegionNane": "Ургутский район"
+    },
+    {
+        "RegionID": "1718238",
+        "RegionNane": "Тайлакский район"
+    },
+    {
+        "RegionID": "1718401",
+        "RegionNane": "город Самарканд"
+    },
+    {
+        "RegionID": "1718406",
+        "RegionNane": "город Каттакурган"
+    },
+    {
+        "RegionID": "1722",
+        "RegionNane": "Сурхандарьинская область"
+    },
+    {
+        "RegionID": "1722201",
+        "RegionNane": "Алтынсайский район"
+    },
+    {
+        "RegionID": "1722202",
+        "RegionNane": "Ангорский район"
+    },
+    {
+        "RegionID": "1722203",
+        "RegionNane": "Бандиханский район"
+    },
+    {
+        "RegionID": "1722204",
+        "RegionNane": "Байсунский район"
+    },
+    {
+        "RegionID": "1722207",
+        "RegionNane": "Музрабадский район"
+    },
+    {
+        "RegionID": "1722210",
+        "RegionNane": "Денауский район"
+    },
+    {
+        "RegionID": "1722212",
+        "RegionNane": "Джаркурганский район"
+    },
+    {
+        "RegionID": "1722214",
+        "RegionNane": "Кумкурганский район"
+    },
+    {
+        "RegionID": "1722215",
+        "RegionNane": "Кизирикский район"
+    },
+    {
+        "RegionID": "1722217",
+        "RegionNane": "Сариасийский район"
+    },
+    {
+        "RegionID": "1722220",
+        "RegionNane": "Термезский район"
+    },
+    {
+        "RegionID": "1722221",
+        "RegionNane": "Узунский район"
+    },
+    {
+        "RegionID": "1722223",
+        "RegionNane": "Шерабадский район"
+    },
+    {
+        "RegionID": "1722226",
+        "RegionNane": "Шурчинский район"
+    },
+    {
+        "RegionID": "1722401",
+        "RegionNane": "город Термез"
+    },
+    {
+        "RegionID": "1724",
+        "RegionNane": "Сырдарьинская область"
+    },
+    {
+        "RegionID": "1724206",
+        "RegionNane": "Акалтынский район"
+    },
+    {
+        "RegionID": "1724212",
+        "RegionNane": "Баяутский район"
+    },
+    {
+        "RegionID": "1724216",
+        "RegionNane": "Сайхунабадский район"
+    },
+    {
+        "RegionID": "1724220",
+        "RegionNane": "Гулистанский район"
+    },
+    {
+        "RegionID": "1724226",
+        "RegionNane": "Сардобинский район"
+    },
+    {
+        "RegionID": "1724228",
+        "RegionNane": "Мирзаабадский район"
+    },
+    {
+        "RegionID": "1724231",
+        "RegionNane": "Сырдарьинский район"
+    },
+    {
+        "RegionID": "1724235",
+        "RegionNane": "Хавастский район"
+    },
+    {
+        "RegionID": "1724401",
+        "RegionNane": "город Гулистан"
+    },
+    {
+        "RegionID": "1724410",
+        "RegionNane": "город Ширин"
+    },
+    {
+        "RegionID": "1724413",
+        "RegionNane": "город Янгиер"
+    },
+    {
+        "RegionID": "1726",
+        "RegionNane": "г. Ташкент"
+    },
+    {
+        "RegionID": "1726262",
+        "RegionNane": "Учтепинский район"
+    },
+    {
+        "RegionID": "1726264",
+        "RegionNane": "Бектемирский район"
+    },
+    {
+        "RegionID": "1726266",
+        "RegionNane": "Юнусабадский район"
+    },
+    {
+        "RegionID": "1726269",
+        "RegionNane": "Мирзо Улугбекский район"
+    },
+    {
+        "RegionID": "1726273",
+        "RegionNane": "Мирабадский район"
+    },
+    {
+        "RegionID": "1726277",
+        "RegionNane": "Шайхантахурский район"
+    },
+    {
+        "RegionID": "1726280",
+        "RegionNane": "Алмазарский район"
+    },
+    {
+        "RegionID": "1726283",
+        "RegionNane": "Сергелийский район"
+    },
+    {
+        "RegionID": "1726287",
+        "RegionNane": "Яккасарайский район"
+    },
+    {
+        "RegionID": "1726290",
+        "RegionNane": "Яшнабадский район"
+    },
+    {
+        "RegionID": "1726292",
+        "RegionNane": "Янгихаётский район"
+    },
+    {
+        "RegionID": "1726294",
+        "RegionNane": "Чиланзарский район"
+    },
+    {
+        "RegionID": "1727",
+        "RegionNane": "Ташкентская область"
+    },
+    {
+        "RegionID": "1727206",
+        "RegionNane": "Аккурганский район"
+    },
+    {
+        "RegionID": "1727212",
+        "RegionNane": "Ахангаранский район"
+    },
+    {
+        "RegionID": "1727220",
+        "RegionNane": "Бекабадский район"
+    },
+    {
+        "RegionID": "1727224",
+        "RegionNane": "Бостанлыкский район"
+    },
+    {
+        "RegionID": "1727228",
+        "RegionNane": "Букинский район"
+    },
+    {
+        "RegionID": "1727233",
+        "RegionNane": "Куйичирчикский район"
+    },
+    {
+        "RegionID": "1727237",
+        "RegionNane": "Зангиатинский район"
+    },
+    {
+        "RegionID": "1727239",
+        "RegionNane": "Юкоричирчикский район"
+    },
+    {
+        "RegionID": "1727248",
+        "RegionNane": "Кибрайский район"
+    },
+    {
+        "RegionID": "1727249",
+        "RegionNane": "Паркентский район"
+    },
+    {
+        "RegionID": "1727250",
+        "RegionNane": "Пскентский район"
+    },
+    {
+        "RegionID": "1727253",
+        "RegionNane": "Уртачирчикский район"
+    },
+    {
+        "RegionID": "1727256",
+        "RegionNane": "Чиназский район"
+    },
+    {
+        "RegionID": "1727259",
+        "RegionNane": "Янгиюльский район"
+    },
+    {
+        "RegionID": "1727265",
+        "RegionNane": "Ташкентский район"
+    },
+    {
+        "RegionID": "1727401",
+        "RegionNane": "город Нурафшон"
+    },
+    {
+        "RegionID": "1727404",
+        "RegionNane": "город Алмалык"
+    },
+    {
+        "RegionID": "1727407",
+        "RegionNane": "город Ангрен"
+    },
+    {
+        "RegionID": "1727413",
+        "RegionNane": "город Бекабад"
+    },
+    {
+        "RegionID": "1727415",
+        "RegionNane": "город Ахангаран"
+    },
+    {
+        "RegionID": "1727419",
+        "RegionNane": "город Чирчик"
+    },
+    {
+        "RegionID": "1727424",
+        "RegionNane": "город Янгиюль"
+    },
+    {
+        "RegionID": "1730",
+        "RegionNane": "Ферганская область"
+    },
+    {
+        "RegionID": "1730203",
+        "RegionNane": "Алтыарыкский район"
+    },
+    {
+        "RegionID": "1730206",
+        "RegionNane": "Куштепинский район"
+    },
+    {
+        "RegionID": "1730209",
+        "RegionNane": "Багдадский район"
+    },
+    {
+        "RegionID": "1730212",
+        "RegionNane": "Бувайдинский район"
+    },
+    {
+        "RegionID": "1730215",
+        "RegionNane": "Бешарыкский район"
+    },
+    {
+        "RegionID": "1730218",
+        "RegionNane": "Кувинский район"
+    },
+    {
+        "RegionID": "1730221",
+        "RegionNane": "Учкуприкский район"
+    },
+    {
+        "RegionID": "1730224",
+        "RegionNane": "Риштанский район"
+    },
+    {
+        "RegionID": "1730226",
+        "RegionNane": "Сохский район"
+    },
+    {
+        "RegionID": "1730227",
+        "RegionNane": "Ташлакский район"
+    },
+    {
+        "RegionID": "1730230",
+        "RegionNane": "Узбекистанский район"
+    },
+    {
+        "RegionID": "1730233",
+        "RegionNane": "Ферганский район"
+    },
+    {
+        "RegionID": "1730236",
+        "RegionNane": "Дангаринский район"
+    },
+    {
+        "RegionID": "1730238",
+        "RegionNane": "Фуркатский район"
+    },
+    {
+        "RegionID": "1730242",
+        "RegionNane": "Язъяванский район"
+    },
+    {
+        "RegionID": "1730401",
+        "RegionNane": "город Фергана"
+    },
+    {
+        "RegionID": "1730405",
+        "RegionNane": "город Коканд"
+    },
+    {
+        "RegionID": "1730408",
+        "RegionNane": "город Кувасай"
+    },
+    {
+        "RegionID": "1730412",
+        "RegionNane": "город Маргилан"
+    },
+    {
+        "RegionID": "1733",
+        "RegionNane": "Хорезмская область"
+    },
+    {
+        "RegionID": "1733204",
+        "RegionNane": "Багатский район"
+    },
+    {
+        "RegionID": "1733208",
+        "RegionNane": "Гурленский район"
+    },
+    {
+        "RegionID": "1733212",
+        "RegionNane": "Кошкупырский район"
+    },
+    {
+        "RegionID": "1733217",
+        "RegionNane": "Ургенчский район"
+    },
+    {
+        "RegionID": "1733220",
+        "RegionNane": "Хазараспский район"
+    },
+    {
+        "RegionID": "1733221",
+        "RegionNane": "Тупроккалинский район"
+    },
+    {
+        "RegionID": "1733223",
+        "RegionNane": "Ханкинский район"
+    },
+    {
+        "RegionID": "1733226",
+        "RegionNane": "Хивинский район"
+    },
+    {
+        "RegionID": "1733230",
+        "RegionNane": "Шаватский район"
+    },
+    {
+        "RegionID": "1733233",
+        "RegionNane": "Янгиарыкский район"
+    },
+    {
+        "RegionID": "1733236",
+        "RegionNane": "Янгибазарский район"
+    },
+    {
+        "RegionID": "1733401",
+        "RegionNane": "город Ургенч"
+    },
+    {
+        "RegionID": "1733406",
+        "RegionNane": "город Хива"
+    }
+]

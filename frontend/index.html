@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ish Ko'p</title>
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Use Tailwind CDN for immediate styling support in all environments -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tg: {
+              bg: 'var(--tg-theme-bg-color, #f8fafc)',
+              text: 'var(--tg-theme-text-color, #1e293b)',
+              hint: 'var(--tg-theme-hint-color, #94a3b8)',
+              link: 'var(--tg-theme-link-color, #2481cc)',
+              button: 'var(--tg-theme-button-color, #2481cc)',
+              'button-text': 'var(--tg-theme-button-text-color, #ffffff)',
+              secondary: 'var(--tg-theme-secondary-bg-color, #f1f5f9)',
+            }
+          },
+          borderRadius: {
+            'xl-plus': '24px',
+            '2xl-plus': '32px',
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/css">
+    :root {
+      --tg-theme-bg: #f8fafc;
+      --tg-theme-card: #ffffff;
+      --tg-theme-accent: #2481cc;
+    }
+
+    body {
+      background-color: var(--tg-theme-bg);
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      overflow-x: hidden;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-gradient {
+      background: linear-gradient(135deg, #2481cc 0%, #1a6fb0 100%);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    .onboarding-enter-active {
+      animation: slideUp 0.3s ease-out forwards;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-bounce-short {
+      animation: bounceShort 2s infinite;
+    }
+
+    @keyframes bounceShort {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-gray-50">
+  <div id="root"></div>
+  <!-- Using relative path to ensure resolution in different preview environments -->
+  <script type="module" src="./src/index.tsx"></script>
+</body>
+
+</html>

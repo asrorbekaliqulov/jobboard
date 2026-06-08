@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      GCS_CREDENTIALS_FILE: /app/gcs-credentials.json
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./uyavto-s3-1af0e9f49acf.json:/app/gcs-credentials.json:ro
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_TELEGRAM_BOT_NAME: ${VITE_TELEGRAM_BOT_NAME}
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    env_file: .env
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+volumes:
+  postgres_data:

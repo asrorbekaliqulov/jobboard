@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ish Ko'p</title>
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Use Tailwind CDN for immediate styling support in all environments -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tg: {
+              bg: 'var(--tg-theme-bg-color, #f8fafc)',
+              text: 'var(--tg-theme-text-color, #1e293b)',
+              hint: 'var(--tg-theme-hint-color, #94a3b8)',
+              link: 'var(--tg-theme-link-color, #2481cc)',
+              button: 'var(--tg-theme-button-color, #2481cc)',
+              'button-text': 'var(--tg-theme-button-text-color, #ffffff)',
+              secondary: 'var(--tg-theme-secondary-bg-color, #f1f5f9)',
+            }
+          },
+          borderRadius: {
+            'xl-plus': '24px',
+            '2xl-plus': '32px',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style type="text/css">
+    :root {
+      --tg-theme-bg: #f8fafc;
+      --tg-theme-card: #ffffff;
+      --tg-theme-accent: #3b82f6;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-light: #f1f5f9;
+      --radius-card: 1.5rem;
+    }
+
+    body {
+      background-color: var(--tg-theme-bg);
+      -webkit-tap-highlight-color: transparent;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-gray-50">
+  <div id="root"></div>
+  <!-- Using relative path to ensure resolution in different preview environments -->
+  <script type="module" src="./index.tsx"></script>
+</body>
+
+</html>

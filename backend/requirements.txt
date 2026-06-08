@@ -1,0 +1,27 @@
+
+# Web Framework & Server
+fastapi<0.125.0
+uvicorn[standard]<0.39.0
+fastapi-babel==1.0.0
+python-multipart>=0.0.9
+Babel>=2.14.0
+setuptools>=69.5.1
+# Telegram Bot
+aiogram<3.25.0
+aiogram-i18n[gettext]>=1.4.0
+redis>=5.0.1
+apscheduler>=3.10.4
+
+# Database & Migrations
+sqlalchemy[asyncio]<2.1.0
+asyncpg>=0.29.0
+alembic>=1.13.1
+pydantic-settings>=2.2.0
+pydantic[email]<2.13.0
+
+# Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Storage
+google-cloud-storage>=2.14.0

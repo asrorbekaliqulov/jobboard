@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/git/jobboard-tma/backend/app/api/v1/endpoints/admin_endpoints -type f -name \"*.py\" -exec basename {} \\\\;)"
+    ]
+  }
+}

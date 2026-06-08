@@ -1,0 +1,2917 @@
+[
+    {
+        "name_ru": "Администратор",
+        "name_en": "Administrator",
+        "name_uz": "Administrator",
+        "items": [
+            {
+                "id": 257,
+                "text": "Администратор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Администратор",
+                        "id": "8",
+                        "name_ru": "Администратор",
+                        "name_en": "Administrator",
+                        "name_uz": "Administrator"
+                    }
+                ],
+                "text_ru": "Администратор",
+                "text_en": "Administrator",
+                "text_uz": "Administrator"
+            },
+            {
+                "id": 299,
+                "text": "Администратор магазина",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Администратор магазина, администратор торгового зала",
+                        "id": "9",
+                        "name_ru": "Администратор магазина, администратор торгового зала",
+                        "name_en": "Store Administrator, Floor Manager",
+                        "name_uz": "Do'kon administratori, savdo zali administratori"
+                    }
+                ],
+                "text_ru": "Администратор магазина",
+                "text_en": "Store Administrator",
+                "text_uz": "Do'kon administratori"
+            },
+            {
+                "id": 59,
+                "text": "Администратор проектов",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Руководитель проектов",
+                        "id": "107",
+                        "name_ru": "Руководитель проектов",
+                        "name_en": "Project Manager",
+                        "name_uz": "Loyiha rahbari"
+                    }
+                ],
+                "text_ru": "Администратор проектов",
+                "text_en": "Project Administrator",
+                "text_uz": "Loyiha administratori"
+            },
+            {
+                "id": 61,
+                "text": "Администратор баз данных",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Системный администратор",
+                        "id": "113",
+                        "name_ru": "Системный администратор",
+                        "name_en": "System Administrator",
+                        "name_uz": "Tizim administratori"
+                    }
+                ],
+                "text_ru": "Администратор баз данных",
+                "text_en": "Database Administrator",
+                "text_uz": "Ma'lumotlar bazasi administratori"
+            },
+            {
+                "id": 67,
+                "text": "Системный администратор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Системный администратор",
+                        "id": "113",
+                        "name_ru": "Системный администратор",
+                        "name_en": "System Administrator",
+                        "name_uz": "Tizim administratori"
+                    }
+                ],
+                "text_ru": "Системный администратор",
+                "text_en": "System Administrator",
+                "text_uz": "Tizim administratori"
+            },
+            {
+                "id": 65,
+                "text": "Сетевой администратор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Системный администратор",
+                        "id": "113",
+                        "name_ru": "Системный администратор",
+                        "name_en": "System Administrator",
+                        "name_uz": "Tizim administratori"
+                    }
+                ],
+                "text_ru": "Сетевой администратор",
+                "text_en": "Network Administrator",
+                "text_uz": "Tarmoq administratori"
+            },
+            {
+                "id": 70,
+                "text": "Системный администратор Linux",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Системный администратор",
+                        "id": "113",
+                        "name_ru": "Системный администратор",
+                        "name_en": "System Administrator",
+                        "name_uz": "Tizim administratori"
+                    }
+                ],
+                "text_ru": "Системный администратор Linux",
+                "text_en": "Linux System Administrator",
+                "text_uz": "Linux tizim administratori"
+            },
+            {
+                "id": 433,
+                "text": "Директор ресторана",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер ресторана",
+                        "id": "74",
+                        "name_ru": "Менеджер ресторана",
+                        "name_en": "Restaurant Manager",
+                        "name_uz": "Restoran menejeri"
+                    }
+                ],
+                "text_ru": "Директор ресторана",
+                "text_en": "Restaurant Director",
+                "text_uz": "Restoran direktori"
+            }
+        ]
+    },
+    {
+        "name_ru": "Директор ресторана",
+        "name_en": "Restaurant Director",
+        "name_uz": "Restoran direktori",
+        "items": [
+            {
+                "id": 433,
+                "text": "Директор ресторана",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер ресторана",
+                        "id": "74",
+                        "name_ru": "Менеджер ресторана",
+                        "name_en": "Restaurant Manager",
+                        "name_uz": "Restoran menejeri"
+                    }
+                ],
+                "text_ru": "Директор ресторана",
+                "text_en": "Restaurant Director",
+                "text_uz": "Restoran direktori"
+            }
+        ]
+    },
+    {
+        "name_ru": "Аналитик",
+        "name_en": "Analyst",
+        "name_uz": "Analitik",
+        "items": [
+            {
+                "id": 6,
+                "text": "Аналитик данных",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "BI-аналитик, аналитик данных",
+                        "id": "156",
+                        "name_ru": "BI-аналитик, аналитик данных",
+                        "name_en": "BI Analyst, Data Analyst",
+                        "name_uz": "BI-tahlilchi, ma'lumotlar tahlilchisi"
+                    }
+                ],
+                "text_ru": "Аналитик данных",
+                "text_en": "Data Analyst",
+                "text_uz": "Ma'lumotlar tahlilchisi"
+            },
+            {
+                "id": 2,
+                "text": "Аналитик 1С",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Аналитик",
+                        "id": "10",
+                        "name_ru": "Аналитик",
+                        "name_en": "Analyst",
+                        "name_uz": "Tahlilchi"
+                    }
+                ],
+                "text_ru": "Аналитик 1С",
+                "text_en": "1C Analyst",
+                "text_uz": "1C tahlilchisi"
+            },
+            {
+                "id": 77,
+                "text": "Аналитик DWH",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "BI-аналитик, аналитик данных",
+                        "id": "156",
+                        "name_ru": "BI-аналитик, аналитик данных",
+                        "name_en": "BI Analyst, Data Analyst",
+                        "name_uz": "BI-tahlilchi, ma'lumotlar tahlilchisi"
+                    }
+                ],
+                "text_ru": "Аналитик DWH",
+                "text_en": "DWH Analyst",
+                "text_uz": "DWH tahlilchisi"
+            },
+            {
+                "id": 109,
+                "text": "Аналитик продаж",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Аналитик",
+                        "id": "10",
+                        "name_ru": "Аналитик",
+                        "name_en": "Analyst",
+                        "name_uz": "Tahlilchi"
+                    }
+                ],
+                "text_ru": "Аналитик продаж",
+                "text_en": "Sales Analyst",
+                "text_uz": "Sotuv tahlilchisi"
+            },
+            {
+                "id": 3,
+                "text": "Бизнес-аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бизнес-аналитик",
+                        "id": "150",
+                        "name_ru": "Бизнес-аналитик",
+                        "name_en": "Business Analyst",
+                        "name_uz": "Biznes tahlilchi"
+                    }
+                ],
+                "text_ru": "Бизнес-аналитик",
+                "text_en": "Business Analyst",
+                "text_uz": "Biznes tahlilchi"
+            },
+            {
+                "id": 8,
+                "text": "Системный аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Системный аналитик",
+                        "id": "148",
+                        "name_ru": "Системный аналитик",
+                        "name_en": "System Analyst",
+                        "name_uz": "Tizim tahlilchisi"
+                    }
+                ],
+                "text_ru": "Системный аналитик",
+                "text_en": "System Analyst",
+                "text_uz": "Tizim tahlilchisi"
+            },
+            {
+                "id": 112,
+                "text": "Финансовый аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Финансовый аналитик, инвестиционный аналитик",
+                        "id": "134",
+                        "name_ru": "Финансовый аналитик, инвестиционный аналитик",
+                        "name_en": "Financial Analyst, Investment Analyst",
+                        "name_uz": "Moliyaviy tahlilchi, investitsiya tahlilchisi"
+                    }
+                ],
+                "text_ru": "Финансовый аналитик",
+                "text_en": "Financial Analyst",
+                "text_uz": "Moliyaviy tahlilchi"
+            },
+            {
+                "id": 263,
+                "text": "Инвестиционный аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Финансовый аналитик, инвестиционный аналитик",
+                        "id": "134",
+                        "name_ru": "Финансовый аналитик, инвестиционный аналитик",
+                        "name_en": "Financial Analyst, Investment Analyst",
+                        "name_uz": "Moliyaviy tahlilchi, investitsiya tahlilchisi"
+                    }
+                ],
+                "text_ru": "Инвестиционный аналитик",
+                "text_en": "Investment Analyst",
+                "text_uz": "Investitsiya tahlilchisi"
+            },
+            {
+                "id": 25,
+                "text": "Маркетинговый аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Маркетолог-аналитик",
+                        "id": "163",
+                        "name_ru": "Маркетолог-аналитик",
+                        "name_en": "Marketing Analyst",
+                        "name_uz": "Marketolog-tahlilchi"
+                    }
+                ],
+                "text_ru": "Маркетинговый аналитик",
+                "text_en": "Marketing Analyst",
+                "text_uz": "Marketing tahlilchisi"
+            },
+            {
+                "id": 5,
+                "text": "BI-аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "BI-аналитик, аналитик данных",
+                        "id": "156",
+                        "name_ru": "BI-аналитик, аналитик данных",
+                        "name_en": "BI Analyst, Data Analyst",
+                        "name_uz": "BI-tahlilchi, ma'lumotlar tahlilchisi"
+                    }
+                ],
+                "text_ru": "BI-аналитик",
+                "text_en": "BI Analyst",
+                "text_uz": "BI tahlilchi"
+            },
+            {
+                "id": 261,
+                "text": "Кредитный аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Кредитный специалист",
+                        "id": "57",
+                        "name_ru": "Кредитный специалист",
+                        "name_en": "Credit Specialist",
+                        "name_uz": "Kredit mutaxassisi"
+                    }
+                ],
+                "text_ru": "Кредитный аналитик",
+                "text_en": "Credit Analyst",
+                "text_uz": "Kredit tahlilchisi"
+            },
+            {
+                "id": 4,
+                "text": "Продуктовый аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Продуктовый аналитик",
+                        "id": "164",
+                        "name_ru": "Продуктовый аналитик",
+                        "name_en": "Product Analyst",
+                        "name_uz": "Mahsulot tahlilchisi"
+                    }
+                ],
+                "text_ru": "Продуктовый аналитик",
+                "text_en": "Product Analyst",
+                "text_uz": "Mahsulot tahlilchisi"
+            },
+            {
+                "id": 116,
+                "text": "HR-аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Аналитик",
+                        "id": "10",
+                        "name_ru": "Аналитик",
+                        "name_en": "Analyst",
+                        "name_uz": "Tahlilchi"
+                    }
+                ],
+                "text_ru": "HR-аналитик",
+                "text_en": "HR Analyst",
+                "text_uz": "HR tahlilchi"
+            },
+            {
+                "id": 10,
+                "text": "Веб-аналитик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Аналитик",
+                        "id": "10",
+                        "name_ru": "Аналитик",
+                        "name_en": "Analyst",
+                        "name_uz": "Tahlilchi"
+                    }
+                ],
+                "text_ru": "Веб-аналитик",
+                "text_en": "Web Analyst",
+                "text_uz": "Veb-tahlilchi"
+            },
+            {
+                "id": 113,
+                "text": "Руководитель отдела аналитики",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Руководитель отдела аналитики",
+                        "id": "157",
+                        "name_ru": "Руководитель отдела аналитики",
+                        "name_en": "Head of Analytics",
+                        "name_uz": "Tahlil bo'limi rahbari"
+                    }
+                ],
+                "text_ru": "Руководитель отдела аналитики",
+                "text_en": "Head of Analytics",
+                "text_uz": "Tahlil bo'limi rahbari"
+            }
+        ]
+    },
+    {
+        "name_ru": "Бухгалтер",
+        "name_en": "Accountant",
+        "name_uz": "Buxgalter",
+        "items": [
+            {
+                "id": 309,
+                "text": "Бухгалтер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер",
+                "text_en": "Accountant",
+                "text_uz": "Buxgalter"
+            },
+            {
+                "id": 87,
+                "text": "Бухгалтер на первичную документацию",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер на первичную документацию",
+                "text_en": "Primary Documentation Accountant",
+                "text_uz": "Boshlang'ich hujjatlar bo'yicha buxgalter"
+            },
+            {
+                "id": 310,
+                "text": "Бухгалтер по расчету заработной платы",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер по расчету заработной платы",
+                "text_en": "Payroll Accountant",
+                "text_uz": "Ish haqi hisob-kitobi bo'yicha buxgalter"
+            },
+            {
+                "id": 311,
+                "text": "Бухгалтер-кассир",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер-кассир",
+                "text_en": "Accountant-Cashier",
+                "text_uz": "Buxgalter-kassir"
+            },
+            {
+                "id": 88,
+                "text": "Бухгалтер по учету ТМЦ",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер по учету ТМЦ",
+                "text_en": "Inventory Accountant",
+                "text_uz": "TMZ hisobi bo'yicha buxgalter"
+            },
+            {
+                "id": 313,
+                "text": "Бухгалтер на участок банк-клиент",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер на участок банк-клиент",
+                "text_en": "Bank-Client Accountant",
+                "text_uz": "Bank-mijoz bo'yicha buxgalter"
+            },
+            {
+                "id": 89,
+                "text": "Главный бухгалтер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Главный бухгалтер",
+                "text_en": "Chief Accountant",
+                "text_uz": "Bosh buxgalter"
+            }
+        ]
+    },
+    {
+        "name_ru": "Водитель",
+        "name_en": "Driver",
+        "name_uz": "Haydovchi",
+        "items": [
+            {
+                "id": 200,
+                "text": "Водитель",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Водитель",
+                        "id": "21",
+                        "name_ru": "Водитель",
+                        "name_en": "Driver",
+                        "name_uz": "Haydovchi"
+                    }
+                ],
+                "text_ru": "Водитель",
+                "text_en": "Driver",
+                "text_uz": "Haydovchi"
+            },
+            {
+                "id": 227,
+                "text": "Курьер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Курьер",
+                        "id": "58",
+                        "name_ru": "Курьер",
+                        "name_en": "Courier",
+                        "name_uz": "Kuryer"
+                    }
+                ],
+                "text_ru": "Курьер",
+                "text_en": "Courier",
+                "text_uz": "Kuryer"
+            },
+            {
+                "id": 472,
+                "text": "Экспедитор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Водитель",
+                        "id": "21",
+                        "name_ru": "Водитель",
+                        "name_en": "Driver",
+                        "name_uz": "Haydovchi"
+                    }
+                ],
+                "text_ru": "Экспедитор",
+                "text_en": "Forwarder",
+                "text_uz": "Ekspeditor"
+            }
+        ]
+    },
+    {
+        "name_ru": "Врач",
+        "name_en": "Doctor",
+        "name_uz": "Shifokor",
+        "items": [
+            {
+                "id": 152,
+                "text": "Врач-терапевт",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-терапевт",
+                "text_en": "Therapist",
+                "text_uz": "Terapevt"
+            },
+            {
+                "id": 139,
+                "text": "Врач акушер-гинеколог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач акушер-гинеколог",
+                "text_en": "Obstetrician-Gynecologist",
+                "text_uz": "Akusher-ginekolog"
+            },
+            {
+                "id": 155,
+                "text": "Врач-хирург",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-хирург",
+                "text_en": "Surgeon",
+                "text_uz": "Xirurg"
+            },
+            {
+                "id": 154,
+                "text": "Врач-физиотерапевт",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-физиотерапевт",
+                "text_en": "Physiotherapist",
+                "text_uz": "Fizioterapevt"
+            },
+            {
+                "id": 140,
+                "text": "Врач анестезиолог-реаниматолог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач анестезиолог-реаниматолог",
+                "text_en": "Anesthesiologist-Resuscitator",
+                "text_uz": "Anesteziolog-reanimatolog"
+            },
+            {
+                "id": 135,
+                "text": "Врач клинической лабораторной диагностики",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач клинической лабораторной диагностики",
+                "text_en": "Clinical Laboratory Diagnostics Doctor",
+                "text_uz": "Klinik laboratoriya diagnostikasi shifokori"
+            },
+            {
+                "id": 390,
+                "text": "Врач-кардиолог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-кардиолог",
+                "text_en": "Cardiologist",
+                "text_uz": "Kardiolog"
+            },
+            {
+                "id": 391,
+                "text": "Врач-невролог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-невролог",
+                "text_en": "Neurologist",
+                "text_uz": "Nevrolog"
+            },
+            {
+                "id": 151,
+                "text": "Врач-рентгенолог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-рентгенолог",
+                "text_en": "Radiologist",
+                "text_uz": "Rentgenolog"
+            },
+            {
+                "id": 146,
+                "text": "Врач-онколог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-онколог",
+                "text_en": "Oncologist",
+                "text_uz": "Onkolog"
+            },
+            {
+                "id": 153,
+                "text": "Врач травматолог-ортопед",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач травматолог-ортопед",
+                "text_en": "Traumatologist-Orthopedist",
+                "text_uz": "Travmatolog-ortoped"
+            },
+            {
+                "id": 145,
+                "text": "Врач-методист/Медицинский статистик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-методист/Медицинский статистик",
+                "text_en": "Methodist Doctor/Medical Statistician",
+                "text_uz": "Metodist shifokor/Tibbiy statistik"
+            },
+            {
+                "id": 148,
+                "text": "Врач-офтальмолог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-офтальмолог",
+                "text_en": "Ophthalmologist",
+                "text_uz": "Oftalmolog"
+            },
+            {
+                "id": 136,
+                "text": "Врач общей практики",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач общей практики",
+                "text_en": "General Practitioner",
+                "text_uz": "Umumiy amaliyot shifokori"
+            },
+            {
+                "id": 137,
+                "text": "Врач ультразвуковой диагностики",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач ультразвуковой диагностики",
+                "text_en": "Ultrasound Diagnostics Doctor",
+                "text_uz": "Ultratovush diagnostikasi shifokori"
+            },
+            {
+                "id": 150,
+                "text": "Врач-психиатр",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-психиатр",
+                "text_en": "Psychiatrist",
+                "text_uz": "Psixiatr"
+            },
+            {
+                "id": 138,
+                "text": "Врач функциональной диагностики",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач функциональной диагностики",
+                "text_en": "Functional Diagnostics Doctor",
+                "text_uz": "Funksional diagnostika shifokori"
+            },
+            {
+                "id": 156,
+                "text": "Врач-эндокринолог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-эндокринолог",
+                "text_en": "Endocrinologist",
+                "text_uz": "Endokrinolog"
+            },
+            {
+                "id": 147,
+                "text": "Врач-оториноларинголог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-оториноларинголог",
+                "text_en": "Otorhinolaryngologist",
+                "text_uz": "Otorinolaringolog (LOR)"
+            },
+            {
+                "id": 394,
+                "text": "Врач-уролог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Врач",
+                        "id": "24",
+                        "name_ru": "Врач",
+                        "name_en": "Doctor",
+                        "name_uz": "Shifokor"
+                    }
+                ],
+                "text_ru": "Врач-уролог",
+                "text_en": "Urologist",
+                "text_uz": "Urolog"
+            }
+        ]
+    },
+    {
+        "name_ru": "Дизайнер",
+        "name_en": "Designer",
+        "name_uz": "Dizayner",
+        "items": [
+            {
+                "id": 22,
+                "text": "Дизайнер интерьеров",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер интерьеров",
+                "text_en": "Interior Designer",
+                "text_uz": "Interyer dizayneri"
+            },
+            {
+                "id": 18,
+                "text": "Дизайнер-верстальщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер-верстальщик",
+                "text_en": "Layout Designer",
+                "text_uz": "Dizayner-sahifalo'vchi"
+            },
+            {
+                "id": 104,
+                "text": "Дизайнер одежды",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер одежды",
+                "text_en": "Fashion Designer",
+                "text_uz": "Kiyim dizayneri"
+            },
+            {
+                "id": 103,
+                "text": "Дизайнер мебели",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер мебели",
+                "text_en": "Furniture Designer",
+                "text_uz": "Mebel dizayneri"
+            },
+            {
+                "id": 21,
+                "text": "Дизайнер презентаций",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер презентаций",
+                "text_en": "Presentation Designer",
+                "text_uz": "Taqdimot dizayneri"
+            },
+            {
+                "id": 105,
+                "text": "Дизайнер-декоратор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер-декоратор",
+                "text_en": "Decorator Designer",
+                "text_uz": "Dizayner-dekorator"
+            },
+            {
+                "id": 17,
+                "text": "Графический дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Графический дизайнер",
+                "text_en": "Graphic Designer",
+                "text_uz": "Grafik dizayner"
+            },
+            {
+                "id": 23,
+                "text": "Веб-дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Веб-дизайнер",
+                "text_en": "Web Designer",
+                "text_uz": "Veb-dizayner"
+            },
+            {
+                "id": 15,
+                "text": "Гейм-дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Гейм-дизайнер",
+                        "id": "25",
+                        "name_ru": "Гейм-дизайнер",
+                        "name_en": "Game Designer",
+                        "name_uz": "O'yin dizayneri"
+                    }
+                ],
+                "text_ru": "Гейм-дизайнер",
+                "text_en": "Game Designer",
+                "text_uz": "O'yin dizayneri"
+            },
+            {
+                "id": 20,
+                "text": "Моушн-дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Моушн-дизайнер",
+                "text_en": "Motion Designer",
+                "text_uz": "Moushn-dizayner"
+            },
+            {
+                "id": 194,
+                "text": "Архитектор-дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Архитектор",
+                        "id": "14",
+                        "name_ru": "Архитектор",
+                        "name_en": "Architect",
+                        "name_uz": "Arxitektor"
+                    }
+                ],
+                "text_ru": "Архитектор-дизайнер",
+                "text_en": "Architect-Designer",
+                "text_uz": "Arxitektor-dizayner"
+            },
+            {
+                "id": 101,
+                "text": "Полиграфический дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Полиграфический дизайнер",
+                "text_en": "Print Designer",
+                "text_uz": "Poligrafiya dizayneri"
+            },
+            {
+                "id": 107,
+                "text": "Промышленный дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Промышленный дизайнер",
+                "text_en": "Industrial Designer",
+                "text_uz": "Sanoat dizayneri"
+            },
+            {
+                "id": 106,
+                "text": "Коммуникационный дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Коммуникационный дизайнер",
+                "text_en": "Communication Designer",
+                "text_uz": "Kommunikatsiya dizayneri"
+            },
+            {
+                "id": 16,
+                "text": "Нарративный дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Гейм-дизайнер",
+                        "id": "25",
+                        "name_ru": "Гейм-дизайнер",
+                        "name_en": "Game Designer",
+                        "name_uz": "O'yin dizayneri"
+                    }
+                ],
+                "text_ru": "Нарративный дизайнер",
+                "text_en": "Narrative Designer",
+                "text_uz": "Narrativ dizayner"
+            },
+            {
+                "id": 24,
+                "text": "UX/UI-дизайнер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "UX/UI-дизайнер",
+                "text_en": "UX/UI Designer",
+                "text_uz": "UX/UI dizayneri"
+            },
+            {
+                "id": 230,
+                "text": "Ландшафтный архитектор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Архитектор",
+                        "id": "14",
+                        "name_ru": "Архитектор",
+                        "name_en": "Architect",
+                        "name_uz": "Arxitektor"
+                    }
+                ],
+                "text_ru": "Ландшафтный архитектор",
+                "text_en": "Landscape Architect",
+                "text_uz": "Landshaft me'mori"
+            }
+        ]
+    },
+    {
+        "name_ru": "Дизайнер-верстальщик",
+        "name_en": "Designer-layout designer",
+        "name_uz": "Dizayner-verstalschik",
+        "items": [
+            {
+                "id": 18,
+                "text": "Дизайнер-верстальщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Дизайнер, художник",
+                        "id": "34",
+                        "name_ru": "Дизайнер, художник",
+                        "name_en": "Designer, Artist",
+                        "name_uz": "Dizayner, rassom"
+                    }
+                ],
+                "text_ru": "Дизайнер-верстальщик",
+                "text_en": "Layout Designer",
+                "text_uz": "Dizayner-sahifalo'vchi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Директор",
+        "name_en": "Director",
+        "name_uz": "Direktor",
+        "items": [
+            {
+                "id": 298,
+                "text": "Директор магазина",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор магазина, директор сети магазинов",
+                        "id": "35",
+                        "name_ru": "Директор магазина, директор сети магазинов",
+                        "name_en": "Store Director, Retail Chain Director",
+                        "name_uz": "Do'kon direktori, do'konlar tarmog'i direktori"
+                    }
+                ],
+                "text_ru": "Директор магазина",
+                "text_en": "Store Manager",
+                "text_uz": "Do'kon direktori"
+            },
+            {
+                "id": 495,
+                "text": "Директор филиала",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Руководитель филиала",
+                        "id": "161",
+                        "name_ru": "Руководитель филиала",
+                        "name_en": "Branch Manager",
+                        "name_uz": "Filial rahbari"
+                    }
+                ],
+                "text_ru": "Директор филиала",
+                "text_en": "Branch Director",
+                "text_uz": "Filial direktori"
+            },
+            {
+                "id": 433,
+                "text": "Директор ресторана",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер ресторана",
+                        "id": "74",
+                        "name_ru": "Менеджер ресторана",
+                        "name_en": "Restaurant Manager",
+                        "name_uz": "Restoran menejeri"
+                    }
+                ],
+                "text_ru": "Директор ресторана",
+                "text_en": "Restaurant Director",
+                "text_uz": "Restoran direktori"
+            },
+            {
+                "id": 286,
+                "text": "Директор розничной сети",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор магазина, директор сети магазинов",
+                        "id": "35",
+                        "name_ru": "Директор магазина, директор сети магазинов",
+                        "name_en": "Store Director, Retail Chain Director",
+                        "name_uz": "Do'kon direktori, do'konlar tarmog'i direktori"
+                    }
+                ],
+                "text_ru": "Директор розничной сети",
+                "text_en": "Retail Chain Director",
+                "text_uz": "Chakana savdo tarmog'i direktori"
+            },
+            {
+                "id": 275,
+                "text": "Директор по маркетингу",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор по маркетингу и PR (CMO)",
+                        "id": "37",
+                        "name_ru": "Директор по маркетингу и PR (CMO)",
+                        "name_en": "Marketing and PR Director (CMO)",
+                        "name_uz": "Marketing va PR direktori (CMO)"
+                    }
+                ],
+                "text_ru": "Директор по маркетингу",
+                "text_en": "Marketing Director",
+                "text_uz": "Marketing direktori"
+            },
+            {
+                "id": 189,
+                "text": "Директор по персоналу (HRD)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор по персоналу (HRD)",
+                        "id": "38",
+                        "name_ru": "Директор по персоналу (HRD)",
+                        "name_en": "HR Director (HRD)",
+                        "name_uz": "Xodimlar bo'yicha direktor (HRD)"
+                    }
+                ],
+                "text_ru": "Директор по персоналу (HRD)",
+                "text_en": "HR Director (HRD)",
+                "text_uz": "Xodimlar bo'yicha direktor (HRD)"
+            },
+            {
+                "id": 363,
+                "text": "Директор учебного заведения/заведующий учебным процессом",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Учитель, преподаватель, педагог",
+                        "id": "132",
+                        "name_ru": "Учитель, преподаватель, педагог",
+                        "name_en": "Teacher, Lecturer, Educator",
+                        "name_uz": "O'qituvchi, ma'ruza o'qituvchisi, pedagog"
+                    }
+                ],
+                "text_ru": "Директор учебного заведения/заведующий учебным процессом",
+                "text_en": "Educational Institution Director/Head of Educational Process",
+                "text_uz": "Ta'lim muassasasi direktori/O'quv jarayoni mudiri"
+            },
+            {
+                "id": 78,
+                "text": "Директор по информационным технологиям (CIO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор по информационным технологиям (CIO)",
+                        "id": "36",
+                        "name_ru": "Директор по информационным технологиям (CIO)",
+                        "name_en": "Chief Information Officer (CIO)",
+                        "name_uz": "Axborot texnologiyalari direktori (CIO)"
+                    }
+                ],
+                "text_ru": "Директор по информационным технологиям (CIO)",
+                "text_en": "Chief Information Officer (CIO)",
+                "text_uz": "Axborot texnologiyalari direktori (CIO)"
+            },
+            {
+                "id": 203,
+                "text": "Директор по качеству",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер по качеству",
+                        "id": "44",
+                        "name_ru": "Инженер по качеству",
+                        "name_en": "Quality Engineer",
+                        "name_uz": "Sifat muhandisi"
+                    }
+                ],
+                "text_ru": "Директор по качеству",
+                "text_en": "Quality Director",
+                "text_uz": "Sifat bo'yicha direktor"
+            },
+            {
+                "id": 385,
+                "text": "Директор медицинского центра",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Главный врач, заведующий отделением",
+                        "id": "29",
+                        "name_ru": "Главный врач, заведующий отделением",
+                        "name_en": "Head Physician, Head of Department",
+                        "name_uz": "Bosh shifokor, bo'lim boshlig'i"
+                    }
+                ],
+                "text_ru": "Директор медицинского центра",
+                "text_en": "Medical Center Director",
+                "text_uz": "Tibbiyot markazi direktori"
+            },
+            {
+                "id": 371,
+                "text": "Директор по логистике",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Руководитель отдела логистики",
+                        "id": "172",
+                        "name_ru": "Руководитель отдела логистики",
+                        "name_en": "Head of Logistics",
+                        "name_uz": "Logistika bo'limi rahbari"
+                    }
+                ],
+                "text_ru": "Директор по логистике",
+                "text_en": "Logistics Director",
+                "text_uz": "Logistika direktori"
+            },
+            {
+                "id": 562,
+                "text": "Директор по продукту",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер продукта",
+                        "id": "73",
+                        "name_ru": "Менеджер продукта",
+                        "name_en": "Product Manager",
+                        "name_uz": "Mahsulot menejeri"
+                    }
+                ],
+                "text_ru": "Директор по продукту",
+                "text_en": "Product Director",
+                "text_uz": "Mahsulot direktori"
+            },
+            {
+                "id": 491,
+                "text": "Арт-директор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Арт-директор, креативный директор",
+                        "id": "12",
+                        "name_ru": "Арт-директор, креативный директор",
+                        "name_en": "Art Director, Creative Director",
+                        "name_uz": "Badiiy direktor, kreativ direktor"
+                    }
+                ],
+                "text_ru": "Арт-директор",
+                "text_en": "Art Director",
+                "text_uz": "Badiiy direktor"
+            },
+            {
+                "id": 279,
+                "text": "PR-директор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Директор по маркетингу и PR (CMO)",
+                        "id": "37",
+                        "name_ru": "Директор по маркетингу и PR (CMO)",
+                        "name_en": "Marketing and PR Director (CMO)",
+                        "name_uz": "Marketing va PR direktori (CMO)"
+                    }
+                ],
+                "text_ru": "PR-директор",
+                "text_en": "PR Director",
+                "text_uz": "PR direktori"
+            },
+            {
+                "id": 348,
+                "text": "Коммерческий директор (CCO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Коммерческий директор (CCO)",
+                        "id": "53",
+                        "name_ru": "Коммерческий директор (CCO)",
+                        "name_en": "Chief Commercial Officer (CCO)",
+                        "name_uz": "Tijorat direktori (CCO)"
+                    }
+                ],
+                "text_ru": "Коммерческий директор (CCO)",
+                "text_en": "Chief Commercial Officer (CCO)",
+                "text_uz": "Tijorat direktori (CCO)"
+            },
+            {
+                "id": 494,
+                "text": "Исполнительный директор (CEO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Генеральный директор, исполнительный директор (CEO)",
+                        "id": "26",
+                        "name_ru": "Генеральный директор, исполнительный директор (CEO)",
+                        "name_en": "General Director, Executive Director (CEO)",
+                        "name_uz": "Bosh direktor, ijrochi direktor (CEO)"
+                    }
+                ],
+                "text_ru": "Исполнительный директор (CEO)",
+                "text_en": "Chief Executive Officer (CEO)",
+                "text_uz": "Ijrochi direktor (CEO)"
+            },
+            {
+                "id": 493,
+                "text": "Операционный директор (COO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Операционный директор (COO)",
+                        "id": "87",
+                        "name_ru": "Операционный директор (COO)",
+                        "name_en": "Chief Operating Officer (COO)",
+                        "name_uz": "Operatsion direktor (COO)"
+                    }
+                ],
+                "text_ru": "Операционный директор (COO)",
+                "text_en": "Chief Operating Officer (COO)",
+                "text_uz": "Operatsion direktor (COO)"
+            },
+            {
+                "id": 74,
+                "text": "Технический директор (CTO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Технический директор (CTO)",
+                        "id": "125",
+                        "name_ru": "Технический директор (CTO)",
+                        "name_en": "Chief Technology Officer (CTO)",
+                        "name_uz": "Texnik direktor (CTO)"
+                    }
+                ],
+                "text_ru": "Технический директор (CTO)",
+                "text_en": "Chief Technology Officer (CTO)",
+                "text_uz": "Texnik direktor (CTO)"
+            },
+            {
+                "id": 323,
+                "text": "Финансовый директор (CFO)",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Финансовый директор (CFO)",
+                        "id": "135",
+                        "name_ru": "Финансовый директор (CFO)",
+                        "name_en": "Chief Financial Officer (CFO)",
+                        "name_uz": "Moliyaviy direktor (CFO)"
+                    }
+                ],
+                "text_ru": "Финансовый директор (CFO)",
+                "text_en": "Chief Financial Officer (CFO)",
+                "text_uz": "Moliyaviy direktor (CFO)"
+            },
+            {
+                "id": 238,
+                "text": "Производственный директор / Технический директор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Начальник производства",
+                        "id": "80",
+                        "name_ru": "Начальник производства",
+                        "name_en": "Production Manager",
+                        "name_uz": "Ishlab chiqarish boshlig'i"
+                    }
+                ],
+                "text_ru": "Производственный директор / Технический директор",
+                "text_en": "Production Director / Technical Director",
+                "text_uz": "Ishlab chiqarish direktori / Texnik direktor"
+            }
+        ]
+    },
+    {
+        "name_ru": "Инженер",
+        "name_en": "Engineer",
+        "name_uz": "Injinеr",
+        "items": [
+            {
+                "id": 206,
+                "text": "Инженер КИПиА",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер ПНР",
+                        "id": "174",
+                        "name_ru": "Инженер ПНР",
+                        "name_en": "Commissioning Engineer",
+                        "name_uz": "PNR muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер КИПиА",
+                "text_en": "Instrumentation and Control Engineer",
+                "text_uz": "Nazorat-o'lchov asboblari muhandisi"
+            },
+            {
+                "id": 213,
+                "text": "Инженер-конструктор",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-конструктор",
+                "text_en": "Design Engineer",
+                "text_uz": "Konstruktor-muhandis"
+            },
+            {
+                "id": 207,
+                "text": "Инженер ПТО",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер ПТО, инженер-сметчик",
+                        "id": "47",
+                        "name_ru": "Инженер ПТО, инженер-сметчик",
+                        "name_en": "Production and Technical Department Engineer, Cost Engineer",
+                        "name_uz": "PTO muhandisi, smeta muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер ПТО",
+                "text_en": "Production and Technical Department Engineer",
+                "text_uz": "PTO muhandisi"
+            },
+            {
+                "id": 212,
+                "text": "Инженер строительного контроля",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер ПТО, инженер-сметчик",
+                        "id": "47",
+                        "name_ru": "Инженер ПТО, инженер-сметчик",
+                        "name_en": "Production and Technical Department Engineer, Cost Engineer",
+                        "name_uz": "PTO muhandisi, smeta muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер строительного контроля",
+                "text_en": "Construction Control Engineer",
+                "text_uz": "Qurilish nazorati muhandisi"
+            },
+            {
+                "id": 216,
+                "text": "Инженер-проектировщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-проектировщик",
+                "text_en": "Design Engineer",
+                "text_uz": "Loyiha muhandisi"
+            },
+            {
+                "id": 57,
+                "text": "Инженер-программист",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Программист, разработчик",
+                        "id": "96",
+                        "name_ru": "Программист, разработчик",
+                        "name_en": "Programmer, Developer",
+                        "name_uz": "Dasturchi, ishlab chiquvchi"
+                    }
+                ],
+                "text_ru": "Инженер-программист",
+                "text_en": "Software Engineer",
+                "text_uz": "Dasturchi-muhandis"
+            },
+            {
+                "id": 215,
+                "text": "Инженер-механик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Сервисный инженер, инженер-механик",
+                        "id": "111",
+                        "name_ru": "Сервисный инженер, инженер-механик",
+                        "name_en": "Service Engineer, Mechanical Engineer",
+                        "name_uz": "Servis muhandisi, mexanik-muhandis"
+                    }
+                ],
+                "text_ru": "Инженер-механик",
+                "text_en": "Mechanical Engineer",
+                "text_uz": "Mexanik-muhandis"
+            },
+            {
+                "id": 220,
+                "text": "Инженер-сметчик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер ПТО, инженер-сметчик",
+                        "id": "47",
+                        "name_ru": "Инженер ПТО, инженер-сметчик",
+                        "name_en": "Production and Technical Department Engineer, Cost Engineer",
+                        "name_uz": "PTO muhandisi, smeta muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-сметчик",
+                "text_en": "Cost Engineer",
+                "text_uz": "Smeta muhandisi"
+            },
+            {
+                "id": 222,
+                "text": "Инженер-эколог",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер по охране труда и технике безопасности, инженер-эколог",
+                        "id": "45",
+                        "name_ru": "Инженер по охране труда и технике безопасности, инженер-эколог",
+                        "name_en": "Health and Safety Engineer, Environmental Engineer",
+                        "name_uz": "Mehnat muhofazasi va xavfsizlik texnikasi muhandisi, ekolog-muhandis"
+                    }
+                ],
+                "text_ru": "Инженер-эколог",
+                "text_en": "Environmental Engineer",
+                "text_uz": "Ekolog-muhandis"
+            },
+            {
+                "id": 509,
+                "text": "Инженер по охране труда и технике безопасности",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер по охране труда и технике безопасности, инженер-эколог",
+                        "id": "45",
+                        "name_ru": "Инженер по охране труда и технике безопасности, инженер-эколог",
+                        "name_en": "Health and Safety Engineer, Environmental Engineer",
+                        "name_uz": "Mehnat muhofazasi va xavfsizlik texnikasi muhandisi, ekolog-muhandis"
+                    }
+                ],
+                "text_ru": "Инженер по охране труда и технике безопасности",
+                "text_en": "Health and Safety Engineer",
+                "text_uz": "Mehnat muhofazasi va xavfsizlik texnikasi muhandisi"
+            },
+            {
+                "id": 221,
+                "text": "Инженер-химик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Технолог",
+                        "id": "49",
+                        "name_ru": "Технолог",
+                        "name_en": "Technologist",
+                        "name_uz": "Texnolog"
+                    }
+                ],
+                "text_ru": "Инженер-химик",
+                "text_en": "Chemical Engineer",
+                "text_uz": "Kimyogar-muhandis"
+            },
+            {
+                "id": 223,
+                "text": "Инженер-электронщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-электроник, инженер-электронщик",
+                        "id": "169",
+                        "name_ru": "Инженер-электроник, инженер-электронщик",
+                        "name_en": "Electronics Engineer",
+                        "name_uz": "Elektronika muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-электронщик",
+                "text_en": "Electronics Engineer",
+                "text_uz": "Elektronika muhandisi"
+            },
+            {
+                "id": 217,
+                "text": "Инженер-проектировщик ОВиК",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-проектировщик ОВиК",
+                "text_en": "HVAC Design Engineer",
+                "text_uz": "HVAC loyiha muhandisi"
+            },
+            {
+                "id": 209,
+                "text": "Инженер по эксплуатации зданий и сооружений",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер по эксплуатации",
+                        "id": "46",
+                        "name_ru": "Инженер по эксплуатации",
+                        "name_en": "Maintenance Engineer",
+                        "name_uz": "Foydalanish muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер по эксплуатации зданий и сооружений",
+                "text_en": "Building Maintenance Engineer",
+                "text_uz": "Bino va inshootlardan foydalanish muhandisi"
+            },
+            {
+                "id": 219,
+                "text": "Инженер-проектировщик слаботочных систем",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-проектировщик слаботочных систем",
+                "text_en": "Low-Voltage Systems Design Engineer",
+                "text_uz": "Kuchsiz oqim tizimlari loyiha muhandisi"
+            },
+            {
+                "id": 218,
+                "text": "Инженер-проектировщик систем электроснабжения",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер-проектировщик систем электроснабжения",
+                "text_en": "Power Supply Design Engineer",
+                "text_uz": "Elektr ta'minoti tizimlari loyiha muhandisi"
+            },
+            {
+                "id": 95,
+                "text": "Инженер по нагрузочному тестированию",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Тестировщик",
+                        "id": "124",
+                        "name_ru": "Тестировщик",
+                        "name_en": "Tester/QA",
+                        "name_uz": "Sinovchi/QA"
+                    }
+                ],
+                "text_ru": "Инженер по нагрузочному тестированию",
+                "text_en": "Load Testing Engineer",
+                "text_uz": "Yuklama sinovlari muhandisi"
+            },
+            {
+                "id": 440,
+                "text": "Инженер лесного хозяйства",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Другое",
+                        "id": "40",
+                        "name_ru": "Другое",
+                        "name_en": "Other",
+                        "name_uz": "Boshqa"
+                    }
+                ],
+                "text_ru": "Инженер лесного хозяйства",
+                "text_en": "Forestry Engineer",
+                "text_uz": "O'rmon xo'jaligi muhandisi"
+            },
+            {
+                "id": 558,
+                "text": "Инженер путей сообщения",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер-конструктор, инженер-проектировщик",
+                        "id": "48",
+                        "name_ru": "Инженер-конструктор, инженер-проектировщик",
+                        "name_en": "Design Engineer",
+                        "name_uz": "Konstruktor-muhandis, loyiha muhandisi"
+                    }
+                ],
+                "text_ru": "Инженер путей сообщения",
+                "text_en": "Railway Engineer",
+                "text_uz": "Temir yo'l muhandisi"
+            },
+            {
+                "id": 62,
+                "text": "Сервисный инженер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Сервисный инженер, инженер-механик",
+                        "id": "111",
+                        "name_ru": "Сервисный инженер, инженер-механик",
+                        "name_en": "Service Engineer, Mechanical Engineer",
+                        "name_uz": "Servis muhandisi, mexanik-muhandis"
+                    }
+                ],
+                "text_ru": "Сервисный инженер",
+                "text_en": "Service Engineer",
+                "text_uz": "Servis muhandisi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Кладовщик",
+        "name_en": "Storekeeper",
+        "name_uz": "Omborchi",
+        "items": [
+            {
+                "id": 94,
+                "text": "Кладовщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Кладовщик",
+                        "id": "52",
+                        "name_ru": "Кладовщик",
+                        "name_en": "Storekeeper",
+                        "name_uz": "Omborchi"
+                    }
+                ],
+                "text_ru": "Кладовщик",
+                "text_en": "Storekeeper",
+                "text_uz": "Omborchi"
+            },
+            {
+                "id": 378,
+                "text": "Грузчик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Грузчик",
+                        "id": "31",
+                        "name_ru": "Грузчик",
+                        "name_en": "Loader",
+                        "name_uz": "Yuklovchi"
+                    }
+                ],
+                "text_ru": "Грузчик",
+                "text_en": "Loader",
+                "text_uz": "Yuklovchi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Копирайтер",
+        "name_en": "Copywriter",
+        "name_uz": "Kopirayter",
+        "items": [
+            {
+                "id": 76,
+                "text": "Копирайтер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Копирайтер, редактор, корректор",
+                        "id": "55",
+                        "name_ru": "Копирайтер, редактор, корректор",
+                        "name_en": "Copywriter, Editor, Proofreader",
+                        "name_uz": "Kopirayter, muharrir, musahhih"
+                    }
+                ],
+                "text_ru": "Копирайтер",
+                "text_en": "Copywriter",
+                "text_uz": "Kopirayter"
+            }
+        ]
+    },
+    {
+        "name_ru": "Менеджер",
+        "name_en": "Manager",
+        "name_uz": "Menejer",
+        "items": [
+            {
+                "id": 123,
+                "text": "Менеджер по работе с клиентами",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "id": "70",
+                        "name_ru": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "name_en": "Sales Manager, Account Manager",
+                        "name_uz": "Sotuv menejeri, mijozlar bilan ishlash menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по работе с клиентами",
+                "text_en": "Account Manager",
+                "text_uz": "Mijozlar bilan ishlash menejeri"
+            },
+            {
+                "id": 122,
+                "text": "Менеджер по продажам",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "id": "70",
+                        "name_ru": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "name_en": "Sales Manager, Account Manager",
+                        "name_uz": "Sotuv menejeri, mijozlar bilan ishlash menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по продажам",
+                "text_en": "Sales Manager",
+                "text_uz": "Sotuv menejeri"
+            },
+            {
+                "id": 372,
+                "text": "Менеджер по закупкам и снабжению",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по закупкам",
+                        "id": "66",
+                        "name_ru": "Менеджер по закупкам",
+                        "name_en": "Procurement Manager",
+                        "name_uz": "Xarid menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по закупкам и снабжению",
+                "text_en": "Procurement and Supply Manager",
+                "text_uz": "Xaridlar va ta'minot menejeri"
+            },
+            {
+                "id": 165,
+                "text": "Менеджер по персоналу",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по персоналу",
+                        "id": "69",
+                        "name_ru": "Менеджер по персоналу",
+                        "name_en": "HR Manager",
+                        "name_uz": "Xodimlar bo'yicha menejer"
+                    }
+                ],
+                "text_ru": "Менеджер по персоналу",
+                "text_en": "HR Manager",
+                "text_uz": "Xodimlar bo'yicha menejer"
+            },
+            {
+                "id": 29,
+                "text": "Менеджер маркетплейсов",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по маркетингу, интернет-маркетолог",
+                        "id": "68",
+                        "name_ru": "Менеджер по маркетингу, интернет-маркетолог",
+                        "name_en": "Marketing Manager, Internet Marketer",
+                        "name_uz": "Marketing menejeri, internet-marketolog"
+                    }
+                ],
+                "text_ru": "Менеджер маркетплейсов",
+                "text_en": "Marketplace Manager",
+                "text_uz": "Marketpleys menejeri"
+            },
+            {
+                "id": 367,
+                "text": "Менеджер по логистике",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по логистике, менеджер по ВЭД",
+                        "id": "67",
+                        "name_ru": "Менеджер по логистике, менеджер по ВЭД",
+                        "name_en": "Logistics Manager, Foreign Trade Manager",
+                        "name_uz": "Logistika menejeri, TIF menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по логистике",
+                "text_en": "Logistics Manager",
+                "text_uz": "Logistika menejeri"
+            },
+            {
+                "id": 163,
+                "text": "Менеджер по кадровому делопроизводству",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Специалист по кадрам",
+                        "id": "117",
+                        "name_ru": "Специалист по кадрам",
+                        "name_en": "HR Specialist",
+                        "name_uz": "Kadrlar bo'yicha mutaxassis"
+                    }
+                ],
+                "text_ru": "Менеджер по кадровому делопроизводству",
+                "text_en": "HR Administration Manager",
+                "text_uz": "Kadrlar ish yuritish menejeri"
+            },
+            {
+                "id": 35,
+                "text": "Менеджер продукта",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер продукта",
+                        "id": "73",
+                        "name_ru": "Менеджер продукта",
+                        "name_en": "Product Manager",
+                        "name_uz": "Mahsulot menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер продукта",
+                "text_en": "Product Manager",
+                "text_uz": "Mahsulot menejeri"
+            },
+            {
+                "id": 166,
+                "text": "Менеджер по подбору персонала",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Специалист по подбору персонала",
+                        "id": "118",
+                        "name_ru": "Специалист по подбору персонала",
+                        "name_en": "Recruitment Specialist",
+                        "name_uz": "Xodimlarni tanlash bo'yicha mutaxassis"
+                    }
+                ],
+                "text_ru": "Менеджер по подбору персонала",
+                "text_en": "Recruitment Manager",
+                "text_uz": "Xodimlarni tanlash menejeri"
+            },
+            {
+                "id": 285,
+                "text": "Менеджер по работе с партнерами",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по работе с партнерами",
+                        "id": "71",
+                        "name_ru": "Менеджер по работе с партнерами",
+                        "name_en": "Partnership Manager",
+                        "name_uz": "Hamkorlar bilan ishlash menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по работе с партнерами",
+                "text_en": "Partnership Manager",
+                "text_uz": "Hamkorlar bilan ishlash menejeri"
+            },
+            {
+                "id": 369,
+                "text": "Менеджер по ВЭД",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по логистике, менеджер по ВЭД",
+                        "id": "67",
+                        "name_ru": "Менеджер по логистике, менеджер по ВЭД",
+                        "name_en": "Logistics Manager, Foreign Trade Manager",
+                        "name_uz": "Logistika menejeri, TIF menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по ВЭД",
+                "text_en": "Foreign Trade Manager",
+                "text_uz": "Tashqi iqtisodiy faoliyat menejeri"
+            },
+            {
+                "id": 432,
+                "text": "Менеджер ресторана",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер ресторана",
+                        "id": "74",
+                        "name_ru": "Менеджер ресторана",
+                        "name_en": "Restaurant Manager",
+                        "name_uz": "Restoran menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер ресторана",
+                "text_en": "Restaurant Manager",
+                "text_uz": "Restoran menejeri"
+            },
+            {
+                "id": 287,
+                "text": "Менеджер по туризму",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по туризму",
+                        "id": "72",
+                        "name_ru": "Менеджер по туризму",
+                        "name_en": "Tourism Manager",
+                        "name_uz": "Turizm menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по туризму",
+                "text_en": "Tourism Manager",
+                "text_uz": "Turizm menejeri"
+            },
+            {
+                "id": 233,
+                "text": "Менеджер по качеству",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Инженер по качеству",
+                        "id": "44",
+                        "name_ru": "Инженер по качеству",
+                        "name_en": "Quality Engineer",
+                        "name_uz": "Sifat muhandisi"
+                    }
+                ],
+                "text_ru": "Менеджер по качеству",
+                "text_en": "Quality Manager",
+                "text_uz": "Sifat menejeri"
+            },
+            {
+                "id": 167,
+                "text": "Менеджер по работе с ключевыми клиентами",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "id": "70",
+                        "name_ru": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "name_en": "Sales Manager, Account Manager",
+                        "name_uz": "Sotuv menejeri, mijozlar bilan ishlash menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по работе с ключевыми клиентами",
+                "text_en": "Key Account Manager",
+                "text_uz": "Muhim mijozlar bilan ishlash menejeri"
+            },
+            {
+                "id": 368,
+                "text": "Менеджер по транспортной логистике",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по логистике, менеджер по ВЭД",
+                        "id": "67",
+                        "name_ru": "Менеджер по логистике, менеджер по ВЭД",
+                        "name_en": "Logistics Manager, Foreign Trade Manager",
+                        "name_uz": "Logistika menejeri, TIF menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по транспортной логистике",
+                "text_en": "Transport Logistics Manager",
+                "text_uz": "Transport logistikasi menejeri"
+            },
+            {
+                "id": 182,
+                "text": "Менеджер по обучению и развитию персонала",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по персоналу",
+                        "id": "69",
+                        "name_ru": "Менеджер по персоналу",
+                        "name_en": "HR Manager",
+                        "name_uz": "Xodimlar bo'yicha menejer"
+                    }
+                ],
+                "text_ru": "Менеджер по обучению и развитию персонала",
+                "text_en": "L&D Manager",
+                "text_uz": "Xodimlarni o'qitish va rivojlantirish menejeri"
+            },
+            {
+                "id": 164,
+                "text": "Менеджер по оптовым продажам",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "id": "70",
+                        "name_ru": "Менеджер по продажам, менеджер по работе с клиентами",
+                        "name_en": "Sales Manager, Account Manager",
+                        "name_uz": "Sotuv menejeri, mijozlar bilan ishlash menejeri"
+                    }
+                ],
+                "text_ru": "Менеджер по оптовым продажам",
+                "text_en": "Wholesale Manager",
+                "text_uz": "Ulgurji savdo menejeri"
+            },
+            {
+                "id": 280,
+                "text": "Менеджер по маркетингу и PR",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Менеджер по маркетингу, интернет-маркетолог",
+                        "id": "68",
+                        "name_ru": "Менеджер по маркетингу, интернет-маркетолог",
+                        "name_en": "Marketing Manager, Internet Marketer",
+                        "name_uz": "Marketing menejeri, internet-marketolog"
+                    }
+                ],
+                "text_ru": "Менеджер по маркетингу и PR",
+                "text_en": "Marketing and PR Manager",
+                "text_uz": "Marketing va PR menejeri"
+            },
+            {
+                "id": 119,
+                "text": "Менеджер по внутренним коммуникациям",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "PR-менеджер",
+                        "id": "2",
+                        "name_ru": "PR-менеджер",
+                        "name_en": "PR Manager",
+                        "name_uz": "PR-menejer"
+                    }
+                ],
+                "text_ru": "Менеджер по внутренним коммуникациям",
+                "text_en": "Internal Communications Manager",
+                "text_uz": "Ichki kommunikatsiyalar menejeri"
+            }
+        ]
+    },
+    {
+        "name_ru": "Мерчандайзер",
+        "name_en": "Merchandiser",
+        "name_uz": "Merchandiser",
+        "items": [
+            {
+                "id": 168,
+                "text": "Мерчандайзер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Мерчандайзер",
+                        "id": "77",
+                        "name_ru": "Мерчандайзер",
+                        "name_en": "Merchandiser",
+                        "name_uz": "Merchandayzer"
+                    }
+                ],
+                "text_ru": "Мерчандайзер",
+                "text_en": "Merchandiser",
+                "text_uz": "Merchandayzer"
+            }
+        ]
+    },
+    {
+        "name_ru": "Монтажник",
+        "name_en": "Installer",
+        "name_uz": "Montajchi",
+        "items": [
+            {
+                "id": 573,
+                "text": "Монтажник",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Монтажник",
+                        "id": "78",
+                        "name_ru": "Монтажник",
+                        "name_en": "Installer",
+                        "name_uz": "Montajchi"
+                    }
+                ],
+                "text_ru": "Монтажник",
+                "text_en": "Installer",
+                "text_uz": "Montajchi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Оператор",
+        "name_en": "Operator",
+        "name_uz": "Operator",
+        "items": [
+            {
+                "id": 170,
+                "text": "Оператор call-центра",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Оператор call-центра, специалист контактного центра",
+                        "id": "83",
+                        "name_ru": "Оператор call-центра, специалист контактного центра",
+                        "name_en": "Call Center Operator, Contact Center Specialist",
+                        "name_uz": "Call-markaz operatori, aloqa markazi mutaxassisi"
+                    }
+                ],
+                "text_ru": "Оператор call-центра",
+                "text_en": "Call Center Operator",
+                "text_uz": "Call-markaz operatori"
+            },
+            {
+                "id": 481,
+                "text": "Оператор производственной линии",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Оператор производственной линии",
+                        "id": "85",
+                        "name_ru": "Оператор производственной линии",
+                        "name_en": "Production Line Operator",
+                        "name_uz": "Ishlab chiqarish liniyasi operatori"
+                    }
+                ],
+                "text_ru": "Оператор производственной линии",
+                "text_en": "Production Line Operator",
+                "text_uz": "Ishlab chiqarish liniyasi operatori"
+            },
+            {
+                "id": 484,
+                "text": "Оператор станков с ЧПУ",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Оператор станков с ЧПУ",
+                        "id": "86",
+                        "name_ru": "Оператор станков с ЧПУ",
+                        "name_en": "CNC Machine Operator",
+                        "name_uz": "CHPU dastgohlari operatori"
+                    }
+                ],
+                "text_ru": "Оператор станков с ЧПУ",
+                "text_en": "CNC Machine Operator",
+                "text_uz": "CHPU dastgohlari operatori"
+            },
+            {
+                "id": 449,
+                "text": "Оператор-заправщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Разнорабочий",
+                        "id": "102",
+                        "name_ru": "Разнорабочий",
+                        "name_en": "Handyman",
+                        "name_uz": "Yordamchi ishchi"
+                    }
+                ],
+                "text_ru": "Оператор-заправщик",
+                "text_en": "Filling Station Attendant",
+                "text_uz": "Operator-yoqilg'i quyuvchi"
+            },
+            {
+                "id": 461,
+                "text": "Оператор почтовой связи",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Другое",
+                        "id": "40",
+                        "name_ru": "Другое",
+                        "name_en": "Other",
+                        "name_uz": "Boshqa"
+                    }
+                ],
+                "text_ru": "Оператор почтовой связи",
+                "text_en": "Postal Service Operator",
+                "text_uz": "Pochta aloqasi operatori"
+            },
+            {
+                "id": 463,
+                "text": "Оператор химчистки",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Разнорабочий",
+                        "id": "102",
+                        "name_ru": "Разнорабочий",
+                        "name_en": "Handyman",
+                        "name_uz": "Yordamchi ishchi"
+                    }
+                ],
+                "text_ru": "Оператор химчистки",
+                "text_en": "Dry Cleaning Operator",
+                "text_uz": "Kimyoviy tozalash operatori"
+            },
+            {
+                "id": 452,
+                "text": "Оператор аттракциона",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Разнорабочий",
+                        "id": "102",
+                        "name_ru": "Разнорабочий",
+                        "name_en": "Handyman",
+                        "name_uz": "Yordamchi ishchi"
+                    }
+                ],
+                "text_ru": "Оператор аттракциона",
+                "text_en": "Attraction Operator",
+                "text_uz": "Attraksion operatori"
+            },
+            {
+                "id": 570,
+                "text": "Кочегар/Оператор котельной",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Оператор производственной линии",
+                        "id": "85",
+                        "name_ru": "Оператор производственной линии",
+                        "name_en": "Production Line Operator",
+                        "name_uz": "Ishlab chiqarish liniyasi operatori"
+                    }
+                ],
+                "text_ru": "Кочегар/Оператор котельной",
+                "text_en": "Stoker/Boiler Operator",
+                "text_uz": "Olovchi/Qozonxona operatori"
+            },
+            {
+                "id": 64,
+                "text": "Оператор ПК/Оператор базы данных",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Оператор ПК, оператор базы данных",
+                        "id": "84",
+                        "name_ru": "Оператор ПК, оператор базы данных",
+                        "name_en": "PC Operator, Database Operator",
+                        "name_uz": "EKM operatori, ma'lumotlar bazasi operatori"
+                    }
+                ],
+                "text_ru": "Оператор ПК/Оператор базы данных",
+                "text_en": "PC Operator/Database Operator",
+                "text_uz": "EKM operatori/Ma'lumotlar bazasi operatori"
+            }
+        ]
+    },
+    {
+        "name_ru": "Официант",
+        "name_en": "Waiter",
+        "name_uz": "Ofitsiant",
+        "items": [
+            {
+                "id": 241,
+                "text": "Официант",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Официант, бармен, бариста",
+                        "id": "89",
+                        "name_ru": "Официант, бармен, бариста",
+                        "name_en": "Waiter, Bartender, Barista",
+                        "name_uz": "Ofitsiant, barmen, barista"
+                    }
+                ],
+                "text_ru": "Официант",
+                "text_en": "Waiter",
+                "text_uz": "Ofitsiant"
+            },
+            {
+                "id": 197,
+                "text": "Бармен",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Официант, бармен, бариста",
+                        "id": "89",
+                        "name_ru": "Официант, бармен, бариста",
+                        "name_en": "Waiter, Bartender, Barista",
+                        "name_uz": "Ofitsiant, barmen, barista"
+                    }
+                ],
+                "text_ru": "Бармен",
+                "text_en": "Bartender",
+                "text_uz": "Barmen"
+            }
+        ]
+    },
+    {
+        "name_ru": "Охранник",
+        "name_en": "Security guard",
+        "name_uz": "Soqchi",
+        "items": [
+            {
+                "id": 464,
+                "text": "Охранник",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Охранник",
+                        "id": "90",
+                        "name_ru": "Охранник",
+                        "name_en": "Security Guard",
+                        "name_uz": "Qo'riqchi"
+                    }
+                ],
+                "text_ru": "Охранник",
+                "text_en": "Security Guard",
+                "text_uz": "Qo'riqchi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Экономист",
+        "name_en": "Economist",
+        "name_uz": "Iqtisodchi",
+        "items": [
+            {
+                "id": 314,
+                "text": "Экономист",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Экономист",
+                        "id": "142",
+                        "name_ru": "Экономист",
+                        "name_en": "Economist",
+                        "name_uz": "Iqtisodchi"
+                    }
+                ],
+                "text_ru": "Экономист",
+                "text_en": "Economist",
+                "text_uz": "Iqtisodchi"
+            },
+            {
+                "id": 309,
+                "text": "Бухгалтер",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Бухгалтер",
+                        "id": "18",
+                        "name_ru": "Бухгалтер",
+                        "name_en": "Accountant",
+                        "name_uz": "Buxgalter"
+                    }
+                ],
+                "text_ru": "Бухгалтер",
+                "text_en": "Accountant",
+                "text_uz": "Buxgalter"
+            }
+        ]
+    },
+    {
+        "name_ru": "Помощник",
+        "name_en": "Assistant",
+        "name_uz": "Yordamchi",
+        "items": [
+            {
+                "id": 259,
+                "text": "Помощник/ассистент руководителя",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Секретарь, помощник руководителя, ассистент",
+                        "id": "110",
+                        "name_ru": "Секретарь, помощник руководителя, ассистент",
+                        "name_en": "Secretary, Executive Assistant, Assistant",
+                        "name_uz": "Kotib, rahbar yordamchisi, assistent"
+                    }
+                ],
+                "text_ru": "Помощник/ассистент руководителя",
+                "text_en": "Executive Assistant",
+                "text_uz": "Rahbar yordamchisi/Assistenti"
+            },
+            {
+                "id": 425,
+                "text": "Помощник повара",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Повар, пекарь, кондитер",
+                        "id": "94",
+                        "name_ru": "Повар, пекарь, кондитер",
+                        "name_en": "Cook, Baker, Confectioner",
+                        "name_uz": "Oshpaz, novvoy, qandolatchi"
+                    }
+                ],
+                "text_ru": "Помощник повара",
+                "text_en": "Assistant Cook",
+                "text_uz": "Oshpaz yordamchisi"
+            },
+            {
+                "id": 305,
+                "text": "Помощник адвоката",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Юрист",
+                        "id": "146",
+                        "name_ru": "Юрист",
+                        "name_en": "Lawyer",
+                        "name_uz": "Yurist"
+                    }
+                ],
+                "text_ru": "Помощник адвоката",
+                "text_en": "Lawyer Assistant",
+                "text_uz": "Advokat yordamchisi"
+            },
+            {
+                "id": 304,
+                "text": "Помощник нотариуса",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Юрист",
+                        "id": "146",
+                        "name_ru": "Юрист",
+                        "name_en": "Lawyer",
+                        "name_uz": "Yurist"
+                    }
+                ],
+                "text_ru": "Помощник нотариуса",
+                "text_en": "Notary Assistant",
+                "text_uz": "Notarius yordamchisi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Преподаватель",
+        "name_en": "Teacher",
+        "name_uz": "O'qituvchi",
+        "items": [
+            {
+                "id": 356,
+                "text": "Преподаватель",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Учитель, преподаватель, педагог",
+                        "id": "132",
+                        "name_ru": "Учитель, преподаватель, педагог",
+                        "name_en": "Teacher, Lecturer, Educator",
+                        "name_uz": "O'qituvchi, ma'ruza o'qituvchisi, pedagog"
+                    }
+                ],
+                "text_ru": "Преподаватель",
+                "text_en": "Teacher/Lecturer",
+                "text_uz": "O'qituvchi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Юрист",
+        "name_en": "Lawyer",
+        "name_uz": "Yurist",
+        "items": [
+            {
+                "id": 303,
+                "text": "Юрист",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Юрист",
+                        "id": "146",
+                        "name_ru": "Юрист",
+                        "name_en": "Lawyer",
+                        "name_uz": "Yurist"
+                    }
+                ],
+                "text_ru": "Юрист",
+                "text_en": "Lawyer",
+                "text_uz": "Yurist"
+            },
+            {
+                "id": 302,
+                "text": "Юрисконсульт",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Юрисконсульт",
+                        "id": "145",
+                        "name_ru": "Юрисконсульт",
+                        "name_en": "Legal Counsel",
+                        "name_uz": "Yuriskonsult"
+                    }
+                ],
+                "text_ru": "Юрисконсульт",
+                "text_en": "Legal Counsel",
+                "text_uz": "Yuriskonsult"
+            },
+            {
+                "id": 502,
+                "text": "Судебный пристав-исполнитель",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Другое",
+                        "id": "40",
+                        "name_ru": "Другое",
+                        "name_en": "Other",
+                        "name_uz": "Boshqa"
+                    }
+                ],
+                "text_ru": "Судебный пристав-исполнитель",
+                "text_en": "Bailiff-Executor",
+                "text_uz": "Sud ijrochisi"
+            },
+            {
+                "id": 507,
+                "text": "Судебный пристав по ОУПДС",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Другое",
+                        "id": "40",
+                        "name_ru": "Другое",
+                        "name_en": "Other",
+                        "name_uz": "Boshqa"
+                    }
+                ],
+                "text_ru": "Судебный пристав по ОУПДС",
+                "text_en": "Bailiff for OUPDS",
+                "text_uz": "OUPDS bo'yicha sud ijrochisi"
+            }
+        ]
+    },
+    {
+        "name_ru": "Уборщик",
+        "name_en": "Cleaner",
+        "name_uz": "Tozalovchi",
+        "items": [
+            {
+                "id": 431,
+                "text": "Уборщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Уборщица, уборщик",
+                        "id": "130",
+                        "name_ru": "Уборщица, уборщик",
+                        "name_en": "Cleaner",
+                        "name_uz": "Farrosh"
+                    }
+                ],
+                "text_ru": "Уборщик",
+                "text_en": "Cleaner",
+                "text_uz": "Tozalovchi"
+            },
+            {
+                "id": 93,
+                "text": "Комплектовщик",
+                "specializations": [],
+                "professionalRoles": [
+                    {
+                        "name": "Упаковщик, комплектовщик",
+                        "id": "131",
+                        "name_ru": "Упаковщик, комплектовщик",
+                        "name_en": "Packer, Picker",
+                        "name_uz": "Qadoqlovchi, komplektlovchi"
+                    }
+                ],
+                "text_ru": "Комплектовщик",
+                "text_en": "Picker",
+                "text_uz": "Komplektlovchi"
+            }
+        ]
+    }
+]

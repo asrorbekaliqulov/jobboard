@@ -1,0 +1,9 @@
+.idea/
+__pycache__/
+.env
+*.log
+node_modules
+media/
+uploads/
+logs/
+uyavto-s3-1af0e9f49acf.json
