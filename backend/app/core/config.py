@@ -17,10 +17,10 @@ class Settings(BaseSettings):
             return [item.strip() for item in v.split(",") if item.strip()]
         return v
 
-    WEBHOOK_URL: str  # e.g., https://yourdomain.com/webhook
-    MINI_APP_URL: str  # e.g., https://your-miniapp-domain.com
+    WEBHOOK_URL: str = ""  # Optional: if empty or not https, bot runs in polling mode
+    MINI_APP_URL: str = ""  # e.g., https://your-miniapp-domain.com
     DATABASE_URL: str  # e.g., postgresql+asyncpg://user:pass@db:5432/job_db
-    REDIS_URL: str  # e.g., redis://redis:6379/0
+    REDIS_URL: str = ""  # e.g., redis://redis:6379/0 (optional for polling mode)
 
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
@@ -38,6 +38,16 @@ class Settings(BaseSettings):
     GCS_PUBLIC_BASE_URL: str | None = (
         None  # e.g. https://storage.googleapis.com/BUCKET or custom CDN
     )
+
+    @property
+    def use_webhook(self) -> bool:
+        """Returns True if webhook mode should be used, False for polling."""
+        return bool(self.WEBHOOK_URL and self.WEBHOOK_URL.startswith("https://"))
+
+    @property
+    def use_redis(self) -> bool:
+        """Returns True if Redis URL is configured."""
+        return bool(self.REDIS_URL and self.REDIS_URL.strip())
 
     class Config:
         env_file = ".env"
