@@ -96,16 +96,25 @@ class AuthService {
     }
 
     async updateRole(role: string): Promise<boolean> {
-        if (!this.token) return false;
+        if (!this.token) {
+            console.error('Update role failed: No auth token available');
+            return false;
+        }
         try {
+            const body = JSON.stringify({ role: role.toLowerCase() });
+            console.log('Sending role update:', body, 'Token:', this.token?.substring(0, 20) + '...');
             const response = await fetch(`${API_URL}/auth/role`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${this.token}`
                 },
-                body: JSON.stringify({ role: role.toLowerCase() }),
+                body,
             });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Update role failed:', response.status, errorText);
+            }
             return response.ok;
         } catch (error) {
             console.error('Update role error:', error);
