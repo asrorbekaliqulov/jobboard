@@ -23,12 +23,18 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
 
   const handleRoleSelection = async (role: UserRole) => {
     setIsFinishing(true);
-    const success = await authService.updateRole(role);
-    if (!success) {
-      setIsFinishing(false);
-      alert(t('onboarding.failed_role'));
-      return;
+    
+    // If user is authenticated, save to server
+    if (authService.isAuthenticated()) {
+      const success = await authService.updateRole(role);
+      if (!success) {
+        setIsFinishing(false);
+        alert(t('onboarding.failed_role'));
+        return;
+      }
     }
+    
+    // Always proceed with the selected role (even if not authenticated)
     setTimeout(() => {
       onComplete(role);
     }, 600);
