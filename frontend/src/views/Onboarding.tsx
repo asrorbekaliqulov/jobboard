@@ -1,26 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserRole } from '../types.ts';
 import { authService } from '../services/auth.ts';
 import { useTranslation } from 'react-i18next';
 
 const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () => void }> = ({ onComplete, onAdmin }) => {
   const { t, i18n } = useTranslation();
-  const [step, setStep] = useState<'lang' | 'role'>('lang');
+  const [step, setStep] = useState<'splash' | 'role'>('splash');
   const [isFinishing, setIsFinishing] = useState(false);
   const [isSavingLang, setIsSavingLang] = useState(false);
 
-  const handleLanguageSelection = async (langCode: string) => {
-    setIsSavingLang(true);
-    // Change i18n language locally first
-    i18n.changeLanguage(langCode);
-
-    // Persist language to backend
-    const success = await authService.updateLanguage(langCode);
-    if (!success) {
-      console.warn('Failed to save language to backend, continuing anyway');
+  // Auto-advance splash after 2.5 seconds
+  useEffect(() => {
+    if (step === 'splash') {
+      const timer = setTimeout(() => setStep('role'), 2500);
+      return () => clearTimeout(timer);
     }
+  }, [step]);
 
-    setIsSavingLang(false);
+  const handleStart = () => {
     setStep('role');
   };
 
@@ -34,76 +31,149 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
     }
     setTimeout(() => {
       onComplete(role);
-    }, 800);
+    }, 600);
   };
 
-  return (
-    <div className={`min-h-screen bg-onboarding p-4 flex flex-col items-center justify-center text-center max-w-md mx-auto transition-all duration-1000 relative overflow-hidden ${isFinishing ? 'opacity-0 scale-95 blur-sm' : ''}`}>
-      {/* Floating decorative elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="floating-1 absolute top-[15%] left-[10%] w-16 h-16 rounded-full bg-blue-100/30 blur-lg" />
-        <div className="floating-2 absolute top-[25%] right-[8%] w-12 h-12 rounded-full bg-violet-100/30 blur-lg" />
-        <div className="floating-1 absolute bottom-[20%] left-[15%] w-10 h-10 rounded-full bg-emerald-100/30 blur-lg" />
-        <div className="floating-2 absolute bottom-[30%] right-[12%] w-14 h-14 rounded-full bg-blue-100/20 blur-lg" />
+  // Splash Screen (1-QADAM)
+  if (step === 'splash') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 max-w-md mx-auto relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-indigo-50 opacity-50" />
+          <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-indigo-50 opacity-40" />
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* Logo */}
+          <div className="mb-8">
+            <h1 className="text-5xl font-black tracking-tight">
+              <span className="text-slate-900">ISH</span>
+              <span className="text-indigo-600">KO'P</span>
+            </h1>
+          </div>
+
+          {/* Tagline */}
+          <h2 className="text-2xl font-bold text-slate-900 leading-tight mb-2">
+            Bugun ish toping,<br/>
+            <span className="text-indigo-600">ertaga ishlang.</span>
+          </h2>
+
+          {/* Stats */}
+          <div className="flex items-center gap-6 mt-8 text-sm text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <i className="fa-solid fa-briefcase text-indigo-500 text-xs" />
+              <span className="font-semibold">10 000+</span>
+              <span className="text-xs">vakansiya</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <i className="fa-solid fa-users text-indigo-500 text-xs" />
+              <span className="font-semibold">8 000+</span>
+              <span className="text-xs">ishchi</span>
+            </div>
+          </div>
+
+          {/* Start button */}
+          <button
+            onClick={handleStart}
+            className="mt-12 w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base py-4 px-8 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-indigo-200"
+          >
+            Boshlash
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <i className="fa-solid fa-arrow-right text-sm" />
+            </div>
+          </button>
+
+          {/* Footer */}
+          <p className="mt-6 text-xs text-slate-400">
+            Ma'lumotlaringiz xavfsiz himoyalanadi
+          </p>
+        </div>
       </div>
+    );
+  }
+
+  // Role Selection (2-QADAM)
+  return (
+    <div className={`min-h-screen bg-white flex flex-col px-6 pt-16 pb-8 max-w-md mx-auto transition-all duration-500 ${isFinishing ? 'opacity-0 scale-95' : ''}`}>
+      {/* Back button */}
+      <button
+        onClick={() => setStep('splash')}
+        className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-600 z-10"
+      >
+        <i className="fa-solid fa-chevron-left text-sm" />
+      </button>
 
       {isFinishing ? (
-        <div className="flex flex-col items-center gap-4 relative z-10">
-          {/* Success animation */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <div className="relative">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center success-icon">
               <i className="fa-solid fa-check text-2xl text-emerald-600"></i>
             </div>
             <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-emerald-300 success-ring" />
           </div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">{t('onboarding.preparing')}</p>
-        </div>
-      ) : step === 'lang' ? (
-        <div className="relative z-10 w-full fade-up">
-          <div className="mb-8 animate-bounce-short">
-            <img style={{ width: '120px' }} src='./logo_new.png' alt="Ish Ko'p" className="mx-auto" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t('onboarding.title')}</h1>
-          <p className="text-sm text-slate-500 mb-10 font-medium">{t('onboarding.ecosystem')}</p>
-          <div className="w-full space-y-3">
-            {[
-              { label: 'O\'zbekcha', code: 'uz', flag: '🇺🇿' },
-              { label: 'Русский', code: 'ru', flag: '🇷🇺' },
-              { label: 'English', code: 'en', flag: '🇺🇸' },
-            ].map((l, i) => (
-              <button
-                key={l.code}
-                onClick={() => handleLanguageSelection(l.code)}
-                disabled={isSavingLang}
-                className={`w-full py-4 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-xl font-semibold text-slate-700 text-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all active:scale-[0.97] card-shadow flex items-center justify-center gap-3 card-enter card-enter-${i + 1} ${isSavingLang ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <span className="text-lg">{l.flag}</span>
-                {isSavingLang ? <i className="fa-solid fa-spinner animate-spin"></i> : l.label}
-              </button>
-            ))}
-          </div>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">{t('onboarding.preparing')}</p>
         </div>
       ) : (
-        <div className="relative z-10 w-full fade-up">
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-1">{t('onboarding.your_profile')}</h2>
-          <p className="text-sm text-slate-500 mb-8 font-medium">{t('onboarding.select_objective')}</p>
-          <div className="w-full space-y-3">
-            <button onClick={() => handleRoleSelection(UserRole.CANDIDATE_HUNTER)} className="w-full p-5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl card-shadow hover:border-violet-200 hover:shadow-md transition-all flex items-center gap-4 group text-left active:scale-[0.97] card-enter card-enter-1">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center text-violet-500 text-xl shrink-0 group-hover:bg-violet-500 group-hover:text-white transition-colors group-hover:shadow-lg group-hover:shadow-violet-200"><i className="fa-solid fa-user-tie"></i></div>
-              <div><h3 className="font-extrabold text-base text-slate-800">{t('onboarding.partner')}</h3><p className="text-[11px] font-medium text-slate-400 mt-0.5">{t('onboarding.partner_desc')}</p></div>
-              <i className="fa-solid fa-chevron-right text-[10px] text-slate-200 ml-auto" />
+        <div className="flex-1 flex flex-col fade-up">
+          {/* Title */}
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-black text-slate-900 mb-2">Siz kimsiz?</h1>
+            <p className="text-sm text-slate-500 font-medium">O'zingizga mos rolni tanlang</p>
+          </div>
+
+          {/* Role cards */}
+          <div className="space-y-4 flex-1">
+            {/* Ish qidiryapman */}
+            <button
+              onClick={() => handleRoleSelection(UserRole.JOB_SEEKER)}
+              className="w-full p-5 bg-white border-2 border-slate-100 rounded-2xl flex items-center gap-4 text-left active:scale-[0.97] transition-all hover:border-indigo-200 hover:shadow-md group card-enter card-enter-1"
+            >
+              <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <i className="fa-solid fa-magnifying-glass text-xl text-indigo-600 group-hover:text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base text-slate-900">Ish qidiryapman</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Yangi ish topish</p>
+              </div>
+              <i className="fa-solid fa-chevron-right text-slate-300 text-sm" />
             </button>
-            <button onClick={() => handleRoleSelection(UserRole.JOB_SEEKER)} className="w-full p-5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl card-shadow hover:border-blue-200 hover:shadow-md transition-all flex items-center gap-4 group text-left active:scale-[0.97] card-enter card-enter-2">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-xl shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-colors group-hover:shadow-lg group-hover:shadow-blue-200"><i className="fa-solid fa-user-graduate"></i></div>
-              <div><h3 className="font-extrabold text-base text-slate-800">{t('onboarding.candidate')}</h3><p className="text-[11px] font-medium text-slate-400 mt-0.5">{t('onboarding.candidate_desc')}</p></div>
-              <i className="fa-solid fa-chevron-right text-[10px] text-slate-200 ml-auto" />
+
+            {/* Ish beruvchiman */}
+            <button
+              onClick={() => handleRoleSelection(UserRole.CANDIDATE_HUNTER)}
+              className="w-full p-5 bg-white border-2 border-slate-100 rounded-2xl flex items-center gap-4 text-left active:scale-[0.97] transition-all hover:border-indigo-200 hover:shadow-md group card-enter card-enter-2"
+            >
+              <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <i className="fa-solid fa-user-tie text-xl text-emerald-600 group-hover:text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base text-slate-900">Ish beruvchiman</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Xodim topish</p>
+              </div>
+              <i className="fa-solid fa-chevron-right text-slate-300 text-sm" />
             </button>
-            <button onClick={() => handleRoleSelection(UserRole.DAILY_JOB_SEEKER)} className="w-full p-5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl card-shadow hover:border-emerald-200 hover:shadow-md transition-all flex items-center gap-4 group text-left active:scale-[0.97] card-enter card-enter-3">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 text-xl shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors group-hover:shadow-lg group-hover:shadow-emerald-200"><i className="fa-solid fa-calendar-day"></i></div>
-              <div><h3 className="font-extrabold text-base text-slate-800">{t('onboarding.daily_job_seeker')}</h3><p className="text-[11px] font-medium text-slate-400 mt-0.5">{t('onboarding.daily_job_seeker_desc')}</p></div>
-              <i className="fa-solid fa-chevron-right text-[10px] text-slate-200 ml-auto" />
+
+            {/* Kunlik ishchi */}
+            <button
+              onClick={() => handleRoleSelection(UserRole.DAILY_JOB_SEEKER)}
+              className="w-full p-5 bg-white border-2 border-slate-100 rounded-2xl flex items-center gap-4 text-left active:scale-[0.97] transition-all hover:border-indigo-200 hover:shadow-md group card-enter card-enter-3"
+            >
+              <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <i className="fa-solid fa-bolt text-xl text-amber-500 group-hover:text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base text-slate-900">Kunlik ishchi</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Kunlik daromad topish</p>
+              </div>
+              <i className="fa-solid fa-chevron-right text-slate-300 text-sm" />
             </button>
           </div>
+
+          {/* Footer disclaimer */}
+          <p className="text-center text-[11px] text-slate-400 mt-8">
+            Davom etish orqali siz <span className="text-indigo-600 font-medium">qoidalar</span> bilan rozilik bildirasiz
+          </p>
         </div>
       )}
     </div>
