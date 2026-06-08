@@ -15,6 +15,21 @@ textarea::placeholder {
 /* ─── Label color override ──────────────────────────────────────────────────── */
 label { color: #334155 !important; }
 
+/* ─── Primary colors (ISHKO'P purple/indigo) ────────────────────────────────── */
+:root {
+  --primary: #4F46E5;
+  --primary-light: #6366F1;
+  --primary-dark: #3730A3;
+  --primary-50: #EEF2FF;
+  --primary-100: #E0E7FF;
+  --primary-200: #C7D2FE;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;
+  --primary-700: #4338CA;
+  --primary-800: #3730A3;
+  --primary-900: #312E81;
+}
+
 /* ─── Utility classes ───────────────────────────────────────────────────────── */
 .glass {
   background: rgba(255,255,255,0.72);
@@ -37,58 +52,51 @@ label { color: #334155 !important; }
 
 /* ─── Gradient buttons ──────────────────────────────────────────────────────── */
 .btn-gradient {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
 }
 .btn-gradient-emerald {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 .btn-gradient-purple {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
 }
 
 /* ─── Role-based gradient backgrounds ───────────────────────────────────────── */
 .bg-mesh-blue {
-  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 40%, #f0f9ff 70%, #faf5ff 100%);
+  background: #F8FAFC;
 }
 .bg-mesh-emerald {
-  background: linear-gradient(135deg, #ecfdf5 0%, #f8fafc 40%, #f0fdf4 70%, #ecfeff 100%);
+  background: #F8FAFC;
 }
 .bg-mesh-violet {
-  background: linear-gradient(135deg, #f5f3ff 0%, #f8fafc 40%, #faf5ff 70%, #fdf2f8 100%);
+  background: #F8FAFC;
 }
 
 /* ─── Onboarding gradient mesh ──────────────────────────────────────────────── */
 .bg-onboarding {
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.05) 0%, transparent 50%),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: #FFFFFF;
 }
 
-/* ─── Card accent line (left border gradient) ───────────────────────────────── */
-.card-accent-blue {
-  border-left: 3px solid transparent;
-  border-image: linear-gradient(to bottom, #3b82f6, #60a5fa) 1;
+/* ─── Splash screen gradient ────────────────────────────────────────────────── */
+.splash-gradient {
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #4338CA 100%);
 }
-.card-accent-emerald {
-  border-left: 3px solid transparent;
-  border-image: linear-gradient(to bottom, #10b981, #34d399) 1;
-}
-.card-accent-violet {
-  border-left: 3px solid transparent;
-  border-image: linear-gradient(to bottom, #8b5cf6, #a78bfa) 1;
+
+/* ─── Banner gradient ───────────────────────────────────────────────────────── */
+.banner-gradient {
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  border-radius: 20px;
 }
 
 /* ─── Bottom nav glow ───────────────────────────────────────────────────────── */
 .nav-glow-blue {
-  filter: drop-shadow(0 0 6px rgba(59,130,246,0.35));
+  filter: none;
 }
 .nav-glow-emerald {
-  filter: drop-shadow(0 0 6px rgba(16,185,129,0.35));
+  filter: none;
 }
 .nav-glow-violet {
-  filter: drop-shadow(0 0 6px rgba(139,92,246,0.35));
+  filter: none;
 }
 
 /* ─── Bookmark pop animation ────────────────────────────────────────────────── */
@@ -112,7 +120,7 @@ label { color: #334155 !important; }
   animation: fadeUp 0.35s ease-out both;
 }
 
-/* ─── Staggered card entrance (Linear.app inspired) ─────────────────────────── */
+/* ─── Staggered card entrance ───────────────────────────────────────────────── */
 @keyframes cardEnter {
   from { opacity: 0; transform: translateY(16px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -223,18 +231,13 @@ label { color: #334155 !important; }
 .floating-1 { animation: float1 8s ease-in-out infinite; }
 .floating-2 { animation: float2 6s ease-in-out infinite; }
 
-/* ─── Swipe container ───────────────────────────────────────────────────────── */
-.swipe-container {
-  touch-action: pan-y;
-  overflow: hidden;
+/* ─── Splash screen pulse ───────────────────────────────────────────────────── */
+@keyframes splashPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
-.swipe-content {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* ─── Relative time badge ───────────────────────────────────────────────────── */
-.time-badge {
-  font-variant-numeric: tabular-nums;
+.splash-pulse {
+  animation: splashPulse 2s ease-in-out infinite;
 }
 
 /* ─── Scrollbar hide ────────────────────────────────────────────────────────── */
@@ -248,7 +251,7 @@ label { color: #334155 !important; }
   }
 }
 
-/* ─── Gradient border effect (Stripe inspired) ──────────────────────────────── */
+/* ─── Gradient border effect ────────────────────────────────────────────────── */
 .gradient-border {
   position: relative;
 }
@@ -258,7 +261,7 @@ label { color: #334155 !important; }
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, #4F46E5, #6366F1, #818CF8);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -269,75 +272,35 @@ label { color: #334155 !important; }
   opacity: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════════
-   DARK MODE — triggered by Telegram's color_scheme or system preference
-   ═══════════════════════════════════════════════════════════════════════════════ */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
-
-  body {
-    background-color: #0f172a !important;
-    color: #e2e8f0 !important;
-  }
-
-  label { color: #cbd5e1 !important; }
-
-  ::placeholder,
-  input::placeholder,
-  textarea::placeholder {
-    color: #475569 !important;
-  }
-
-  .glass {
-    background: rgba(15, 23, 42, 0.72);
-    border-color: rgba(51, 65, 85, 0.25);
-  }
-
-  .card-shadow {
-    box-shadow:
-      0 1px 2px rgba(0,0,0,0.2),
-      0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  .card-shadow-lg {
-    box-shadow:
-      0 2px 4px rgba(0,0,0,0.15),
-      0 8px 24px rgba(0,0,0,0.25);
-  }
-
-  .skeleton {
-    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-  }
+/* ─── Category card ─────────────────────────────────────────────────────────── */
+.category-card {
+  transition: all 0.2s ease;
+}
+.category-card:active {
+  transform: scale(0.95);
 }
 
-/* Dark mesh background for layout */
-.dark .bg-dark-mesh {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+/* ─── Filter chip ───────────────────────────────────────────────────────────── */
+.filter-chip {
+  transition: all 0.2s ease;
+}
+.filter-chip.active {
+  background: #4F46E5;
+  color: white;
 }
 
-@media (prefers-color-scheme: dark) {
-  .bg-mesh-blue, .bg-mesh-emerald, .bg-mesh-violet {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
-  }
+/* ─── Bottom navigation styles ──────────────────────────────────────────────── */
+.bottom-nav-item {
+  transition: all 0.2s ease;
+}
+.bottom-nav-item.active {
+  color: #4F46E5;
+}
+.bottom-nav-item:not(.active) {
+  color: #94A3B8;
 }
 
-/* Telegram WebApp dark mode detection */
-html[style*="color-scheme: dark"],
-html.dark {
-  --tw-bg-opacity: 1;
-}
-
-html[style*="color-scheme: dark"] body,
-html.dark body {
-  background-color: #0f172a !important;
-  color: #e2e8f0 !important;
-}
-
-/* Keep client chrome light inside Telegram/iOS even when the host prefers dark mode. */
+/* Keep client chrome light */
 .client-topbar,
 .client-bottom-nav {
   background-color: #ffffff !important;
@@ -351,4 +314,29 @@ html.dark body {
 }
 .toast-exit {
   animation: toastExit 0.2s ease-in forwards;
+}
+
+/* ─── Swipe container ───────────────────────────────────────────────────────── */
+.swipe-container {
+  touch-action: pan-y;
+  overflow: hidden;
+}
+
+/* ─── Time badge ────────────────────────────────────────────────────────────── */
+.time-badge {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Card accent lines ─────────────────────────────────────────────────────── */
+.card-accent-blue {
+  border-left: 3px solid transparent;
+  border-image: linear-gradient(to bottom, #4F46E5, #6366F1) 1;
+}
+.card-accent-emerald {
+  border-left: 3px solid transparent;
+  border-image: linear-gradient(to bottom, #10b981, #34d399) 1;
+}
+.card-accent-violet {
+  border-left: 3px solid transparent;
+  border-image: linear-gradient(to bottom, #4F46E5, #6366F1) 1;
 }
