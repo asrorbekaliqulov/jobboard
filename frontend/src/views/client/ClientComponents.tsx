@@ -6,7 +6,6 @@ import i18n from "../../i18n.ts";
 import { vacancyService } from "../../services/vacancyService.ts";
 import { resumeService } from "../../services/resumeService.ts";
 
-
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 const getLocalizedName = (item: any) => {
   if (!item) return "";
@@ -20,7 +19,6 @@ const formatSalary = (amount?: number) => {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 };
 
-/** Relative time: "2 kun oldin", "Just now", etc. */
 const getRelativeTime = (dateStr: string, t: any): string => {
   const now = new Date();
   const date = new Date(dateStr);
@@ -37,14 +35,13 @@ const getRelativeTime = (dateStr: string, t: any): string => {
   return date.toLocaleDateString(i18n.language);
 };
 
-/** Is the item "new" (less than 24 hours old)? */
 const isNew = (dateStr: string): boolean => {
   const diff = Date.now() - new Date(dateStr).getTime();
   return diff < 86400000;
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   VACANCY EXPLORER CARD
+   VACANCY EXPLORER CARD - Redesigned to match ISHKO'P mockup
    ═══════════════════════════════════════════════════════════════════════════════ */
 export const ClientVacancyExplorerCard: React.FC<{
   vacancy: Vacancy;
@@ -73,27 +70,47 @@ export const ClientVacancyExplorerCard: React.FC<{
 
   return (
     <div
-      className={`relative rounded-2xl bg-white border-l-[3px] transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
-        isExpanded
-          ? "border-l-blue-400 shadow-[0_4px_24px_rgba(59,130,246,0.1)] ring-1 ring-blue-50"
-          : "border-l-blue-400/60 card-shadow hover:shadow-md"
+      className={`bg-white rounded-2xl border border-slate-100 card-shadow transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
+        isExpanded ? "ring-1 ring-indigo-100 shadow-md" : "hover:shadow-md"
       }`}
-      style={{ borderTop: '1px solid #f1f5f9', borderRight: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}
     >
-      {/* NEW badge */}
-      {itemIsNew && (
-        <div className="absolute top-3 right-14 flex items-center gap-1">
-          <span className="new-pulse w-1.5 h-1.5 rounded-full bg-blue-500" />
-          <span className="text-[8px] font-bold text-blue-500 uppercase tracking-wider">NEW</span>
-        </div>
-      )}
+      <div className="cursor-pointer p-4" onClick={() => setIsExpanded(!isExpanded)}>
+        {/* Top row: Company logo + title + bookmark */}
+        <div className="flex items-start gap-3">
+          {/* Company avatar */}
+          <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
+            <i className="fa-solid fa-building text-lg text-indigo-500" />
+          </div>
 
-      <div className="cursor-pointer px-5 py-4" onClick={() => setIsExpanded(!isExpanded)}>
-        {/* Title + Bookmark */}
-        <div className="flex justify-between items-start gap-3 mb-1.5">
-          <h3 className="font-extrabold text-[16px] text-slate-800 leading-snug flex-1">
-            {getLocalizedName(vacancy.profession)}
-          </h3>
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
+                  {getLocalizedName(vacancy.profession)}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {vacancy.company_name}
+                </p>
+              </div>
+              {/* NEW badge */}
+              {itemIsNew && (
+                <span className="shrink-0 px-2 py-0.5 bg-indigo-100 text-indigo-600 text-[9px] font-bold rounded-md uppercase">
+                  NEW
+                </span>
+              )}
+            </div>
+
+            {/* Location */}
+            <div className="flex items-center gap-1 mt-1">
+              <i className="fa-solid fa-location-dot text-[9px] text-indigo-400" />
+              <span className="text-[11px] text-slate-500 font-medium">
+                {getLocalizedName(vacancy.region)}
+              </span>
+            </div>
+          </div>
+
+          {/* Bookmark */}
           {onToggleSave && (
             <button
               onClick={handleBookmark}
@@ -101,7 +118,7 @@ export const ClientVacancyExplorerCard: React.FC<{
                 bookmarkAnim ? "bookmark-pop" : ""
               } ${
                 isSaved
-                  ? "bg-blue-500 text-white shadow-md shadow-blue-200"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                   : "bg-slate-50 text-slate-300 hover:text-slate-400"
               }`}
             >
@@ -110,111 +127,105 @@ export const ClientVacancyExplorerCard: React.FC<{
           )}
         </div>
 
-        {/* Company + Region */}
-        <div className="flex items-center gap-2 mb-2.5 text-[12px] font-medium text-slate-500">
-          <span>{vacancy.company_name}</span>
-          <span className="text-slate-200">·</span>
-          <span className="flex items-center gap-1">
-            <i className="fa-solid fa-location-dot text-[9px] text-slate-300" />
-            {getLocalizedName(vacancy.region)}
-          </span>
-        </div>
-
-        {/* Salary highlight */}
-        <div className="mb-2.5">
-          <span className="text-[15px] font-extrabold text-emerald-600">
+        {/* Salary */}
+        <div className="mt-3">
+          <span className="text-[15px] font-bold text-slate-900">
             {vacancy.salary_from || vacancy.salary_till
               ? vacancy.salary_from && vacancy.salary_till
-                ? t("vacancy_card.salary_range", {
-                    from: formatSalary(vacancy.salary_from),
-                    till: formatSalary(vacancy.salary_till),
-                  })
+                ? `${formatSalary(vacancy.salary_from)} – ${formatSalary(vacancy.salary_till)} so'm`
                 : vacancy.salary_from
-                  ? t("vacancy_card.salary_from", { amount: formatSalary(vacancy.salary_from) })
-                  : t("vacancy_card.salary_up_to", { amount: formatSalary(vacancy.salary_till) })
+                  ? `${formatSalary(vacancy.salary_from)} so'mdan`
+                  : `${formatSalary(vacancy.salary_till)} so'mgacha`
               : t("vacancy_card.negotiable")}
           </span>
         </div>
 
-        {/* Chips row */}
-        <div className="flex flex-wrap gap-1.5 mb-1.5">
-          <span className="px-2.5 py-1 bg-slate-50 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+        {/* Tags row */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
             {t(`client_forms.work_format_options.${vacancy.work_format.toLowerCase()}`)}
           </span>
-          <span className="px-2.5 py-1 bg-slate-50 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-            {vacancy.exp_from}-{vacancy.exp_till} {t("client_components.years_short")}
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
+            {t(`client_forms.work_type_options.${vacancy.work_type.toLowerCase()}`)}
           </span>
-          <span className="px-2.5 py-1 bg-blue-50/60 rounded-lg text-[10px] font-bold text-blue-500 uppercase tracking-wide flex items-center gap-1">
-            <i className="fa-solid fa-eye text-[8px]" />
-            {vacancy.viewed_count || 0}
-          </span>
-        </div>
-
-        {/* Date + Chevron */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="time-badge text-[10px] font-medium text-slate-400 flex items-center gap-1">
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-500 ml-auto flex items-center gap-1">
             <i className="fa-regular fa-clock text-[9px]" />
             {vacancy.created_at ? getRelativeTime(vacancy.created_at, t) : ""}
           </span>
-          <i className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
         </div>
       </div>
 
       {/* ─── Expanded Content ───────────────────────────────────────────── */}
       <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 pb-5 pt-2 border-t border-dashed border-slate-100 space-y-4 fade-up">
+        <div className="px-4 pb-4 pt-2 border-t border-slate-50 space-y-4 fade-up">
+          {/* Description */}
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t("client_components.job_description")}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ish haqida ma'lumot</p>
             <RichTextDisplay content={vacancy.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">{t("client_components.schedule")}</p>
-              <p className="text-xs font-bold text-slate-800">{vacancy.schedule} · {vacancy.work_hours}{t("client_components.hours_short")}</p>
-            </div>
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">{t("client_components.experience")}</p>
-              <p className="text-xs font-bold text-slate-800">{vacancy.exp_from}-{vacancy.exp_till} {t("client_components.years_short")}</p>
+          {/* Requirements */}
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Talablar</p>
+            <div className="space-y-1.5">
+              <div className="flex items-start gap-2">
+                <i className="fa-solid fa-check text-[10px] text-indigo-500 mt-1" />
+                <span className="text-xs text-slate-600">Tajriba: {vacancy.exp_from}-{vacancy.exp_till} yil</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <i className="fa-solid fa-check text-[10px] text-indigo-500 mt-1" />
+                <span className="text-xs text-slate-600">Jadval: {vacancy.schedule}</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <i className="fa-solid fa-check text-[10px] text-indigo-500 mt-1" />
+                <span className="text-xs text-slate-600">Ish soati: {vacancy.work_hours} soat/hafta</span>
+              </div>
             </div>
           </div>
 
+          {/* Work conditions */}
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ish sharoitlari</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5">
+                <i className="fa-regular fa-clock text-xs text-slate-400" />
+                <span className="text-xs text-slate-600">Ish vaqti: {vacancy.schedule}</span>
+              </div>
+              {vacancy.region && (
+                <div className="flex items-center gap-2.5">
+                  <i className="fa-solid fa-location-dot text-xs text-slate-400" />
+                  <span className="text-xs text-slate-600">Manzil: {getLocalizedName(vacancy.region)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Contacts */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("client_components.contacts")}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Kontaktlar</p>
             {vacancy.phone && (
-              <a href={`tel:${vacancy.phone}`} className="flex items-center gap-3 p-3 bg-slate-50/60 rounded-xl hover:bg-blue-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-blue-100/60 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+              <a href={`tel:${vacancy.phone}`} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-indigo-50 transition-colors group">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
                   <i className="fa-solid fa-phone text-xs" />
                 </div>
-                <div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block">{t("client_components.phone_number")}</span>
-                  <span className="text-xs font-bold text-slate-800">{vacancy.phone}</span>
-                </div>
+                <span className="text-xs font-bold text-slate-800">{vacancy.phone}</span>
               </a>
             )}
             {vacancy.telegram && (
-              <a href={`https://t.me/${vacancy.telegram.replace("@", "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-slate-50/60 rounded-xl hover:bg-sky-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-sky-100/60 flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
+              <a href={`https://t.me/${vacancy.telegram.replace("@", "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-sky-50 transition-colors group">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
                   <i className="fa-brands fa-telegram text-sm" />
                 </div>
-                <div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block">{t("client_components.telegram_handle")}</span>
-                  <span className="text-xs font-bold text-slate-800">{vacancy.telegram}</span>
-                </div>
-              </a>
-            )}
-            {vacancy.email && (
-              <a href={`mailto:${vacancy.email}`} className="flex items-center gap-3 p-3 bg-slate-50/60 rounded-xl hover:bg-red-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-red-100/60 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
-                  <i className="fa-solid fa-envelope text-xs" />
-                </div>
-                <div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block">{t("client_components.email_address")}</span>
-                  <span className="text-xs font-bold text-slate-800">{vacancy.email}</span>
-                </div>
+                <span className="text-xs font-bold text-slate-800">{vacancy.telegram}</span>
               </a>
             )}
           </div>
+
+          {/* Apply button */}
+          <button className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100">
+            Rezyume yuborish
+            <i className="fa-solid fa-paper-plane text-xs" />
+          </button>
         </div>
       </div>
     </div>
@@ -234,66 +245,63 @@ export const ClientVacancyOwnerCard: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
 
   const statusColor = vacancy.status === ItemStatus.ACTIVE
-    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+    ? "bg-emerald-50 text-emerald-600"
     : vacancy.status === ItemStatus.ARCHIVED
-      ? "bg-amber-50 text-amber-600 border-amber-100"
-      : "bg-slate-100 text-slate-500 border-slate-200";
+      ? "bg-amber-50 text-amber-600"
+      : "bg-slate-100 text-slate-500";
 
   return (
-    <div className={`relative rounded-2xl bg-white border-l-[3px] transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
-      isExpanded ? "border-l-violet-400 shadow-[0_4px_24px_rgba(139,92,246,0.08)] ring-1 ring-violet-50" : "border-l-violet-400/60 card-shadow"
-    }`}
-      style={{ borderTop: '1px solid #f1f5f9', borderRight: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}
-    >
-      <div className="cursor-pointer px-5 py-4" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-extrabold text-[16px] text-slate-800 leading-snug flex-1 pr-4">
-            {getLocalizedName(vacancy.profession)}
-          </h3>
-          <i className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 mt-1.5 ${isExpanded ? "rotate-180" : ""}`} />
-        </div>
-
-        <div className="mb-2.5">
-          <span className="text-[13px] font-bold text-violet-600">{vacancy.company_name}</span>
-          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mt-0.5">
-            <i className="fa-solid fa-location-dot text-[10px] text-slate-300" />
-            <span>{getLocalizedName(vacancy.region)}</span>
+    <div className={`bg-white rounded-2xl border border-slate-100 card-shadow transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
+      isExpanded ? "ring-1 ring-indigo-100 shadow-md" : ""
+    }`}>
+      <div className="cursor-pointer p-4" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+            <i className="fa-solid fa-briefcase text-lg text-emerald-500" />
           </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
+              {getLocalizedName(vacancy.profession)}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{vacancy.company_name}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${statusColor}`}>
+                {t(`client_forms.status.${vacancy.status}`)}
+              </span>
+              <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                <i className="fa-solid fa-eye text-[8px]" /> {vacancy.viewed_count}
+              </span>
+            </div>
+          </div>
+          <i className={`fa-solid fa-chevron-down text-xs text-slate-300 transition-transform duration-300 mt-2 ${isExpanded ? "rotate-180" : ""}`} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-1.5">
-          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border ${statusColor}`}>
-            {t(`client_forms.status.${vacancy.status}`)}
-          </span>
-          {vacancy.status === ItemStatus.ARCHIVED && (
-            <span className="px-2.5 py-1 bg-red-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-wide">
-              {t("client_components.already_hired")}
-            </span>
-          )}
-          <span className="px-2.5 py-1 bg-violet-50/60 rounded-lg text-[10px] font-bold text-violet-500 uppercase tracking-wide flex items-center gap-1">
-            <i className="fa-solid fa-eye text-[8px]" /> {vacancy.viewed_count}
+        <div className="mt-3">
+          <span className="text-sm font-bold text-slate-800">
+            {vacancy.salary_from || vacancy.salary_till
+              ? `${formatSalary(vacancy.salary_from)} – ${formatSalary(vacancy.salary_till)} so'm`
+              : t("vacancy_card.negotiable")}
           </span>
         </div>
 
-        {/* Date */}
-        <div className="flex items-center pt-0.5">
-          <span className="time-badge text-[10px] font-medium text-slate-400 flex items-center gap-1">
+        <div className="flex items-center pt-2">
+          <span className="text-[10px] text-slate-400 flex items-center gap-1">
             <i className="fa-regular fa-clock text-[9px]" />
             {vacancy.created_at ? getRelativeTime(vacancy.created_at, t) : ""}
           </span>
         </div>
       </div>
 
-      <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 pb-4 pt-2 border-t border-dashed border-slate-100 fade-up">
+      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up">
           <RichTextDisplay content={vacancy.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto] gap-2 px-5 pb-4">
+      <div className="grid grid-cols-[1fr_auto] gap-2 px-4 pb-4">
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(vacancy); }}
-          className="flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-xl font-bold text-[11px] uppercase tracking-wide transition-colors active:scale-95"
+          className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl font-bold text-xs transition-colors active:scale-95"
         >
           <i className="fa-solid fa-pen text-[10px]" /> {t("client_forms.edit")}
         </button>
@@ -337,27 +345,40 @@ export const ClientResumeExplorerCard: React.FC<{
   const itemIsNew = resume.created_at && isNew(resume.created_at);
 
   return (
-    <div className={`relative rounded-2xl bg-white border-l-[3px] transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
-      isExpanded ? "border-l-violet-400 shadow-[0_4px_24px_rgba(139,92,246,0.08)] ring-1 ring-violet-50" : "border-l-violet-400/60 card-shadow hover:shadow-md"
-    }`}
-      style={{ borderTop: '1px solid #f1f5f9', borderRight: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}
-    >
-      {itemIsNew && (
-        <div className="absolute top-3 right-14 flex items-center gap-1">
-          <span className="new-pulse w-1.5 h-1.5 rounded-full bg-violet-500" />
-          <span className="text-[8px] font-bold text-violet-500 uppercase tracking-wider">NEW</span>
-        </div>
-      )}
-
-      <div className="cursor-pointer px-5 py-4" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex justify-between items-start gap-3 mb-1.5">
-          <h3 className="font-extrabold text-[16px] text-slate-800 leading-snug flex-1">
-            {resume.first_name} {resume.last_name}
-          </h3>
+    <div className={`bg-white rounded-2xl border border-slate-100 card-shadow transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
+      isExpanded ? "ring-1 ring-indigo-100 shadow-md" : "hover:shadow-md"
+    }`}>
+      <div className="cursor-pointer p-4" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center shrink-0">
+            <i className="fa-solid fa-user text-lg text-violet-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
+                  {resume.first_name} {resume.last_name}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {getLocalizedName(resume.profession)}
+                </p>
+              </div>
+              {itemIsNew && (
+                <span className="shrink-0 px-2 py-0.5 bg-indigo-100 text-indigo-600 text-[9px] font-bold rounded-md uppercase">
+                  NEW
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              <i className="fa-solid fa-location-dot text-[9px] text-indigo-400" />
+              <span className="text-[11px] text-slate-500 font-medium">{getLocalizedName(resume.region)}</span>
+            </div>
+          </div>
           {onToggleSave && (
-            <button onClick={handleBookmark}
+            <button
+              onClick={handleBookmark}
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 ${bookmarkAnim ? "bookmark-pop" : ""} ${
-                isSaved ? "bg-violet-500 text-white shadow-md shadow-violet-200" : "bg-slate-50 text-slate-300 hover:text-slate-400"
+                isSaved ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" : "bg-slate-50 text-slate-300 hover:text-slate-400"
               }`}
             >
               <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-sm`} />
@@ -365,67 +386,54 @@ export const ClientResumeExplorerCard: React.FC<{
           )}
         </div>
 
-        <div className="mb-2.5">
-          <span className="text-[12px] font-medium text-slate-500">{getLocalizedName(resume.profession)}</span>
-          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mt-0.5">
-            <i className="fa-solid fa-location-dot text-[9px] text-slate-300" />
-            <span>{getLocalizedName(resume.region)}</span>
-          </div>
-        </div>
-
-        <div className="mb-2.5">
-          <span className="text-[15px] font-extrabold text-violet-600">
-            {resume.experience} {t("client_components.years_short")}
+        <div className="flex flex-wrap gap-2 mt-3">
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
+            {resume.experience} yil tajriba
           </span>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5 mb-1.5">
-          <span className="px-2.5 py-1 bg-slate-50 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
+            {resume.age} yosh
+          </span>
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
             {t(`gender.${resume.gender}`)}
           </span>
-          <span className="px-2.5 py-1 bg-slate-50 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-            {resume.age} {t("client_components.age_years_short")}
-          </span>
-          <span className="px-2.5 py-1 bg-violet-50/60 rounded-lg text-[10px] font-bold text-violet-500 uppercase tracking-wide flex items-center gap-1">
-            <i className="fa-solid fa-eye text-[8px]" /> {resume.viewed_count || 0}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between pt-1">
-          <span className="time-badge text-[10px] font-medium text-slate-400 flex items-center gap-1">
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-500 ml-auto flex items-center gap-1">
             <i className="fa-regular fa-clock text-[9px]" />
             {resume.created_at ? getRelativeTime(resume.created_at, t) : ""}
           </span>
-          <i className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
         </div>
       </div>
 
-      <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 pb-5 pt-2 border-t border-dashed border-slate-100 space-y-4 fade-up">
+      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-4 pt-2 border-t border-slate-50 space-y-4 fade-up">
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t("resume_card.about_talent")}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomzod haqida</p>
             <RichTextDisplay content={resume.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
           </div>
 
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("client_components.contacts")}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Kontaktlar</p>
             {resume.phone && (
-              <a href={`tel:${resume.phone}`} className="flex items-center gap-3 p-3 bg-slate-50/60 rounded-xl hover:bg-violet-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-violet-100/60 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform"><i className="fa-solid fa-phone text-xs" /></div>
-                <div><span className="text-[9px] font-bold text-slate-400 uppercase block">{t("client_components.phone_number")}</span><span className="text-xs font-bold text-slate-800">{resume.phone}</span></div>
+              <a href={`tel:${resume.phone}`} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-indigo-50 transition-colors group">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
+                  <i className="fa-solid fa-phone text-xs" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">{resume.phone}</span>
               </a>
             )}
             {resume.telegram && (
-              <a href={`https://t.me/${resume.telegram.replace("@", "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-slate-50/60 rounded-xl hover:bg-sky-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-sky-100/60 flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform"><i className="fa-brands fa-telegram text-sm" /></div>
-                <div><span className="text-[9px] font-bold text-slate-400 uppercase block">{t("client_components.telegram_handle")}</span><span className="text-xs font-bold text-slate-800">{resume.telegram}</span></div>
+              <a href={`https://t.me/${resume.telegram.replace("@", "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-sky-50 transition-colors group">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
+                  <i className="fa-brands fa-telegram text-sm" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">{resume.telegram}</span>
               </a>
             )}
           </div>
 
           {resume.portfolio && (
             <a href={resume.portfolio} target="_blank" rel="noreferrer" className="flex w-full py-3 bg-slate-900 text-white items-center justify-center rounded-xl active:scale-95 transition-all gap-2">
-              <i className="fa-solid fa-paperclip text-sm" /><span className="text-[11px] font-bold uppercase tracking-wide">{t("resume_card.view_portfolio")}</span>
+              <i className="fa-solid fa-paperclip text-sm" />
+              <span className="text-xs font-bold uppercase tracking-wide">{t("resume_card.view_portfolio")}</span>
             </a>
           )}
         </div>
@@ -447,63 +455,58 @@ export const ClientResumeOwnerCard: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
 
   const statusColor = resume.status === "active"
-    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+    ? "bg-emerald-50 text-emerald-600"
     : resume.status === "archived"
-      ? "bg-amber-50 text-amber-600 border-amber-100"
-      : "bg-slate-100 text-slate-500 border-slate-200";
+      ? "bg-amber-50 text-amber-600"
+      : "bg-slate-100 text-slate-500";
 
   return (
-    <div className={`relative rounded-2xl bg-white border-l-[3px] transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
-      isExpanded ? "border-l-blue-400 shadow-[0_4px_24px_rgba(59,130,246,0.08)] ring-1 ring-blue-50" : "border-l-blue-400/60 card-shadow"
-    }`}
-      style={{ borderTop: '1px solid #f1f5f9', borderRight: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}
-    >
-      <div className="cursor-pointer px-5 py-4" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-extrabold text-[16px] text-slate-800 leading-snug flex-1 pr-4">
-            {resume.first_name} {resume.last_name}
-          </h3>
-          <i className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 mt-1.5 ${isExpanded ? "rotate-180" : ""}`} />
-        </div>
-
-        <div className="mb-2.5">
-          <span className="text-[13px] font-bold text-blue-600">{getLocalizedName(resume.profession)}</span>
-          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mt-0.5">
-            <i className="fa-solid fa-location-dot text-[10px] text-slate-300" />
-            <span>{getLocalizedName(resume.region)}</span>
+    <div className={`bg-white rounded-2xl border border-slate-100 card-shadow transition-all duration-300 card-interactive card-enter card-enter-${Math.min(index + 1, 5)} ${
+      isExpanded ? "ring-1 ring-indigo-100 shadow-md" : ""
+    }`}>
+      <div className="cursor-pointer p-4" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+            <i className="fa-solid fa-user-check text-lg text-blue-500" />
           </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
+              {resume.first_name} {resume.last_name}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{getLocalizedName(resume.profession)}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${statusColor}`}>
+                {t(`client_forms.status.${resume.status}`)}
+              </span>
+              <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                <i className="fa-solid fa-eye text-[8px]" /> {resume.viewed_count || 0}
+              </span>
+            </div>
+          </div>
+          <i className={`fa-solid fa-chevron-down text-xs text-slate-300 transition-transform duration-300 mt-2 ${isExpanded ? "rotate-180" : ""}`} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-1.5">
-          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border ${statusColor}`}>
-            {t(`client_forms.status.${resume.status}`)}
-          </span>
-          <span className="px-2.5 py-1 bg-blue-50/60 rounded-lg text-[10px] font-bold text-blue-500 uppercase tracking-wide flex items-center gap-1">
-            <i className="fa-solid fa-eye text-[8px]" /> {resume.viewed_count || 0}
-          </span>
-        </div>
-
-        <div className="flex items-center pt-0.5">
-          <span className="time-badge text-[10px] font-medium text-slate-400 flex items-center gap-1">
-            <i className="fa-regular fa-clock text-[9px]" />
-            {resume.created_at ? getRelativeTime(resume.created_at, t) : ""}
-          </span>
+        <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-400">
+          <i className="fa-regular fa-clock text-[9px]" />
+          {resume.created_at ? getRelativeTime(resume.created_at, t) : ""}
         </div>
       </div>
 
-      <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 pb-4 pt-2 border-t border-dashed border-slate-100 fade-up">
+      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up">
           <RichTextDisplay content={resume.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto] gap-2 px-5 pb-4">
-        <button onClick={(e) => { e.stopPropagation(); onEdit(resume); }}
-          className="flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl font-bold text-[11px] uppercase tracking-wide transition-colors active:scale-95"
+      <div className="grid grid-cols-[1fr_auto] gap-2 px-4 pb-4">
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit(resume); }}
+          className="flex items-center justify-center gap-2 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl font-bold text-xs transition-colors active:scale-95"
         >
           <i className="fa-solid fa-pen text-[10px]" /> {t("client_forms.edit")}
         </button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(resume.id); }}
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(resume.id); }}
           className="w-12 flex items-center justify-center bg-red-50 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-95"
         >
           <i className="fa-solid fa-trash text-xs" />
