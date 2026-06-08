@@ -13,8 +13,15 @@ from app.models.user import User, UserRole
 from app.services.user import UserService
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+def _get_redis():
+    """Get Redis instance or None if not configured."""
+    if settings.use_redis:
+        from redis.asyncio import Redis
+        return Redis.from_url(settings.REDIS_URL)
+    return None
 
 router = APIRouter()
 
@@ -40,7 +47,7 @@ async def login(auth_data: AuthRequest, db: AsyncSession = Depends(get_db)):
     last_name = user_data.get("last_name")
     photo_url = user_data.get("photo_url")
 
-    redis = Redis.from_url(settings.REDIS_URL)
+    redis = _get_redis()
     user_service = UserService(db, redis)
 
     user = await user_service.get_user_by_telegram_id(telegram_id)
@@ -109,7 +116,7 @@ async def telegram_login(
     last_name = valid_data.get("last_name")
     photo_url = valid_data.get("photo_url")
 
-    redis = Redis.from_url(settings.REDIS_URL)
+    redis = _get_redis()
     user_service = UserService(db, redis)
 
     user = await user_service.get_user_by_telegram_id(telegram_id)
@@ -158,12 +165,16 @@ async def update_role(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    redis = Redis.from_url(settings.REDIS_URL)
-    user_service = UserService(db, redis)
+    try:
+        redis = _get_redis()
+        user_service = UserService(db, redis)
 
-    logger.error("\n\n\nSaving user role: %s", role_data.role.value)
-    await user_service.save_role(current_user.telegram_id, role_data.role)
-    return {"status": "ok", "role": role_data.role}
+        logger.info(f"Saving user role: {role_data.role.value} for user {current_user.telegram_id}")
+        await user_service.save_role(current_user.telegram_id, role_data.role)
+        return {"status": "ok", "role": role_data.role}
+    except Exception as e:
+        logger.error(f"Failed to save role: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save role: {str(e)}")
 
 
 class LanguageUpdateRequest(BaseModel):
@@ -180,7 +191,11 @@ async def update_language(
     if lang_data.language not in ["en", "ru", "uz"]:
         raise HTTPException(status_code=400, detail="Invalid language code")
 
-    redis = Redis.from_url(settings.REDIS_URL)
-    user_service = UserService(db, redis)
-    await user_service.save_language(current_user.telegram_id, lang_data.language)
-    return {"status": "ok", "language": lang_data.language}
+    try:
+        redis = _get_redis()
+        user_service = UserService(db, redis)
+        await user_service.save_language(current_user.telegram_id, lang_data.language)
+        return {"status": "ok", "language": lang_data.language}
+    except Exception as e:
+        logger.error(f"Failed to save language: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save language: {str(e)}")
