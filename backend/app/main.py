@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from aiogram import types
 import asyncio
 import time
+import os
 from app.core.config import settings
 from app.bot.factory import bot, dp
 from app.api.v1.api import api_router
@@ -16,6 +17,9 @@ setup_logging()
 
 app = FastAPI(title="Job Hunter TMA Backend")
 app.add_middleware(BabelMiddleware, babel_configs=babel_configs)
+
+# Ensure uploads directory exists
+os.makedirs("uploads", exist_ok=True)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
