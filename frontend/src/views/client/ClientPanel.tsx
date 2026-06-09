@@ -234,15 +234,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       return;
     }
     setIsRoleSaving(true);
-    const success = await authService.updateRole(selectedRole);
-    if (success) {
-      setIsRoleModalOpen(false);
-      setIsRoleSaving(false);
-      onRoleChange(selectedRole);
-    } else {
-      setIsRoleSaving(false);
-      showToast(t("onboarding.failed_role"), 'error');
+    // Try to save to server if authenticated, but don't block on failure
+    if (authService.isAuthenticated()) {
+      try {
+        await authService.updateRole(selectedRole);
+      } catch (e) {
+        console.warn('Could not save role to server:', e);
+      }
     }
+    setIsRoleModalOpen(false);
+    setIsRoleSaving(false);
+    onRoleChange(selectedRole);
   };
 
   const handleConfirmDelete = () => {
