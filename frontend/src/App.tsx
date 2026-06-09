@@ -153,16 +153,8 @@ const App: React.FC = () => {
           setDailyJobSeekers([]);
         });
     } else {
-      // Fetch vacancies
-      vacancyService
-        .getVacancies({ status: ItemStatus.ACTIVE })
-        .then((data) => {
-          setVacancies(data.items);
-        });
-      // Fetch resumes
-      resumeService.getResumes({ status: ResumeStatus.ACTIVE }).then((data) => {
-        setResumes(data.items);
-      });
+      // Not authenticated - skip API calls, data remains empty
+      // API calls will fail without proper backend connection
     }
   }, [view, adminRefreshSignal]);
 

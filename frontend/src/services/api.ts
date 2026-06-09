@@ -1,22 +1,26 @@
 
 import { Vacancy, Resume, User, UserRole } from '../types.ts';
-
-// Replace with your actual FastAPI production URL
-const API_BASE_URL = 'https://your-fastapi-backend.com/api';
-// export const mainApi="http://ishkoop.abrorjon.uz"
-export const mainApi=""
-/**
- * Helper to get Telegram InitData for backend authentication
- * TMAs should always send this to the backend for validation.
- */
 import i18n from '../i18n.ts';
 
-// ...
+/**
+ * Main API base URL - reads from VITE_API_URL env variable.
+ * Falls back to empty string for same-origin (when frontend is served from same domain as backend).
+ * In production, set VITE_API_URL=https://your-backend.com in .env
+ */
+export const mainApi = (import.meta as any).env?.VITE_API_URL || "";
 
+// Legacy API_BASE_URL for old api object (not used by main services)
+const API_BASE_URL = mainApi + '/api/v1';
+
+/**
+ * Helper to get auth headers with token
+ */
 const getAuthHeaders = () => {
   const tg = (window as any).Telegram?.WebApp;
+  const token = localStorage.getItem('auth_token');
   return {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     'X-TG-Init-Data': tg?.initData || '',
     'Accept-Language': i18n.language || 'en',
   };

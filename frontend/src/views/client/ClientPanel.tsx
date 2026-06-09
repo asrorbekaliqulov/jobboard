@@ -173,6 +173,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   }, [isFilterModalOpen, isRoleModalOpen, isLangModalOpen, deleteTarget]);
 
   const handleProfessionSearch = useCallback(async (search: string) => {
+    if (!authService.isAuthenticated()) return;
     setIsProfLoading(true);
     try {
       const data = await professionService.getProfessions(search);
@@ -185,6 +186,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   }, []);
 
   const handleRegionSearch = useCallback(async (search: string) => {
+    if (!authService.isAuthenticated()) return;
     setIsRegionLoading(true);
     try {
       const data = await regionService.getRegions(search);
@@ -198,6 +200,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
   useEffect(() => {
     if (activeSubTab !== "all") return;
+    if (!authService.isAuthenticated()) return;
     const fetchFilters: any = { status: ItemStatus.ACTIVE };
     if (filters.profession)
       fetchFilters.profession_id = parseInt(filters.profession);
