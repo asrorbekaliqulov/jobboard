@@ -395,13 +395,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
             {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
           </p>
           <h2 className="text-lg font-bold leading-tight mb-3">
-            {t("home.banner_title")}
+            {initialRole === UserRole.CANDIDATE_HUNTER 
+              ? t("home.banner_employer") 
+              : t("home.banner_title")}
           </h2>
           <button
             onClick={() => setActiveSubTab("mine")}
             className="bg-white text-indigo-600 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all"
           >
-            {t("home.view_vacancies")}
+            {initialRole === UserRole.CANDIDATE_HUNTER 
+              ? t("home.view_workers") 
+              : t("home.view_vacancies")}
             <i className="fa-solid fa-arrow-right text-[10px]" />
           </button>
         </div>
@@ -691,11 +695,11 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
             {filteredItems.length === 0 && (
               <div className="py-16 text-center">
-                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <i className="fa-solid fa-bookmark text-xl text-amber-300" />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                  <i className="fa-solid fa-bookmark text-xl" style={{ color: 'var(--text-muted)' }} />
                 </div>
-                <p className="text-sm font-bold text-slate-400">Saqlangan e'lonlar yo'q</p>
-                <p className="text-xs text-slate-300 mt-1">Yoqqan e'lonlarni saqlang</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>{t("saved.empty")}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t("saved.empty_hint")}</p>
               </div>
             )}
 
