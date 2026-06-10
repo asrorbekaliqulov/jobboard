@@ -105,7 +105,7 @@ const Layout: React.FC<LayoutProps> = ({
       </header>
 
       {/* ─── Main Content ────────────────────────────────────────────── */}
-      <main ref={scrollRef} id="main-scroll-container" className="flex-1 overflow-y-auto pb-28">
+      <main ref={scrollRef} id="main-scroll-container" className="flex-1 overflow-y-auto pb-32">
         <div className={`transition-all duration-200 ease-out ${tabTransition ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"}`}>
           {children}
         </div>
@@ -115,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({
       <button
         onClick={scrollToTop}
         className={`fixed z-40 right-4 transition-all duration-300 ${
-          showScrollTop ? "bottom-28 opacity-100 scale-100" : "bottom-28 opacity-0 scale-75 pointer-events-none"
+          showScrollTop ? "bottom-32 opacity-100 scale-100" : "bottom-32 opacity-0 scale-75 pointer-events-none"
         } w-10 h-10 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90`}
         style={{ background: 'var(--accent)' }}
       >
@@ -124,7 +124,7 @@ const Layout: React.FC<LayoutProps> = ({
 
       {/* ─── Bottom Navigation ───────────────────────────────────────── */}
       <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-primary)', boxShadow: '0 -4px 12px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-md mx-auto flex items-center justify-around safe-bottom pt-2 pb-3">
+        <div className="max-w-md mx-auto flex items-center justify-around safe-bottom pt-3 pb-4">
           {/* First two tabs */}
           {tabs.slice(0, 2).map((tab) => {
             const isActive = activeSubTab === tab.id;
@@ -132,10 +132,10 @@ const Layout: React.FC<LayoutProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSubTabChange(tab.id)}
-                className="flex-1 flex flex-col items-center justify-center py-1.5 transition-all active:scale-90"
+                className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:scale-90"
               >
-                <i className={`fa-solid ${tab.icon} text-[20px]`} style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
-                <span className="text-[10px] font-bold mt-1.5" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '25px', color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
+                <span className="text-[11px] font-bold mt-2" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
                   {t(tab.labelKey)}
                 </span>
               </button>
@@ -146,10 +146,10 @@ const Layout: React.FC<LayoutProps> = ({
           <div className="flex items-center justify-center px-3">
             <button
               onClick={onPlusPress}
-              className="w-14 h-14 rounded-full flex items-center justify-center -mt-6 shadow-xl text-white active:scale-90 transition-all"
+              className="w-16 h-16 rounded-full flex items-center justify-center -mt-8 shadow-xl text-white active:scale-90 transition-all"
               style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)' }}
             >
-              <i className="fa-solid fa-plus text-xl" />
+              <i className="fa-solid fa-plus text-2xl" />
             </button>
           </div>
 
@@ -160,10 +160,10 @@ const Layout: React.FC<LayoutProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSubTabChange(tab.id)}
-                className="flex-1 flex flex-col items-center justify-center py-1.5 transition-all active:scale-90"
+                className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:scale-90"
               >
-                <i className={`fa-solid ${tab.icon} text-[20px]`} style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
-                <span className="text-[10px] font-bold mt-1.5" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '25px', color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
+                <span className="text-[11px] font-bold mt-2" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
                   {t(tab.labelKey)}
                 </span>
               </button>
