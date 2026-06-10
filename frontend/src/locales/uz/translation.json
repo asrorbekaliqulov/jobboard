@@ -40,7 +40,7 @@
     "all": "Barchasi"
   },
   "nav": {
-    "home": "Bosh sahifa",
+    "home": "Asosiy",
     "jobs": "Ishlar",
     "profile": "Profil",
     "explore": "Vakantsiyalar",
@@ -51,13 +51,40 @@
     "my_jobs": "Vakantsiyalarim",
     "shortlist": "Saqlanganlar",
     "daily_job_seekers": "Kunlik ishchilar",
-    "vacancies": "Vakansiya",
+    "vacancies": "Vakansiyalar",
     "workers": "Ishchilar",
     "daily_workers": "Kunlik",
     "my_vacancies": "Vakansiyalarim",
     "resumes": "Rezyumalar",
     "my_resumes": "Rezyumelarim",
     "saved": "Saqlangan"
+  },
+  "home": {
+    "greeting": "Salom, {{name}} \ud83d\udc4b",
+    "user": "Foydalanuvchi",
+    "banner_title": "Siz uchun eng yaxshi\nish o'rinlarini topdik",
+    "view_vacancies": "Vakansiyalarni ko'rish",
+    "categories": "Kategoriyalar",
+    "recommendations": "Siz uchun tavsiyalar",
+    "all": "Barchasi",
+    "no_vacancies": "Hozircha vakansiyalar yo'q",
+    "no_vacancies_hint": "Tez orada yangi e'lonlar paydo bo'ladi",
+    "stats": {
+      "workers": "Ishchi",
+      "employers": "Ish beruvchi",
+      "active_vacancies": "Faol vakansiya",
+      "post_time": "E'lon berish",
+      "minute": "daqiqa"
+    },
+    "cat": {
+      "masters": "Ustalar",
+      "drivers": "Haydovchilar",
+      "construction": "Qurilish",
+      "it": "IT",
+      "trade": "Savdo",
+      "service": "Xizmat",
+      "other": "Boshqa"
+    }
   },
   "tabs": {
     "all_vacancies": "Barcha vakansiyalar",

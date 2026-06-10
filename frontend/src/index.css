@@ -487,3 +487,105 @@ input:focus, textarea:focus, select:focus {
   background-color: var(--accent) !important;
   color: var(--text-inverse) !important;
 }
+
+
+
+/* ─── Dark mode: override hardcoded bg-white and text colors ───────────────── */
+html.dark .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/50,
+html.dark .bg-slate-100 {
+  background-color: var(--bg-muted) !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-700 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-slate-400,
+html.dark .text-slate-300 {
+  color: var(--text-muted) !important;
+}
+
+html.dark .border-slate-50,
+html.dark .border-slate-100,
+html.dark .border-slate-200 {
+  border-color: var(--border-primary) !important;
+}
+
+html.dark .border-slate-100\/50 {
+  border-color: var(--border-secondary) !important;
+}
+
+/* Card shadows in dark mode */
+html.dark .card-shadow {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+/* Form elements in dark mode */
+html.dark select,
+html.dark input[type="text"],
+html.dark input[type="number"],
+html.dark input[type="email"],
+html.dark input[type="tel"],
+html.dark textarea {
+  background-color: var(--bg-muted) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark select option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Filter chips in dark mode */
+html.dark .filter-chip {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Category cards dark mode */
+html.dark .category-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* Banner gradient stays the same in both modes */
+.banner-gradient {
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #818CF8 100%);
+  border-radius: 20px;
+}
+
+/* Modals dark mode */
+html.dark .slide-up-modal {
+  background-color: var(--bg-card) !important;
+}
+
+/* Profile card in dark mode */
+html.dark .bg-indigo-50\/50,
+html.dark .bg-indigo-50 {
+  background-color: rgba(79, 70, 229, 0.1) !important;
+}
+
+/* Safe bottom padding for mobile */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+/* Bottom nav background blur */
+html.dark nav[style] {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}

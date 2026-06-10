@@ -59,6 +59,33 @@
     "my_resumes": "My Resumes",
     "saved": "Saved"
   },
+  "home": {
+    "greeting": "Hello, {{name}} \ud83d\udc4b",
+    "user": "User",
+    "banner_title": "We found the best\njobs for you",
+    "view_vacancies": "View vacancies",
+    "categories": "Categories",
+    "recommendations": "Recommended for you",
+    "all": "All",
+    "no_vacancies": "No vacancies yet",
+    "no_vacancies_hint": "New listings will appear soon",
+    "stats": {
+      "workers": "Workers",
+      "employers": "Employers",
+      "active_vacancies": "Active jobs",
+      "post_time": "Post a job",
+      "minute": "min"
+    },
+    "cat": {
+      "masters": "Masters",
+      "drivers": "Drivers",
+      "construction": "Build",
+      "it": "IT",
+      "trade": "Trade",
+      "service": "Service",
+      "other": "Other"
+    }
+  },
   "tabs": {
     "all_vacancies": "All Vacancies",
     "my_vacancies": "My Vacancies",
