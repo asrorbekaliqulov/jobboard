@@ -59,6 +59,33 @@
     "my_resumes": "Мои резюме",
     "saved": "Сохранённые"
   },
+  "home": {
+    "greeting": "Привет, {{name}} \ud83d\udc4b",
+    "user": "Пользователь",
+    "banner_title": "Мы нашли лучшие\nвакансии для вас",
+    "view_vacancies": "Смотреть вакансии",
+    "categories": "Категории",
+    "recommendations": "Рекомендации для вас",
+    "all": "Все",
+    "no_vacancies": "Пока нет вакансий",
+    "no_vacancies_hint": "Скоро появятся новые объявления",
+    "stats": {
+      "workers": "Работник",
+      "employers": "Работодатель",
+      "active_vacancies": "Активных вакансий",
+      "post_time": "Подать объяв.",
+      "minute": "мин"
+    },
+    "cat": {
+      "masters": "Мастера",
+      "drivers": "Водители",
+      "construction": "Стройка",
+      "it": "IT",
+      "trade": "Торговля",
+      "service": "Услуги",
+      "other": "Другое"
+    }
+  },
   "tabs": {
     "all_vacancies": "Все вакансии",
     "my_vacancies": "Мои вакансии",

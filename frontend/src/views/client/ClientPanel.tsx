@@ -357,13 +357,13 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
   // Categories for home page
   const categories = [
-    { icon: "fa-user-doctor", label: "Ustalar", color: "bg-blue-50 text-blue-600" },
-    { icon: "fa-truck", label: "Haydovchilar", color: "bg-red-50 text-red-500" },
-    { icon: "fa-helmet-safety", label: "Qurilish", color: "bg-amber-50 text-amber-600" },
-    { icon: "fa-laptop-code", label: "IT", color: "bg-indigo-50 text-indigo-600" },
-    { icon: "fa-shop", label: "Savdo", color: "bg-emerald-50 text-emerald-600" },
-    { icon: "fa-headset", label: "Xizmat ko'rsatish", color: "bg-purple-50 text-purple-600" },
-    { icon: "fa-ellipsis", label: "Boshqa", color: "bg-slate-100 text-slate-600" },
+    { icon: "fa-user-doctor", labelKey: "home.cat.masters", color: "text-blue-600 bg-blue-50", professionId: "" },
+    { icon: "fa-truck", labelKey: "home.cat.drivers", color: "text-red-500 bg-red-50", professionId: "" },
+    { icon: "fa-helmet-safety", labelKey: "home.cat.construction", color: "text-amber-600 bg-amber-50", professionId: "" },
+    { icon: "fa-laptop-code", labelKey: "home.cat.it", color: "text-indigo-600 bg-indigo-50", professionId: "" },
+    { icon: "fa-shop", labelKey: "home.cat.trade", color: "text-emerald-600 bg-emerald-50", professionId: "" },
+    { icon: "fa-headset", labelKey: "home.cat.service", color: "text-purple-600 bg-purple-50", professionId: "" },
+    { icon: "fa-ellipsis", labelKey: "home.cat.other", color: "text-slate-600 bg-slate-100", professionId: "" },
   ];
 
   const handleEmptyStateAction = () => {
@@ -392,16 +392,16 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         <div className="absolute bottom-0 left-8 w-20 h-20 bg-white/5 rounded-full translate-y-1/2" />
         <div className="relative z-10">
           <p className="text-white/80 text-sm font-medium mb-1">
-            Salom, {currentUser?.first_name || "Foydalanuvchi"} 👋
+            {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
           </p>
           <h2 className="text-lg font-bold leading-tight mb-3">
-            Siz uchun eng yaxshi<br/>ish o'rinlarini topdik
+            {t("home.banner_title")}
           </h2>
           <button
             onClick={() => setActiveSubTab("mine")}
             className="bg-white text-indigo-600 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all"
           >
-            Vakansiyalarni ko'rish
+            {t("home.view_vacancies")}
             <i className="fa-solid fa-arrow-right text-[10px]" />
           </button>
         </div>
@@ -410,17 +410,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Stats Row */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { icon: "fa-users", value: `${vacancies.length > 0 ? vacancies.length : "8 320"}+`, label: "Ishchi", color: "text-indigo-600 bg-indigo-50" },
-          { icon: "fa-briefcase", value: `${resumes.length > 0 ? resumes.length : "1 250"}+`, label: "Ish beruvchi", color: "text-emerald-600 bg-emerald-50" },
-          { icon: "fa-car", value: "5 420+", label: "Faol vakansiya", color: "text-amber-600 bg-amber-50" },
-          { icon: "fa-clock", value: "1 daqiqa", label: "E'lon berish", color: "text-red-500 bg-red-50" },
+          { icon: "fa-users", value: `${vacancies.length > 0 ? vacancies.length : "1"}+`, labelKey: "home.stats.workers", color: "text-indigo-600 bg-indigo-50" },
+          { icon: "fa-briefcase", value: `${resumes.length > 0 ? resumes.length : "1 250"}+`, labelKey: "home.stats.employers", color: "text-emerald-600 bg-emerald-50" },
+          { icon: "fa-car", value: "5 420+", labelKey: "home.stats.active_vacancies", color: "text-amber-600 bg-amber-50" },
+          { icon: "fa-clock", value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time", color: "text-red-500 bg-red-50" },
         ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-2xl p-3 text-center card-shadow border border-slate-50">
+          <div key={i} className="rounded-2xl p-3 text-center border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
             <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
               <i className={`fa-solid ${stat.icon} text-sm`} />
             </div>
-            <p className="text-sm font-bold text-slate-800">{stat.value}</p>
-            <p className="text-[9px] text-slate-400 font-medium">{stat.label}</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+            <p className="text-[9px] font-medium" style={{ color: 'var(--text-muted)' }}>{t(stat.labelKey)}</p>
           </div>
         ))}
       </div>
@@ -428,19 +428,24 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Categories */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-bold text-slate-900">Kategoriyalar</h3>
-          <button className="text-xs text-indigo-600 font-semibold">Barchasi</button>
+          <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
+          <button className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")}</button>
         </div>
         <div className="grid grid-cols-4 gap-3">
           {categories.map((cat, i) => (
             <button
               key={i}
-              className="category-card flex flex-col items-center gap-2 p-3 bg-white rounded-2xl border border-slate-50 card-shadow"
+              onClick={() => {
+                setFilters({ ...filters, profession: cat.professionId || "" });
+                setActiveSubTab("mine");
+              }}
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
             >
               <div className={`w-11 h-11 rounded-xl ${cat.color} flex items-center justify-center`}>
                 <i className={`fa-solid ${cat.icon} text-base`} />
               </div>
-              <span className="text-[10px] font-semibold text-slate-600 text-center leading-tight">{cat.label}</span>
+              <span className="text-[10px] font-semibold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(cat.labelKey)}</span>
             </button>
           ))}
         </div>
@@ -449,12 +454,13 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Recommendations */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-bold text-slate-900">Siz uchun tavsiyalar</h3>
+          <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.recommendations")}</h3>
           <button
             onClick={() => setActiveSubTab("mine")}
-            className="text-xs text-indigo-600 font-semibold"
+            className="text-xs font-semibold"
+            style={{ color: 'var(--accent)' }}
           >
-            Barchasi
+            {t("home.all")}
           </button>
         </div>
         <div className="space-y-3">
@@ -473,11 +479,11 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           ))}
           {vacancies.filter(v => v.status === ItemStatus.ACTIVE).length === 0 && (
             <div className="py-12 text-center">
-              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <i className="fa-solid fa-briefcase text-xl text-slate-300" />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                <i className="fa-solid fa-briefcase text-xl" style={{ color: 'var(--text-muted)' }} />
               </div>
-              <p className="text-sm font-semibold text-slate-400">Hozircha vakansiyalar yo'q</p>
-              <p className="text-xs text-slate-300 mt-1">Tez orada yangi e'lonlar paydo bo'ladi</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{t("home.no_vacancies")}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t("home.no_vacancies_hint")}</p>
             </div>
           )}
         </div>
@@ -807,6 +813,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     </div>
   );
 
+  // + tugmasi bosilganda
+  const handlePlusPress = () => {
+    if (activeSection === "vacancies" || initialRole === UserRole.CANDIDATE_HUNTER) {
+      onAddVacancy();
+    } else if (activeSection === "daily-workers" || initialRole === UserRole.DAILY_JOB_SEEKER) {
+      onAddResume();
+    } else {
+      onAddResume();
+    }
+  };
+
   return (
     <Layout
       activeSection={activeSection}
@@ -820,6 +837,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           setTimeout(() => setIsNavigating(false), 300);
         }
       }}
+      onPlusPress={handlePlusPress}
       role={initialRole}
       onToggleRole={() => setIsRoleModalOpen(true)}
       savedCount={activeSection === "daily-workers" ? savedDailyJobSeekerIds.length : savedIds.length}
