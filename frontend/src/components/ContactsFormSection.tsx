@@ -156,6 +156,5 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
     </FormSection>
   );
 };
-};
 
 export default ContactsFormSection;

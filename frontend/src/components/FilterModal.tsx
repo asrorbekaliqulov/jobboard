@@ -409,6 +409,5 @@ const FilterModal: React.FC<FilterModalProps> = ({
     </div>
   );
 };
-};
 
 export default FilterModal;

@@ -77,7 +77,6 @@ const DescriptionFormSection: React.FC<DescriptionFormSectionProps> = ({
         placeholder={getPlaceholderText()}
         maxLength={maxLength}
         accentColor={accentColor}
-        showFormatting={true}
       />
       
       <div className="flex items-center justify-between text-[9px] text-gray-400 mt-2 ml-1">
