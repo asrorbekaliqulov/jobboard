@@ -7,6 +7,7 @@ import { professionService } from '../../services/professionService.ts';
 import { regionService } from '../../services/regionService.ts';
 import { vacancyService } from '../../services/vacancyService.ts';
 import { resumeService } from '../../services/resumeService.ts';
+import ThemeToggle from '../../components/ThemeToggle.tsx';
 
 interface AdminPanelProps {
   users: User[];
@@ -250,29 +251,70 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   ], [allProfessions, t, getLocalizedName]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
-      <nav className="border-b border-slate-100 px-10 py-6 flex items-center justify-between sticky top-0 z-50 bg-white shadow-sm">
+    <div className="min-h-screen flex flex-col font-sans" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+      <nav className="px-10 py-6 flex items-center justify-between sticky top-0 z-50 shadow-sm" 
+           style={{ 
+             borderBottom: '1px solid var(--border-primary)', 
+             backgroundColor: 'var(--bg-card)',
+             color: 'var(--text-primary)'
+           }}>
         <div className="flex items-center gap-10">
-          <h1 className="text-xl font-black uppercase tracking-normal">Admin<span className="text-blue-600">{t('admin_panel.core')}</span></h1>
-          <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100 overflow-x-auto max-w-[800px]">
+          <h1 className="text-xl font-black uppercase tracking-normal">
+            Admin<span style={{ color: 'var(--accent)' }}>{t('admin_panel.core')}</span>
+          </h1>
+          <div className="flex p-1 rounded-2xl border overflow-x-auto max-w-[800px]" 
+               style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
             {(['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works'] as const).map(t_tab => (
-              <button key={t_tab} onClick={() => { setActiveTab(t_tab); setPage(1); }} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === t_tab ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : ' hover:text-slate-600'}`}>{t(`admin_panel.tabs.${t_tab}`)}</button>
+              <button 
+                key={t_tab} 
+                onClick={() => { setActiveTab(t_tab); setPage(1); }} 
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                  activeTab === t_tab 
+                    ? 'shadow-sm border' 
+                    : 'hover:opacity-70'
+                }`}
+                style={{
+                  backgroundColor: activeTab === t_tab ? 'var(--bg-card)' : 'transparent',
+                  color: activeTab === t_tab ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  borderColor: activeTab === t_tab ? 'var(--border-primary)' : 'transparent'
+                }}
+              >
+                {t(`admin_panel.tabs.${t_tab}`)}
+              </button>
             ))}
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100">
+          <ThemeToggle />
+          <div className="flex p-1 rounded-2xl border" 
+               style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
             {LANGUAGES.map(lang => (
               <button
                 key={lang.code}
                 onClick={() => i18n.changeLanguage(lang.code)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${i18n.language === lang.code ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  i18n.language === lang.code ? 'shadow-sm border' : 'hover:opacity-70'
+                }`}
+                style={{
+                  backgroundColor: i18n.language === lang.code ? 'var(--bg-card)' : 'transparent',
+                  color: i18n.language === lang.code ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  borderColor: i18n.language === lang.code ? 'var(--border-primary)' : 'transparent'
+                }}
               >
                 {lang.label}
               </button>
             ))}
           </div>
-          <button onClick={onLogout} className="px-5 py-2.5 rounded-xl bg-slate-100 text-[10px] font-black uppercase text-slate-500 hover:bg-slate-200 transition-all">{t('admin_panel.logout')}</button>
+          <button 
+            onClick={onLogout} 
+            className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all hover:opacity-80"
+            style={{ 
+              backgroundColor: 'var(--bg-muted)', 
+              color: 'var(--text-secondary)'
+            }}
+          >
+            {t('admin_panel.logout')}
+          </button>
         </div>
       </nav>
 

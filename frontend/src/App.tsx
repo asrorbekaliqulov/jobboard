@@ -36,9 +36,12 @@ import { resumeService } from "./services/resumeService.ts";
 import { favouriteService } from "./services/favouriteService.ts";
 import { dailyJobSeekerService } from "./services/dailyJobSeekerService.ts";
 import i18n from "./i18n.ts";
+import { useTheme } from "./hooks/useTheme.ts";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
+  const { theme, isDark } = useTheme(); // Theme hook qo'shamiz
+  
   const [view, setView] = useState<"onboarding" | "client" | "admin">(
     "onboarding",
   );

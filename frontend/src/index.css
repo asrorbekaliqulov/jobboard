@@ -314,3 +314,176 @@ label { color: var(--text-secondary) !important; }
 .card-accent-violet {
   border-left: 3px solid #6366F1;
 }
+
+
+/* ─── Improved text contrast for light mode ─────────────────────────────────── */
+html:not(.dark) {
+  --text-primary: #0F172A !important;
+  --text-secondary: #334155 !important;
+  --text-muted: #64748B !important;
+}
+
+/* ─── Better button and form styling ───────────────────────────────────────── */
+button, input, textarea, select {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.btn {
+  color: var(--text-primary) !important;
+}
+
+.btn-primary {
+  background-color: var(--accent) !important;
+  color: var(--text-inverse) !important;
+}
+
+.btn-secondary {
+  background-color: var(--bg-muted) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+/* ─── Input and form elements ──────────────────────────────────────────────── */
+input, textarea, select {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-lighter) !important;
+}
+
+/* ─── Card and container styling ───────────────────────────────────────────── */
+.card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.modal-content {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ─── Navigation and layout ────────────────────────────────────────────────── */
+.client-topbar {
+  background-color: var(--bg-card) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.nav-tabs .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--accent) !important;
+  background-color: var(--accent-lighter) !important;
+}
+
+/* ─── Dropdown and select styling ──────────────────────────────────────────── */
+.dropdown-menu {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.dropdown-item {
+  color: var(--text-primary) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-accent) !important;
+  color: var(--accent) !important;
+}
+
+/* ─── Admin panel specific styling ─────────────────────────────────────────── */
+.admin-sidebar {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.admin-content {
+  background-color: var(--bg-secondary) !important;
+}
+
+.table {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.table th {
+  background-color: var(--bg-muted) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.table td {
+  border-color: var(--border-secondary) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-accent) !important;
+}
+
+/* ─── Loading and skeleton states ──────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--bg-accent) 50%,
+    var(--bg-muted) 75%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: loading 1.5s infinite !important;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Notification and alert styling ───────────────────────────────────────── */
+.alert {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.alert-success {
+  background-color: var(--success-light) !important;
+  color: var(--success) !important;
+}
+
+.alert-warning {
+  background-color: var(--warning-light) !important;
+  color: var(--warning) !important;
+}
+
+.alert-danger {
+  background-color: var(--danger-light) !important;
+  color: var(--danger) !important;
+}
+
+/* ─── Responsive improvements ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .client-topbar {
+    padding: 12px 16px !important;
+  }
+  
+  .main-content {
+    padding: 16px !important;
+  }
+}
+
+/* ─── Text selection ───────────────────────────────────────────────────────── */
+::selection {
+  background-color: var(--accent) !important;
+  color: var(--text-inverse) !important;
+}
+
+::-moz-selection {
+  background-color: var(--accent) !important;
+  color: var(--text-inverse) !important;
+}

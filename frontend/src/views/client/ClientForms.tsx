@@ -190,7 +190,7 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
   // ── Validation ───────────────────────────────────────────────────────────────
   const getRequiredFields = useCallback(() => {
     if (type === "vacancy") {
-      return ["company_name", "profession_id", "region_id", "description", "phone", "telegram"];
+      return ["company_name", "profession_id", "region_id", "description", "phone", "telegram", "work_hours"];
     }
     if (isDailyJobSeeker) {
       return ["first_name", "last_name", "region_id", "age", "description", "phone", "telegram"];
@@ -201,6 +201,7 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
   const validateForm = useCallback(() => {
     const errors: Record<string, boolean> = {};
     let isValid = true;
+    
     for (const field of getRequiredFields()) {
       const value = formData[field];
       if (
@@ -212,47 +213,107 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
         isValid = false;
       }
     }
+
+    // Additional vacancy-specific validation
+    if (type === "vacancy") {
+      // Work hours validation
+      if (!formData.work_hours || formData.work_hours < 1 || formData.work_hours > 80) {
+        errors["work_hours"] = true;
+        isValid = false;
+      }
+
+      // Experience validation
+      if (formData.exp_from < 0 || formData.exp_till < 0 || formData.exp_from > formData.exp_till) {
+        errors["exp_from"] = true;
+        errors["exp_till"] = true;
+        isValid = false;
+      }
+
+      // Salary validation
+      if (formData.salary_from && formData.salary_till && formData.salary_from > formData.salary_till) {
+        errors["salary_from"] = true;
+        errors["salary_till"] = true;
+        isValid = false;
+      }
+    }
+
+    // Resume-specific validation
+    if (type === "resume") {
+      // Age validation
+      if (!formData.age || formData.age < 14 || formData.age > 70) {
+        errors["age"] = true;
+        isValid = false;
+      }
+    }
+
     setFieldErrors(errors);
     return isValid;
-  }, [formData, getRequiredFields]);
+  }, [formData, getRequiredFields, type]);
 
   // ── Submit ───────────────────────────────────────────────────────────────────
   const handlePublish = async () => {
     if (isSubmittingRef.current) return;
-    if (!validateForm()) return;
+    
+    // Validation
+    if (!validateForm()) {
+      // Birinchi xato maydoniga scroll qilish
+      const firstErrorField = getRequiredFields().find(field => {
+        const value = formData[field];
+        return value === "" || value === null || value === undefined ||
+          (typeof value === "number" && value === 0 &&
+            (field === "profession_id" || field === "region_id"));
+      });
+      
+      if (firstErrorField) {
+        const element = document.querySelector(`[name="${firstErrorField}"]`);
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // Toast notification ko'rsatish
+      alert(t("client_forms.please_fill_required"));
+      return;
+    }
+
+    // Description uzunligi tekshirish
+    if (formData.description && formData.description.length < 50) {
+      alert("Tavsif kamida 50 ta so'zdan iborat bo'lishi kerak");
+      return;
+    }
 
     isSubmittingRef.current = true;
     setIsUploading(true);
+    
     try {
       let finalData = { ...formData };
+      let uploadErrors = [];
 
+      // Portfolio fayl yuklash
       if (selectedPortfolioFile) {
         try {
           const { url } = await resumeService.uploadPortfolio(selectedPortfolioFile);
           finalData.portfolio = url;
-        } catch {
-          alert(t("client_forms.failed_upload"));
-          return;
+        } catch (error) {
+          uploadErrors.push(t("client_forms.failed_upload"));
         }
       }
 
+      // Video fayl yuklash
       if (selectedVideoFile) {
         try {
           const { url } = await resumeService.uploadVideo(selectedVideoFile);
           finalData.video = url;
-        } catch {
-          alert(t("client_forms.failed_video_upload"));
-          return;
+        } catch (error) {
+          uploadErrors.push(t("client_forms.failed_video_upload"));
         }
       }
 
+      // Vacancy uchun rasm va video yuklash
       if (selectedVacancyImageFile) {
         try {
           const { url } = await vacancyService.uploadImage(selectedVacancyImageFile);
           finalData.image_url = url;
-        } catch {
-          alert(t("client_forms.failed_image_upload"));
-          return;
+        } catch (error) {
+          uploadErrors.push("Rasm yuklashda xato");
         }
       }
 
@@ -260,12 +321,17 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
         try {
           const { url } = await vacancyService.uploadVideo(selectedVacancyVideoFile);
           finalData.video_url = url;
-        } catch {
-          alert(t("client_forms.failed_video_upload"));
-          return;
+        } catch (error) {
+          uploadErrors.push("Video yuklashda xato");
         }
       }
 
+      // Agar fayl yuklashda xato bo'lsa, foydalanuvchiga xabar berish
+      if (uploadErrors.length > 0) {
+        alert(`Yuklashda xatolar:\n${uploadErrors.join('\n')}\n\nDavom etasizmi?`);
+      }
+
+      // Ma'lumotlarni tozalash
       const cleanedData: any = { ...finalData };
       delete cleanedData.profession;
       delete cleanedData.region;
@@ -275,12 +341,29 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
       delete cleanedData.viewed_count;
       delete cleanedData.works;
       delete cleanedData.districts;
+      
+      // Yangi yozuv uchun ID va user_id ni olib tashlash
       if (cleanedData.id === 0) {
         delete cleanedData.id;
         delete cleanedData.user_id;
       }
 
+      // Phone raqamni formatlash
+      if (cleanedData.phone) {
+        cleanedData.phone = cleanedData.phone.replace(/\s+/g, ' ').trim();
+      }
+
+      // Telegram username ni formatlash
+      if (cleanedData.telegram && !cleanedData.telegram.startsWith('@')) {
+        cleanedData.telegram = '@' + cleanedData.telegram;
+      }
+
+      console.log('Sending data:', cleanedData);
+      
       onSave(cleanedData);
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert(t("client_forms.submit_error"));
     } finally {
       isSubmittingRef.current = false;
       setIsUploading(false);
@@ -347,6 +430,7 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
               setFormData={setFormData}
               ringColor={ringColor}
               accentColor={accentColor}
+              fieldErrors={fieldErrors}
               imageInputRef={vacancyImageInputRef}
               videoInputRef={vacancyVideoInputRef}
               selectedImageFile={selectedVacancyImageFile}

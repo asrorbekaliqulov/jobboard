@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { UserRole } from "../types.ts";
+import ThemeToggle from "./ThemeToggle.tsx";
 
 type Section = "vacancies" | "workers" | "daily-workers";
 type SubTab = "all" | "mine" | "saved" | "more";
@@ -71,18 +72,23 @@ const Layout: React.FC<LayoutProps> = ({
         <button className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'var(--text-secondary)' }}>
           <i className="fa-solid fa-bars text-lg" />
         </button>
+        
         <h1 className="text-lg font-black tracking-tight">
           <span style={{ color: 'var(--text-primary)' }}>ISH</span>
           <span style={{ color: 'var(--accent)' }}>KO'P</span>
         </h1>
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'var(--text-secondary)' }}>
-          <i className="fa-solid fa-bell text-lg" />
-          {savedCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
-              {savedCount > 9 ? "9+" : savedCount}
-            </span>
-          )}
-        </button>
+        
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button className="relative w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'var(--text-secondary)' }}>
+            <i className="fa-solid fa-bell text-lg" />
+            {savedCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+                {savedCount > 9 ? "9+" : savedCount}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* ─── Main Content ────────────────────────────────────────────── */}

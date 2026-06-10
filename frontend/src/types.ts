@@ -184,6 +184,12 @@ export interface Filters {
   region: string;
   profession: string;
   gender: Gender | 'all' | 'All';
+  age_range?: string;
+  salary_range?: string;
+  work_format?: string;
+  work_type?: string;
+  experience?: string;
+  search?: string;
 }
 
 export interface AdminFilters {

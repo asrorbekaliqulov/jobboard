@@ -72,7 +72,13 @@ class VacancyService:
         profession_id: Optional[int] = None,
         region_id: Optional[int] = None,
         status: Optional[VacancyStatus] = None,
-        search: Optional[str] = None
+        search: Optional[str] = None,
+        work_format: Optional[str] = None,
+        work_type: Optional[str] = None,
+        salary_from: Optional[int] = None,
+        salary_till: Optional[int] = None,
+        exp_from: Optional[int] = None,
+        exp_till: Optional[int] = None
     ) -> List[Vacancy]:
         query = select(Vacancy).options(
             selectinload(Vacancy.profession),
@@ -90,6 +96,36 @@ class VacancyService:
             query = query.where(Vacancy.status == status)
         elif not user_id: # By default only show ACTIVE vacancies for public
             query = query.where(Vacancy.status == VacancyStatus.ACTIVE)
+        
+        # Work format filter
+        if work_format:
+            query = query.where(Vacancy.work_format == work_format)
+        
+        # Work type filter
+        if work_type:
+            query = query.where(Vacancy.work_type == work_type)
+        
+        # Salary range filter
+        if salary_from is not None:
+            query = query.where(
+                or_(
+                    Vacancy.salary_from >= salary_from,
+                    Vacancy.salary_till >= salary_from
+                )
+            )
+        if salary_till is not None:
+            query = query.where(
+                or_(
+                    Vacancy.salary_from <= salary_till,
+                    Vacancy.salary_till <= salary_till
+                )
+            )
+        
+        # Experience range filter
+        if exp_from is not None:
+            query = query.where(Vacancy.exp_from >= exp_from)
+        if exp_till is not None:
+            query = query.where(Vacancy.exp_till <= exp_till)
             
         if search:
             search_filter = f"%{search}%"
@@ -114,7 +150,13 @@ class VacancyService:
         profession_id: Optional[int] = None,
         region_id: Optional[int] = None,
         status: Optional[VacancyStatus] = None,
-        search: Optional[str] = None
+        search: Optional[str] = None,
+        work_format: Optional[str] = None,
+        work_type: Optional[str] = None,
+        salary_from: Optional[int] = None,
+        salary_till: Optional[int] = None,
+        exp_from: Optional[int] = None,
+        exp_till: Optional[int] = None
     ) -> int:
         query = select(func.count(Vacancy.id))
         
@@ -128,6 +170,29 @@ class VacancyService:
             query = query.where(Vacancy.status == status)
         elif not user_id:
             query = query.where(Vacancy.status == VacancyStatus.ACTIVE)
+        
+        if work_format:
+            query = query.where(Vacancy.work_format == work_format)
+        if work_type:
+            query = query.where(Vacancy.work_type == work_type)
+        if salary_from is not None:
+            query = query.where(
+                or_(
+                    Vacancy.salary_from >= salary_from,
+                    Vacancy.salary_till >= salary_from
+                )
+            )
+        if salary_till is not None:
+            query = query.where(
+                or_(
+                    Vacancy.salary_from <= salary_till,
+                    Vacancy.salary_till <= salary_till
+                )
+            )
+        if exp_from is not None:
+            query = query.where(Vacancy.exp_from >= exp_from)
+        if exp_till is not None:
+            query = query.where(Vacancy.exp_till <= exp_till)
             
         if search:
             search_filter = f"%{search}%"

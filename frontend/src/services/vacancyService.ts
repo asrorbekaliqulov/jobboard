@@ -26,6 +26,10 @@ class VacancyService {
         region_id?: number;
         status?: ItemStatus;
         search?: string;
+        work_format?: string;
+        work_type?: string;
+        salary_range?: string;
+        experience?: string;
     } = {}): Promise<VacancyListResponse> {
         const query = new URLSearchParams();
         Object.entries(params).forEach(([key, value]) => {
