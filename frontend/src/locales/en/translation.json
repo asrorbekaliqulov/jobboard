@@ -63,7 +63,9 @@
     "greeting": "Hello, {{name}} \ud83d\udc4b",
     "user": "User",
     "banner_title": "We found the best\njobs for you",
+    "banner_employer": "We found matching\nworkers for you",
     "view_vacancies": "View vacancies",
+    "view_workers": "View workers",
     "categories": "Categories",
     "recommendations": "Recommended for you",
     "all": "All",
@@ -85,6 +87,10 @@
       "service": "Service",
       "other": "Other"
     }
+  },
+  "saved": {
+    "empty": "No saved listings yet",
+    "empty_hint": "Save listings you like"
   },
   "tabs": {
     "all_vacancies": "All Vacancies",

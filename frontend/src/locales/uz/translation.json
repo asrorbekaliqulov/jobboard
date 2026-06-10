@@ -63,7 +63,9 @@
     "greeting": "Salom, {{name}} \ud83d\udc4b",
     "user": "Foydalanuvchi",
     "banner_title": "Siz uchun eng yaxshi\nish o'rinlarini topdik",
+    "banner_employer": "Sizga mos ishchilarni\ntopdik",
     "view_vacancies": "Vakansiyalarni ko'rish",
+    "view_workers": "Ishchilarni ko'rish",
     "categories": "Kategoriyalar",
     "recommendations": "Siz uchun tavsiyalar",
     "all": "Barchasi",
@@ -85,6 +87,10 @@
       "service": "Xizmat",
       "other": "Boshqa"
     }
+  },
+  "saved": {
+    "empty": "Saqlangan e'lonlar yo'q",
+    "empty_hint": "Yoqqan e'lonlarni saqlang"
   },
   "tabs": {
     "all_vacancies": "Barcha vakansiyalar",
