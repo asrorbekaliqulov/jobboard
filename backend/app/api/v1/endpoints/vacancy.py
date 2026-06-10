@@ -22,6 +22,10 @@ async def list_vacancies(
     region_id: Optional[int] = None,
     status: Optional[VacancyStatus] = None,
     search: Optional[str] = None,
+    work_format: Optional[str] = None,
+    work_type: Optional[str] = None,
+    salary_range: Optional[str] = None,
+    experience: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -29,6 +33,36 @@ async def list_vacancies(
     By default, only ACTIVE vacancies are shown to public.
     If user_id is provided, it filters by that user.
     """
+    # Parse salary range
+    salary_from, salary_till = None, None
+    if salary_range:
+        try:
+            if salary_range == "1-3M":
+                salary_from, salary_till = 1000000, 3000000
+            elif salary_range == "3-5M":
+                salary_from, salary_till = 3000000, 5000000
+            elif salary_range == "5-10M":
+                salary_from, salary_till = 5000000, 10000000
+            elif salary_range == "10M+":
+                salary_from = 10000000
+        except:
+            pass
+    
+    # Parse experience range
+    exp_from, exp_till = None, None
+    if experience:
+        try:
+            if experience == "0-1":
+                exp_from, exp_till = 0, 1
+            elif experience == "2-3":
+                exp_from, exp_till = 2, 3
+            elif experience == "4-7":
+                exp_from, exp_till = 4, 7
+            elif experience == "8+":
+                exp_from = 8
+        except:
+            pass
+
     vacancies = await VacancyService.get_all(
         db, 
         skip=skip, 
@@ -37,7 +71,13 @@ async def list_vacancies(
         profession_id=profession_id,
         region_id=region_id,
         status=status,
-        search=search
+        search=search,
+        work_format=work_format,
+        work_type=work_type,
+        salary_from=salary_from,
+        salary_till=salary_till,
+        exp_from=exp_from,
+        exp_till=exp_till
     )
     total = await VacancyService.count(
         db,
@@ -45,7 +85,13 @@ async def list_vacancies(
         profession_id=profession_id,
         region_id=region_id,
         status=status,
-        search=search
+        search=search,
+        work_format=work_format,
+        work_type=work_type,
+        salary_from=salary_from,
+        salary_till=salary_till,
+        exp_from=exp_from,
+        exp_till=exp_till
     )
     return VacancyList(items=vacancies, total=total)
 

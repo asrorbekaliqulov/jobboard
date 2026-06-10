@@ -20,6 +20,12 @@
       "new_resume": "👤 *New Talent Found!*\n\nA new *{{profession}}* is available for hire.\n\nReview their profile now!"
     }
   },
+  "theme": {
+    "light": "Light Theme",
+    "dark": "Dark Theme",
+    "system": "System",
+    "toggle": "Toggle Theme"
+  },
   "time": {
     "just_now": "Just now",
     "minutes_ago": "{{count}} min ago",

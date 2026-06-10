@@ -39,18 +39,34 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
   const inputClass = (field: string) => {
     const hasError = fieldErrors[field];
-    return `w-full p-4 bg-white border ${hasError ? "border-red-400" : "border-slate-100"} rounded-2xl text-sm font-bold outline-none ${ringColor}`;
+    return `w-full p-4 border rounded-2xl text-sm font-bold outline-none transition-all duration-200 ${
+      hasError 
+        ? "border-red-400 bg-red-50 text-red-700" 
+        : "border-gray-200 bg-white text-gray-900"
+    } ${ringColor}`;
+  };
+
+  const handleNameChange = (field: string, value: string) => {
+    // Faqat harflar, bo'sh joy va apostrofni qabul qilish
+    const cleanValue = value.replace(/[^a-zA-Zа-яёА-ЯЁ\u0400-\u04FF\s'`-]/g, '');
+    setFormData({ ...formData, [field]: cleanValue });
+  };
+
+  const handleCompanyNameChange = (value: string) => {
+    // Kompaniya nomi uchun raqamlar ham ruxsat etilgan
+    const cleanValue = value.replace(/[^a-zA-Zа-яёА-ЯЁ\u0400-\u04FF0-9\s'`.-]/g, '');
+    setFormData({ ...formData, company_name: cleanValue });
   };
 
   return (
     <FormSection>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1.5 ml-1">
-            <p className="text-[10px] font-black uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-2 ml-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
               {type === "vacancy"
                 ? t("client_forms.company_name")
-                : t("client_forms.first_name")}
+                : t("client_forms.first_name")} *
             </p>
             <FieldError
               fieldName={type === "vacancy" ? "company_name" : "first_name"}
@@ -59,63 +75,115 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
           <input
             required
-            value={type === "vacancy" ? formData.company_name : formData.first_name}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type === "vacancy" ? "company_name" : "first_name"]: e.target.value,
-              })
-            }
+            value={type === "vacancy" ? formData.company_name || "" : formData.first_name || ""}
+            onChange={(e) => {
+              if (type === "vacancy") {
+                handleCompanyNameChange(e.target.value);
+              } else {
+                handleNameChange("first_name", e.target.value);
+              }
+            }}
             className={inputClass(type === "vacancy" ? "company_name" : "first_name")}
+            placeholder={type === "vacancy" ? "MasCompany LLC" : "Islom"}
+            maxLength={50}
           />
+          <p className="text-[9px] text-gray-400 mt-1 ml-1">
+            {type === "vacancy" ? "Kompaniya yoki tashkilot nomi" : "Ism (faqat harflar)"}
+          </p>
         </div>
 
         {type === "resume" && (
           <div>
-            <div className="flex items-center gap-2 mb-1.5 ml-1">
-              <p className="text-[10px] font-black uppercase tracking-widest">
-                {t("client_forms.last_name")}
+            <div className="flex items-center gap-2 mb-2 ml-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
+                {t("client_forms.last_name")} *
               </p>
               <FieldError fieldName="last_name" fieldErrors={fieldErrors} />
             </div>
             <input
               required
-              value={formData.last_name}
-              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              value={formData.last_name || ""}
+              onChange={(e) => handleNameChange("last_name", e.target.value)}
               className={inputClass("last_name")}
+              placeholder="Karimov"
+              maxLength={50}
             />
+            <p className="text-[9px] text-gray-400 mt-1 ml-1">
+              Familiya (faqat harflar)
+            </p>
+          </div>
+        )}
+
+        {type === "resume" && (
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-2 ml-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
+                {t("client_forms.middle_name")}
+              </p>
+            </div>
+            <input
+              value={formData.middle_name || ""}
+              onChange={(e) => handleNameChange("middle_name", e.target.value)}
+              className={`w-full p-4 border border-gray-200 bg-white rounded-2xl text-sm font-bold outline-none transition-all duration-200 ${ringColor}`}
+              placeholder="Abdullayevich (ixtiyoriy)"
+              maxLength={50}
+            />
+            <p className="text-[9px] text-gray-400 mt-1 ml-1">
+              Sharif (ixtiyoriy maydon)
+            </p>
           </div>
         )}
 
         {type === "vacancy" && (
-          <SearchableSelect
-            label={t("filters.region")}
-            options={regionOptions}
-            value={formData.region_id}
-            onChange={(val) => setFormData({ ...formData, region_id: val })}
-            onSearch={onRegionSearch}
-            loading={isRegionLoading}
-            error={fieldErrors["region_id"]}
-            errorMessage={t("client_forms.required")}
-          />
+          <div>
+            <div className="flex items-center gap-2 mb-2 ml-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
+                {t("filters.region")} *
+              </p>
+              <FieldError fieldName="region_id" fieldErrors={fieldErrors} />
+            </div>
+            <SearchableSelect
+              label=""
+              options={regionOptions}
+              value={formData.region_id}
+              onChange={(val) => setFormData({ ...formData, region_id: val })}
+              onSearch={onRegionSearch}
+              loading={isRegionLoading}
+              error={fieldErrors["region_id"]}
+              errorMessage={t("client_forms.required")}
+              placeholder={t("client_forms.select_region")}
+            />
+            <p className="text-[9px] text-gray-400 mt-1 ml-1">
+              Ish joyi hududi
+            </p>
+          </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {!isDailyJobSeeker && (
-          <SearchableSelect
-            label={t("filters.profession")}
-            options={professionOptions}
-            value={formData.profession_id}
-            onChange={(val) => setFormData({ ...formData, profession_id: val })}
-            onSearch={onProfessionSearch}
-            loading={isProfLoading}
-            error={fieldErrors["profession_id"]}
-            errorMessage={t("client_forms.required")}
-          />
+          <div>
+            <div className="flex items-center gap-2 mb-2 ml-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
+                {t("filters.profession")} *
+              </p>
+              <FieldError fieldName="profession_id" fieldErrors={fieldErrors} />
+            </div>
+            <SearchableSelect
+              label=""
+              options={professionOptions}
+              value={formData.profession_id}
+              onChange={(val) => setFormData({ ...formData, profession_id: val })}
+              onSearch={onProfessionSearch}
+              loading={isProfLoading}
+              error={fieldErrors["profession_id"]}
+              errorMessage={t("client_forms.required")}
+              placeholder={t("client_forms.select_profession")}
+            />
+          </div>
         )}
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">
+          <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1 text-gray-700">
             {t("client_forms.current_status")}
           </p>
           <select
@@ -123,12 +191,14 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, status: e.target.value as ItemStatus })
             }
-            className={`w-full p-4 bg-white border border-slate-100 rounded-2xl text-sm font-bold outline-none ${ringColor}`}
+            className={`w-full p-4 border border-gray-200 bg-white rounded-2xl text-sm font-bold outline-none transition-all duration-200 ${ringColor}`}
           >
             <option value={ItemStatus.ACTIVE}>{t("client_forms.status.active")}</option>
             <option value={ItemStatus.DRAFT}>{t("client_forms.status.draft")}</option>
-            <option value={ItemStatus.DELETED}>{t("client_forms.status.deleted")}</option>
           </select>
+          <p className="text-[9px] text-gray-400 mt-1 ml-1">
+            Faol holatda e'lon qilinadi
+          </p>
         </div>
       </div>
     </FormSection>

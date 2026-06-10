@@ -19,6 +19,7 @@ import {
   ConfirmModal,
 } from "../../components/Shared.tsx";
 import { professionService } from "../../services/professionService.ts";
+import FilterModal from "../../components/FilterModal.tsx";
 import { regionService } from "../../services/regionService.ts";
 import {
   ClientVacancyExplorerCard,
@@ -125,6 +126,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     region: "",
     gender: "all",
     age_range: "",
+    salary_range: "",
+    work_format: "",
+    work_type: "",
+    experience: "",
     search: "",
   });
   const [professions, setProfessions] = useState<Profession[]>([]);
@@ -207,6 +212,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     if (filters.region) fetchFilters.region_id = parseInt(filters.region);
     if (filters.gender !== "all") fetchFilters.gender = filters.gender;
     if (filters.age_range) fetchFilters.age_range = filters.age_range;
+    if (filters.salary_range) fetchFilters.salary_range = filters.salary_range;
+    if (filters.work_format) fetchFilters.work_format = filters.work_format;
+    if (filters.work_type) fetchFilters.work_type = filters.work_type;
+    if (filters.experience) fetchFilters.experience = filters.experience;
     if (filters.search) fetchFilters.search = filters.search;
 
     if (activeSection === "workers" && onFetchResumes) {
@@ -339,6 +348,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     filters.region,
     filters.gender !== "all" ? filters.gender : "",
     filters.age_range,
+    filters.salary_range,
+    filters.work_format,
+    filters.work_type,
+    filters.experience,
     filters.search,
   ].filter(Boolean).length;
 
@@ -816,93 +829,6 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
 
-      {/* Filter Modal */}
-      {isFilterModalOpen && createPortal(
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex items-end">
-          <div
-            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 pb-10 slide-up-modal max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
-
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900">Filtrlar</h3>
-              <button
-                onClick={() => setIsFilterModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"
-              >
-                <i className="fa-solid fa-xmark text-sm" />
-              </button>
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <label className="text-sm font-semibold text-slate-700 mb-2 block">Kasb</label>
-                <SearchableSelect
-                  options={professionOptions}
-                  value={filters.profession}
-                  onChange={(val) => setFilters({ ...filters, profession: val })}
-                  onSearch={handleProfessionSearch}
-                  placeholder={t("filters.all_professions")}
-                  loading={isProfLoading}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700 mb-2 block">Hudud</label>
-                <SearchableSelect
-                  options={regionOptions}
-                  value={filters.region}
-                  onChange={(val) => setFilters({ ...filters, region: val })}
-                  onSearch={handleRegionSearch}
-                  placeholder={t("filters.all_regions")}
-                  loading={isRegionLoading}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700 mb-2 block">Jins</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {["all", "male", "female"].map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setFilters({ ...filters, gender: g })}
-                      className={`py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                        filters.gender === g
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white text-slate-600 border-slate-200"
-                      }`}
-                    >
-                      {t(`gender.${g}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsFilterModalOpen(false)}
-                className="w-full py-4 bg-indigo-600 text-white font-bold text-sm rounded-2xl active:scale-[0.97] transition-all"
-              >
-                Qidirish
-              </button>
-
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={() => {
-                    setFilters({ profession: "", region: "", gender: "all", age_range: "", search: "" });
-                    setIsFilterModalOpen(false);
-                  }}
-                  className="w-full py-3 text-red-500 font-semibold text-sm"
-                >
-                  Filtrlarni tozalash
-                </button>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
       {/* Role Modal */}
       {isRoleModalOpen && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex items-end">
@@ -979,6 +905,22 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Filter Modal */}
+      {isFilterModalOpen && (
+        <FilterModal
+          filters={filters}
+          setFilters={setFilters}
+          onClose={() => setIsFilterModalOpen(false)}
+          professions={professions}
+          regions={regions}
+          isProfLoading={isProfLoading}
+          isRegionLoading={isRegionLoading}
+          onProfessionSearch={handleProfessionSearch}
+          onRegionSearch={handleRegionSearch}
+          activeSection={activeSection}
+        />
       )}
 
       {/* Delete Confirm Modal */}
