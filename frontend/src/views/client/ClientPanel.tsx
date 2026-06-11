@@ -29,6 +29,7 @@ import {
 } from "./ClientComponents.tsx";
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
+import Icon3D from "../../components/Icon3D.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -355,17 +356,6 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     filters.search,
   ].filter(Boolean).length;
 
-  // Categories for home page
-  const categories = [
-    { icon: "fa-user-doctor", labelKey: "home.cat.masters", color: "text-blue-600 bg-blue-50", professionId: "" },
-    { icon: "fa-truck", labelKey: "home.cat.drivers", color: "text-red-500 bg-red-50", professionId: "" },
-    { icon: "fa-helmet-safety", labelKey: "home.cat.construction", color: "text-amber-600 bg-amber-50", professionId: "" },
-    { icon: "fa-laptop-code", labelKey: "home.cat.it", color: "text-indigo-600 bg-indigo-50", professionId: "" },
-    { icon: "fa-shop", labelKey: "home.cat.trade", color: "text-emerald-600 bg-emerald-50", professionId: "" },
-    { icon: "fa-headset", labelKey: "home.cat.service", color: "text-purple-600 bg-purple-50", professionId: "" },
-    { icon: "fa-ellipsis", labelKey: "home.cat.other", color: "text-slate-600 bg-slate-100", professionId: "" },
-  ];
-
   const handleEmptyStateAction = () => {
     if (activeSubTab === "mine") {
       if (activeSection === "vacancies") onAddVacancy();
@@ -414,13 +404,12 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
             </button>
           </div>
           {/* 3D Character */}
-          <div className="w-28 h-28 flex items-center justify-center relative">
-            <div className="text-6xl select-none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}>
-              {initialRole === UserRole.CANDIDATE_HUNTER ? "\ud83d\udc68\u200d\ud83d\udcbc" : "\ud83e\uddd1\u200d\ud83d\udcbb"}
-            </div>
-            <div className="absolute bottom-1 right-1 w-8 h-8 bg-white rounded-lg shadow-lg flex items-center justify-center">
-              <span className="text-xs">&#9989;</span>
-            </div>
+          <div className="w-28 h-28 flex items-center justify-center relative shrink-0">
+            <Icon3D
+              name={initialRole === UserRole.CANDIDATE_HUNTER ? "businessman" : "user"}
+              size={104}
+              fallbackEmoji={initialRole === UserRole.CANDIDATE_HUNTER ? "\ud83d\udc68\u200d\ud83d\udcbc" : "\ud83e\uddd1\u200d\ud83d\udcbb"}
+            />
           </div>
         </div>
         
@@ -431,17 +420,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         </div>
       </div>
 
-      {/* Stats Row with 3D emoji icons */}
+      {/* Stats Row with 3D icons */}
       <div className="grid grid-cols-4 gap-2.5">
         {[
-          { emoji: "\ud83d\udc65", value: "8 300+", labelKey: "home.stats.workers" },
-          { emoji: "\ud83d\udcbc", value: "1 250+", labelKey: "home.stats.employers" },
-          { emoji: "\ud83d\ude97", value: "5 420+", labelKey: "home.stats.active_vacancies" },
-          { emoji: "\u23f0", value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time" },
+          { icon: "workers" as const, value: "8 300+", labelKey: "home.stats.workers", emoji: "\ud83d\udc65" },
+          { icon: "employers" as const, value: "1 250+", labelKey: "home.stats.employers", emoji: "\ud83d\udcbc" },
+          { icon: "vacancies" as const, value: "5 420+", labelKey: "home.stats.active_vacancies", emoji: "\ud83d\ude97" },
+          { icon: "time" as const, value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time", emoji: "\u23f0" },
         ].map((stat, i) => (
           <div key={i} className="rounded-2xl p-3 text-center border transition-all" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
-            <div className="text-2xl mb-1.5 select-none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
-              {stat.emoji}
+            <div className="flex items-center justify-center mb-1.5">
+              <Icon3D name={stat.icon} size={36} fallbackEmoji={stat.emoji} />
             </div>
             <p className="text-xs font-extrabold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
             <p className="text-[8px] font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>{t(stat.labelKey)}</p>
@@ -452,23 +441,22 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Quick Actions */}
       <div className="grid grid-cols-4 gap-2.5">
         {[
-          { emoji: "\ud83d\ude80", labelKey: "home.quick.find_fast" },
-          { emoji: "\ud83c\udfaf", labelKey: "home.quick.daily_jobs" },
-          { emoji: "\ud83d\udd25", labelKey: "home.quick.new" },
-          { emoji: "\ud83d\udd16", labelKey: "home.quick.saved" },
+          { icon: "rocket" as const, labelKey: "home.quick.find_fast", emoji: "\ud83d\ude80" },
+          { icon: "target" as const, labelKey: "home.quick.daily_jobs", emoji: "\ud83c\udfaf" },
+          { icon: "fire" as const, labelKey: "home.quick.new", emoji: "\ud83d\udd25" },
+          { icon: "bookmark" as const, labelKey: "home.quick.saved", emoji: "\ud83d\udd16" },
         ].map((item, i) => (
           <button
             key={i}
             onClick={() => {
-              if (i === 0) setActiveSubTab("mine");
-              else if (i === 3) setActiveSubTab("saved");
+              if (i === 3) setActiveSubTab("saved");
               else setActiveSubTab("mine");
             }}
-            className="rounded-2xl p-3 text-center border transition-all active:scale-95"
+            className="rounded-2xl p-3 flex flex-col items-center gap-1 border transition-all active:scale-95"
             style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
           >
-            <div className="text-xl mb-1 select-none">{item.emoji}</div>
-            <p className="text-[9px] font-bold leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(item.labelKey)}</p>
+            <Icon3D name={item.icon} size={32} fallbackEmoji={item.emoji} />
+            <p className="text-[9px] font-bold leading-tight text-center" style={{ color: 'var(--text-secondary)' }}>{t(item.labelKey)}</p>
           </button>
         ))}
       </div>
@@ -481,14 +469,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         </div>
         <div className="grid grid-cols-4 gap-2.5">
           {[
-            { emoji: "\ud83d\udc68\u200d\ud83d\udd27", labelKey: "home.cat.masters" },
-            { emoji: "\ud83d\ude9b", labelKey: "home.cat.drivers" },
-            { emoji: "\ud83c\udfd7\ufe0f", labelKey: "home.cat.construction" },
-            { emoji: "\ud83d\udcbb", labelKey: "home.cat.it" },
-            { emoji: "\ud83c\udfea", labelKey: "home.cat.trade" },
-            { emoji: "\ud83c\udfa7", labelKey: "home.cat.service" },
-            { emoji: "\ud83d\udc68\u200d\ud83c\udf73", labelKey: "home.cat.cooks" },
-            { emoji: "\u2022\u2022\u2022", labelKey: "home.cat.other" },
+            { icon: "masters" as const, labelKey: "home.cat.masters", emoji: "\ud83d\udc68\u200d\ud83d\udd27" },
+            { icon: "drivers" as const, labelKey: "home.cat.drivers", emoji: "\ud83d\ude9b" },
+            { icon: "construction" as const, labelKey: "home.cat.construction", emoji: "\ud83c\udfd7\ufe0f" },
+            { icon: "it" as const, labelKey: "home.cat.it", emoji: "\ud83d\udcbb" },
+            { icon: "trade" as const, labelKey: "home.cat.trade", emoji: "\ud83c\udfea" },
+            { icon: "service" as const, labelKey: "home.cat.service", emoji: "\ud83c\udfa7" },
+            { icon: "cooks" as const, labelKey: "home.cat.cooks", emoji: "\ud83d\udc68\u200d\ud83c\udf73" },
+            { icon: "other" as const, labelKey: "home.cat.other", emoji: "\u2022\u2022\u2022" },
           ].map((cat, i) => (
             <button
               key={i}
@@ -496,8 +484,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
               style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl select-none" style={{ backgroundColor: 'var(--bg-muted)' }}>
-                {cat.emoji}
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                <Icon3D name={cat.icon} size={40} fallbackEmoji={cat.emoji} />
               </div>
               <span className="text-[9px] font-bold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(cat.labelKey)}</span>
             </button>
