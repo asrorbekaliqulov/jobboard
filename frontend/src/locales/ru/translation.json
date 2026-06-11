@@ -109,7 +109,10 @@
   "role": {
     "candidate": "Соискатель",
     "partner": "Работодатель",
-    "daily_job_seeker": "Разнорабочий"
+    "daily_job_seeker": "Разнорабочий",
+    "candidate_short": "Ищу работу",
+    "partner_short": "Работодатель",
+    "daily_short": "Подёнщик"
   },
   "filters": {
     "title": "Фильтры",
