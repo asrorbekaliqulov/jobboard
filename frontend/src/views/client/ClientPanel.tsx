@@ -30,6 +30,7 @@ import {
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
+import Banner3DCharacter from "../../components/Banner3DCharacter.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -357,6 +358,21 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   ].filter(Boolean).length;
 
   const handleEmptyStateAction = () => {
+    // Always clear filters first if there are active filters
+    if (activeFilterCount > 0) {
+      setFilters({
+        profession: "",
+        region: "",
+        gender: "all",
+        age_range: "",
+        salary_range: "",
+        work_format: "",
+        work_type: "",
+        experience: "",
+        search: "",
+      });
+      return;
+    }
     if (activeSubTab === "mine") {
       if (activeSection === "vacancies") onAddVacancy();
       else onAddResume();
@@ -364,10 +380,6 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     }
     if (activeSubTab === "saved") {
       setActiveSubTab("all");
-      return;
-    }
-    if (activeFilterCount > 0) {
-      setFilters({ profession: "", region: "", gender: "all", age_range: "", search: "" });
       return;
     }
     setIsFilterModalOpen(true);
@@ -405,10 +417,9 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </div>
           {/* 3D Character */}
           <div className="w-28 h-28 flex items-center justify-center relative shrink-0">
-            <Icon3D
-              name={initialRole === UserRole.CANDIDATE_HUNTER ? "businessman" : "user"}
+            <Banner3DCharacter
+              variant={initialRole === UserRole.CANDIDATE_HUNTER ? "employer" : "worker"}
               size={104}
-              fallbackEmoji={initialRole === UserRole.CANDIDATE_HUNTER ? "\ud83d\udc68\u200d\ud83d\udcbc" : "\ud83e\uddd1\u200d\ud83d\udcbb"}
             />
           </div>
         </div>
