@@ -85,17 +85,16 @@ const Layout: React.FC<LayoutProps> = ({
     <div className="flex flex-col h-screen max-w-md mx-auto overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <header className="px-5 py-3 flex justify-between items-center sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-primary)' }}>
-        <h1 className="text-lg font-black tracking-tight">
-          <span style={{ color: 'var(--text-primary)' }}>ISH</span>
-          <span style={{ color: 'var(--accent)' }}>KO'P</span>
+        <h1 className="text-xl font-black tracking-tight">
+          <span style={{ color: 'var(--text-primary)' }}>ISH</span><span style={{ color: 'var(--accent)' }}>KO'P</span>
         </h1>
         
         <div className="flex items-center gap-1">
           {/* Language toggle */}
           <button
             onClick={cycleLang}
-            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 active:scale-90"
-            style={{ color: 'var(--text-secondary)' }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 active:scale-90 border"
+            style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-primary)' }}
           >
             <span className="text-[10px] font-black uppercase">{LANG_LABELS[i18n.language] || "UZ"}</span>
           </button>

@@ -85,7 +85,14 @@
       "it": "IT",
       "trade": "Savdo",
       "service": "Xizmat",
+      "cooks": "Oshpazlar",
       "other": "Boshqa"
+    },
+    "quick": {
+      "find_fast": "Tez topish",
+      "daily_jobs": "Kunlik ishlar",
+      "new": "Eng yangi",
+      "saved": "Saqlanganlar"
     }
   },
   "saved": {
