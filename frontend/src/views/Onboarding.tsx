@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { UserRole } from '../types.ts';
 import { authService } from '../services/auth.ts';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../hooks/useTheme.ts';
 
 const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () => void }> = ({ onComplete, onAdmin }) => {
   const { t, i18n } = useTranslation();
+  const { isDark } = useTheme();
   const [step, setStep] = useState<'splash' | 'role'>('splash');
   const [isFinishing, setIsFinishing] = useState(false);
 
@@ -40,10 +42,11 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
 
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="mb-8">
-            <h1 className="text-5xl font-black tracking-tight">
-              <span style={{ color: 'var(--text-primary)' }}>ISH</span>
-              <span style={{ color: 'var(--accent)' }}>KO'P</span>
-            </h1>
+            <img
+              src={isDark ? "/logo.png" : "/logo_new.png"}
+              alt="ISHKO'P"
+              className="h-28 w-auto object-contain mx-auto select-none"
+            />
           </div>
           <h2 className="text-2xl font-bold leading-tight mb-2" style={{ color: 'var(--text-primary)' }}>
             Bugun ish toping,<br/>

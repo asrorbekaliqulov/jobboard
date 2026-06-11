@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { UserRole } from "../types.ts";
 import ThemeToggle from "./ThemeToggle.tsx";
+import { useTheme } from "../hooks/useTheme.ts";
 
 type Section = "vacancies" | "workers" | "daily-workers";
 type SubTab = "all" | "mine" | "saved" | "more";
@@ -42,6 +43,7 @@ const Layout: React.FC<LayoutProps> = ({
   savedCount = 0,
 }) => {
   const { t, i18n } = useTranslation();
+  const { isDark } = useTheme();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [tabTransition, setTabTransition] = useState(false);
@@ -85,9 +87,11 @@ const Layout: React.FC<LayoutProps> = ({
     <div className="flex flex-col h-screen max-w-md mx-auto overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <header className="px-5 py-3 flex justify-between items-center sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-primary)' }}>
-        <h1 className="text-xl font-black tracking-tight">
-          <span style={{ color: 'var(--text-primary)' }}>ISH</span><span style={{ color: 'var(--accent)' }}>KO'P</span>
-        </h1>
+        <img
+          src={isDark ? "/logo.png" : "/logo_new.png"}
+          alt="ISHKO'P"
+          className="h-9 w-auto object-contain object-left select-none"
+        />
         
         <div className="flex items-center gap-1">
           {/* Language toggle */}
