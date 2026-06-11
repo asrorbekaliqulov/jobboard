@@ -388,47 +388,45 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const renderHomePage = () => (
     <div className="space-y-5 px-4 pt-4 pb-4 fade-up">
       {/* Greeting Banner with 3D character */}
-      <div className="relative overflow-hidden rounded-3xl" style={{ background: 'linear-gradient(135deg, #4338CA 0%, #6366F1 40%, #818CF8 100%)' }}>
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-6 w-24 h-24 bg-white/5 rounded-full translate-y-1/2" />
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full" />
-        
-        <div className="flex items-center p-5 relative z-10">
-          <div className="flex-1 pr-2">
-            <p className="text-white/80 text-sm font-medium mb-1">
-              {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
-            </p>
-            <h2 className="text-[17px] font-bold leading-tight mb-3 text-white">
-              {initialRole === UserRole.CANDIDATE_HUNTER 
-                ? t("home.banner_employer") 
-                : t("home.banner_title")}
-            </h2>
-            <button
-              onClick={() => setActiveSubTab("mine")}
-              className="bg-white/95 text-indigo-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-lg"
-            >
-              <span className="text-sm">&#10024;</span>
-              {initialRole === UserRole.CANDIDATE_HUNTER 
-                ? t("home.view_workers") 
-                : t("home.view_vacancies")}
-              <i className="fa-solid fa-chevron-right text-[9px]" />
-            </button>
-          </div>
-          {/* 3D Character */}
-          <div className="w-28 h-28 flex items-center justify-center relative shrink-0">
-            <img
-              src="/vecteezy_distinctive-classic-concept-art-style-hyper-specific_60499717.png"
-              alt="3D character illustration"
-              className="w-full h-full object-contain"
-            />
+      <div className="relative rounded-3xl mt-8">
+        {/* Banner card (clips decorative circles) */}
+        <div className="relative overflow-hidden rounded-3xl" style={{ background: 'linear-gradient(135deg, #4338CA 0%, #6366F1 40%, #818CF8 100%)' }}>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute bottom-0 left-6 w-24 h-24 bg-white/5 rounded-full translate-y-1/2" />
+          <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full" />
+
+          <div className="flex items-center p-5 relative z-10">
+            <div className="flex-1 pr-2">
+              <p className="text-white/80 text-sm font-medium mb-1">
+                {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
+              </p>
+              <h2 className="text-[17px] font-bold leading-tight mb-3 text-white">
+                {initialRole === UserRole.CANDIDATE_HUNTER 
+                  ? t("home.banner_employer") 
+                  : t("home.banner_title")}
+              </h2>
+              <button
+                onClick={() => setActiveSubTab("mine")}
+                className="bg-white/95 text-indigo-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-lg"
+              >
+                <span className="text-sm">&#10024;</span>
+                {initialRole === UserRole.CANDIDATE_HUNTER 
+                  ? t("home.view_workers") 
+                  : t("home.view_vacancies")}
+                <i className="fa-solid fa-chevron-right text-[9px]" />
+              </button>
+            </div>
+            {/* Spacer reserving room for the overlapping character */}
+            <div className="w-32 shrink-0" />
           </div>
         </div>
-        
-        {/* Active vacancies badge */}
-        <div className="absolute bottom-3 right-4 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-1.5">
-          <p className="text-white text-[10px] font-bold">5 420+</p>
-          <p className="text-white/70 text-[8px]">{t("home.stats.active_vacancies")}</p>
-        </div>
+
+        {/* 3D Character - bottom aligned with banner, head pokes out the top */}
+        <img
+          src="/vecteezy_distinctive-classic-concept-art-style-hyper-specific_60499717.png"
+          alt="3D character illustration"
+          className="absolute right-2 bottom-0 w-40 h-52 object-contain object-bottom z-20 pointer-events-none select-none drop-shadow-2xl"
+        />
       </div>
 
       {/* Stats Row with 3D icons */}
