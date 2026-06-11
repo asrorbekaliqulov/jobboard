@@ -386,70 +386,120 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   // ─── HOME TAB (all) - Main Page Design ──────────────────────────────────────
   const renderHomePage = () => (
     <div className="space-y-5 px-4 pt-4 pb-4 fade-up">
-      {/* Greeting Banner */}
-      <div className="banner-gradient p-5 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-8 w-20 h-20 bg-white/5 rounded-full translate-y-1/2" />
-        <div className="relative z-10">
-          <p className="text-white/80 text-sm font-medium mb-1">
-            {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
-          </p>
-          <h2 className="text-lg font-bold leading-tight mb-3">
-            {initialRole === UserRole.CANDIDATE_HUNTER 
-              ? t("home.banner_employer") 
-              : t("home.banner_title")}
-          </h2>
-          <button
-            onClick={() => setActiveSubTab("mine")}
-            className="bg-white text-indigo-600 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all"
-          >
-            {initialRole === UserRole.CANDIDATE_HUNTER 
-              ? t("home.view_workers") 
-              : t("home.view_vacancies")}
-            <i className="fa-solid fa-arrow-right text-[10px]" />
-          </button>
+      {/* Greeting Banner with 3D character */}
+      <div className="relative overflow-hidden rounded-3xl" style={{ background: 'linear-gradient(135deg, #4338CA 0%, #6366F1 40%, #818CF8 100%)' }}>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-6 w-24 h-24 bg-white/5 rounded-full translate-y-1/2" />
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full" />
+        
+        <div className="flex items-center p-5 relative z-10">
+          <div className="flex-1 pr-2">
+            <p className="text-white/80 text-sm font-medium mb-1">
+              {t("home.greeting", { name: currentUser?.first_name || t("home.user") })}
+            </p>
+            <h2 className="text-[17px] font-bold leading-tight mb-3 text-white">
+              {initialRole === UserRole.CANDIDATE_HUNTER 
+                ? t("home.banner_employer") 
+                : t("home.banner_title")}
+            </h2>
+            <button
+              onClick={() => setActiveSubTab("mine")}
+              className="bg-white/95 text-indigo-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-lg"
+            >
+              <span className="text-sm">&#10024;</span>
+              {initialRole === UserRole.CANDIDATE_HUNTER 
+                ? t("home.view_workers") 
+                : t("home.view_vacancies")}
+              <i className="fa-solid fa-chevron-right text-[9px]" />
+            </button>
+          </div>
+          {/* 3D Character */}
+          <div className="w-28 h-28 flex items-center justify-center relative">
+            <div className="text-6xl select-none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}>
+              {initialRole === UserRole.CANDIDATE_HUNTER ? "\ud83d\udc68\u200d\ud83d\udcbc" : "\ud83e\uddd1\u200d\ud83d\udcbb"}
+            </div>
+            <div className="absolute bottom-1 right-1 w-8 h-8 bg-white rounded-lg shadow-lg flex items-center justify-center">
+              <span className="text-xs">&#9989;</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Active vacancies badge */}
+        <div className="absolute bottom-3 right-4 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-1.5">
+          <p className="text-white text-[10px] font-bold">5 420+</p>
+          <p className="text-white/70 text-[8px]">{t("home.stats.active_vacancies")}</p>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-3">
+      {/* Stats Row with 3D emoji icons */}
+      <div className="grid grid-cols-4 gap-2.5">
         {[
-          { icon: "fa-users", value: `${vacancies.length > 0 ? vacancies.length : "1"}+`, labelKey: "home.stats.workers", color: "text-indigo-600 bg-indigo-50" },
-          { icon: "fa-briefcase", value: `${resumes.length > 0 ? resumes.length : "1 250"}+`, labelKey: "home.stats.employers", color: "text-emerald-600 bg-emerald-50" },
-          { icon: "fa-car", value: "5 420+", labelKey: "home.stats.active_vacancies", color: "text-amber-600 bg-amber-50" },
-          { icon: "fa-clock", value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time", color: "text-red-500 bg-red-50" },
+          { emoji: "\ud83d\udc65", value: "8 300+", labelKey: "home.stats.workers" },
+          { emoji: "\ud83d\udcbc", value: "1 250+", labelKey: "home.stats.employers" },
+          { emoji: "\ud83d\ude97", value: "5 420+", labelKey: "home.stats.active_vacancies" },
+          { emoji: "\u23f0", value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time" },
         ].map((stat, i) => (
-          <div key={i} className="rounded-2xl p-3 text-center border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
-            <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-              <i className={`fa-solid ${stat.icon} text-sm`} />
+          <div key={i} className="rounded-2xl p-3 text-center border transition-all" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
+            <div className="text-2xl mb-1.5 select-none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
+              {stat.emoji}
             </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
-            <p className="text-[9px] font-medium" style={{ color: 'var(--text-muted)' }}>{t(stat.labelKey)}</p>
+            <p className="text-xs font-extrabold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+            <p className="text-[8px] font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>{t(stat.labelKey)}</p>
           </div>
         ))}
       </div>
 
-      {/* Categories */}
+      {/* Quick Actions */}
+      <div className="grid grid-cols-4 gap-2.5">
+        {[
+          { emoji: "\ud83d\ude80", labelKey: "home.quick.find_fast" },
+          { emoji: "\ud83c\udfaf", labelKey: "home.quick.daily_jobs" },
+          { emoji: "\ud83d\udd25", labelKey: "home.quick.new" },
+          { emoji: "\ud83d\udd16", labelKey: "home.quick.saved" },
+        ].map((item, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              if (i === 0) setActiveSubTab("mine");
+              else if (i === 3) setActiveSubTab("saved");
+              else setActiveSubTab("mine");
+            }}
+            className="rounded-2xl p-3 text-center border transition-all active:scale-95"
+            style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
+          >
+            <div className="text-xl mb-1 select-none">{item.emoji}</div>
+            <p className="text-[9px] font-bold leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(item.labelKey)}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Categories with 3D emojis */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
-          <button className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")}</button>
+          <button onClick={() => setActiveSubTab("mine")} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
-        <div className="grid grid-cols-4 gap-3">
-          {categories.map((cat, i) => (
+        <div className="grid grid-cols-4 gap-2.5">
+          {[
+            { emoji: "\ud83d\udc68\u200d\ud83d\udd27", labelKey: "home.cat.masters" },
+            { emoji: "\ud83d\ude9b", labelKey: "home.cat.drivers" },
+            { emoji: "\ud83c\udfd7\ufe0f", labelKey: "home.cat.construction" },
+            { emoji: "\ud83d\udcbb", labelKey: "home.cat.it" },
+            { emoji: "\ud83c\udfea", labelKey: "home.cat.trade" },
+            { emoji: "\ud83c\udfa7", labelKey: "home.cat.service" },
+            { emoji: "\ud83d\udc68\u200d\ud83c\udf73", labelKey: "home.cat.cooks" },
+            { emoji: "\u2022\u2022\u2022", labelKey: "home.cat.other" },
+          ].map((cat, i) => (
             <button
               key={i}
-              onClick={() => {
-                setFilters({ ...filters, profession: cat.professionId || "" });
-                setActiveSubTab("mine");
-              }}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
+              onClick={() => setActiveSubTab("mine")}
+              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
               style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
             >
-              <div className={`w-11 h-11 rounded-xl ${cat.color} flex items-center justify-center`}>
-                <i className={`fa-solid ${cat.icon} text-base`} />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl select-none" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                {cat.emoji}
               </div>
-              <span className="text-[10px] font-semibold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(cat.labelKey)}</span>
+              <span className="text-[9px] font-bold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(cat.labelKey)}</span>
             </button>
           ))}
         </div>

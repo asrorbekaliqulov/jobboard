@@ -85,7 +85,14 @@
       "it": "IT",
       "trade": "Trade",
       "service": "Service",
+      "cooks": "Cooks",
       "other": "Other"
+    },
+    "quick": {
+      "find_fast": "Find fast",
+      "daily_jobs": "Daily jobs",
+      "new": "Latest",
+      "saved": "Saved"
     }
   },
   "saved": {
