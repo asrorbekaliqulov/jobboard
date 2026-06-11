@@ -167,6 +167,11 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     }
   }, [initialRole]);
 
+  // Close filter modal when navigating between tabs/sections
+  useEffect(() => {
+    setIsFilterModalOpen(false);
+  }, [activeSubTab, activeSection]);
+
   useEffect(() => {
     if (isFilterModalOpen || isRoleModalOpen || isLangModalOpen || deleteTarget) {
       document.body.style.overflow = "hidden";
@@ -205,8 +210,9 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   }, []);
 
   useEffect(() => {
-    if (activeSubTab !== "all") return;
     if (!authService.isAuthenticated()) return;
+    // Only fetch from API when viewing "all" items (not mine/saved which are client-filtered)
+    if (activeSubTab !== "all" && activeSubTab !== "mine") return;
     const fetchFilters: any = { status: ItemStatus.ACTIVE };
     if (filters.profession)
       fetchFilters.profession_id = parseInt(filters.profession);
@@ -429,7 +435,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         />
       </div>
 
-      {/* Stats Row with 3D icons */}
+      {/* Stats Row - informational, non-clickable */}
       <div className="grid grid-cols-4 gap-2.5">
         {[
           { icon: "workers" as const, value: "8 300+", labelKey: "home.stats.workers", emoji: "\ud83d\udc65" },
@@ -437,7 +443,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           { icon: "vacancies" as const, value: "5 420+", labelKey: "home.stats.active_vacancies", emoji: "\ud83d\ude97" },
           { icon: "time" as const, value: `1 ${t("home.stats.minute")}`, labelKey: "home.stats.post_time", emoji: "\u23f0" },
         ].map((stat, i) => (
-          <div key={i} className="rounded-2xl p-3 text-center border transition-all" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
+          <div key={i} className="rounded-xl p-3 text-center" style={{ backgroundColor: 'var(--bg-muted)' }}>
             <div className="flex items-center justify-center mb-1.5">
               <Icon3D name={stat.icon} size={36} fallbackEmoji={stat.emoji} />
             </div>
@@ -450,18 +456,15 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Quick Actions */}
       <div className="grid grid-cols-4 gap-2.5">
         {[
-          { icon: "rocket" as const, labelKey: "home.quick.find_fast", emoji: "\ud83d\ude80" },
-          { icon: "target" as const, labelKey: "home.quick.daily_jobs", emoji: "\ud83c\udfaf" },
-          { icon: "fire" as const, labelKey: "home.quick.new", emoji: "\ud83d\udd25" },
-          { icon: "bookmark" as const, labelKey: "home.quick.saved", emoji: "\ud83d\udd16" },
+          { icon: "rocket" as const, labelKey: "home.quick.find_fast", emoji: "\ud83d\ude80", action: () => setActiveSubTab("mine") },
+          { icon: "briefcase" as const, labelKey: "home.quick.daily_jobs", emoji: "\ud83d\udcbc", action: () => { setActiveSection("daily-workers"); setActiveSubTab("mine"); } },
+          { icon: "fire" as const, labelKey: "home.quick.new", emoji: "\ud83d\udd25", action: () => setActiveSubTab("mine") },
+          { icon: "bookmark" as const, labelKey: "home.quick.saved", emoji: "\ud83d\udd16", action: () => setActiveSubTab("saved") },
         ].map((item, i) => (
           <button
             key={i}
-            onClick={() => {
-              if (i === 3) setActiveSubTab("saved");
-              else setActiveSubTab("mine");
-            }}
-            className="rounded-2xl p-3 flex flex-col items-center gap-1 border transition-all active:scale-95"
+            onClick={item.action}
+            className="rounded-2xl p-3 flex flex-col items-center gap-1.5 border transition-all active:scale-95"
             style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
           >
             <Icon3D name={item.icon} size={32} fallbackEmoji={item.emoji} />
@@ -580,14 +583,32 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
-      {/* Add button for vacancy owners */}
-      {activeSection === "vacancies" && (
+      {/* Add button based on role/section */}
+      {activeSection === "vacancies" && initialRole === UserRole.CANDIDATE_HUNTER && (
         <button
           onClick={onAddVacancy}
           className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100"
         >
           <i className="fa-solid fa-plus text-sm" />
           {t("client_panel.post_vacancy")}
+        </button>
+      )}
+      {activeSection === "workers" && initialRole === UserRole.JOB_SEEKER && (
+        <button
+          onClick={onAddResume}
+          className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-blue-100"
+        >
+          <i className="fa-solid fa-plus text-sm" />
+          {t("client_forms.create")} {t("common.resume")}
+        </button>
+      )}
+      {activeSection === "daily-workers" && initialRole === UserRole.DAILY_JOB_SEEKER && (
+        <button
+          onClick={onAddResume}
+          className="w-full py-3.5 bg-emerald-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-emerald-100"
+        >
+          <i className="fa-solid fa-plus text-sm" />
+          {t("client_forms.create")} {t("nav.daily_workers")}
         </button>
       )}
 
@@ -989,6 +1010,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           onProfessionSearch={handleProfessionSearch}
           onRegionSearch={handleRegionSearch}
           activeSection={activeSection}
+          userRole={initialRole}
+          onCreateItem={() => {
+            if (initialRole === UserRole.CANDIDATE_HUNTER) {
+              onAddVacancy();
+            } else {
+              onAddResume();
+            }
+          }}
         />
       )}
 

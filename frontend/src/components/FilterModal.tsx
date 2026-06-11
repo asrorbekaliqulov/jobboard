@@ -14,6 +14,8 @@ interface FilterModalProps {
   onProfessionSearch?: (search: string) => void;
   onRegionSearch?: (search: string) => void;
   activeSection: "vacancies" | "workers" | "daily-workers";
+  userRole?: string;
+  onCreateItem?: () => void;
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({ 
@@ -26,7 +28,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
   isRegionLoading = false,
   onProfessionSearch,
   onRegionSearch,
-  activeSection
+  activeSection,
+  userRole,
+  onCreateItem
 }) => {
   const { t, i18n } = useTranslation();
   const [tempFilters, setTempFilters] = useState<Filters>(filters);
@@ -89,7 +93,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const isWorkerFilter = activeSection === "workers" || activeSection === "daily-workers";
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-end">
+    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[9999] flex items-end">
       <div 
         className="w-full rounded-t-3xl px-5 py-6 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-300"
         style={{ backgroundColor: 'var(--bg-card)' }}
@@ -387,15 +391,21 @@ const FilterModal: React.FC<FilterModalProps> = ({
         {/* Action buttons */}
         <div className="flex gap-3 mt-8">
           <button
-            onClick={clearFilters}
-            className="flex-1 py-4 rounded-xl text-sm font-bold border transition-all active:scale-[0.98]"
+            onClick={() => {
+              onClose();
+              onCreateItem?.();
+            }}
+            className="flex-1 py-4 rounded-xl text-sm font-bold border transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             style={{ 
               backgroundColor: 'var(--bg-muted)', 
               borderColor: 'var(--border-primary)',
-              color: 'var(--text-secondary)'
+              color: 'var(--accent)'
             }}
           >
-            {t('filters.clear')}
+            <i className="fa-solid fa-plus text-xs"></i>
+            {userRole === 'candidate_hunter' 
+              ? t('client_panel.post_vacancy')
+              : t('client_forms.create') + ' ' + t('common.resume')}
           </button>
           <button
             onClick={applyFilters}

@@ -99,6 +99,41 @@ const Layout: React.FC<LayoutProps> = ({
         </div>
         
         <div className="flex items-center gap-1">
+          {/* Role indicator badge */}
+          <button
+            onClick={onToggleRole}
+            className="px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide border transition-all active:scale-95 mr-1"
+            style={{
+              backgroundColor: role === UserRole.CANDIDATE_HUNTER 
+                ? 'rgba(99, 102, 241, 0.1)' 
+                : role === UserRole.DAILY_JOB_SEEKER 
+                  ? 'rgba(16, 185, 129, 0.1)' 
+                  : 'rgba(59, 130, 246, 0.1)',
+              borderColor: role === UserRole.CANDIDATE_HUNTER 
+                ? 'rgba(99, 102, 241, 0.3)' 
+                : role === UserRole.DAILY_JOB_SEEKER 
+                  ? 'rgba(16, 185, 129, 0.3)' 
+                  : 'rgba(59, 130, 246, 0.3)',
+              color: role === UserRole.CANDIDATE_HUNTER 
+                ? '#6366f1' 
+                : role === UserRole.DAILY_JOB_SEEKER 
+                  ? '#10b981' 
+                  : '#3b82f6'
+            }}
+          >
+            <i className={`fa-solid ${
+              role === UserRole.CANDIDATE_HUNTER 
+                ? 'fa-user-tie' 
+                : role === UserRole.DAILY_JOB_SEEKER 
+                  ? 'fa-calendar-day' 
+                  : 'fa-user-graduate'
+            } mr-1`} />
+            {role === UserRole.CANDIDATE_HUNTER 
+              ? t('role.partner_short') || 'Ish beruvchi'
+              : role === UserRole.DAILY_JOB_SEEKER 
+                ? t('role.daily_short') || 'Kunlik'
+                : t('role.candidate_short') || 'Ishchi'}
+          </button>
           {/* Language toggle */}
           <button
             onClick={cycleLang}

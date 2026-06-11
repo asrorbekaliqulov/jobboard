@@ -109,7 +109,10 @@
   "role": {
     "candidate": "Candidate",
     "partner": "Employer",
-    "daily_job_seeker": "Daily worker"
+    "daily_job_seeker": "Daily worker",
+    "candidate_short": "Worker",
+    "partner_short": "Employer",
+    "daily_short": "Daily"
   },
   "filters": {
     "title": "Filters",

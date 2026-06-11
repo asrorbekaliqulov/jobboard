@@ -109,7 +109,10 @@
   "role": {
     "candidate": "Ishchi",
     "partner": "Ish beruvchi",
-    "daily_job_seeker": "Kunlik ishchi"
+    "daily_job_seeker": "Kunlik ishchi",
+    "candidate_short": "Ishchi",
+    "partner_short": "Ish beruvchi",
+    "daily_short": "Kunlik"
   },
   "filters": {
     "title": "Filtrlar",

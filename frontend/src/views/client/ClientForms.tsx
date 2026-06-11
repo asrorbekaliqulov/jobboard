@@ -371,14 +371,16 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
   };
 
   // ── Colours ──────────────────────────────────────────────────────────────────
-  const accentColor =
-    type === "vacancy" ? "violet-600" : isDailyJobSeeker ? "emerald-600" : "blue-600";
+  const accentBgClass =
+    type === "vacancy" ? "bg-violet-600" : isDailyJobSeeker ? "bg-emerald-600" : "bg-blue-600";
   const ringColor =
     type === "vacancy"
       ? "focus:ring-violet-500"
       : isDailyJobSeeker
         ? "focus:ring-emerald-500"
         : "focus:ring-blue-500";
+  const accentColor =
+    type === "vacancy" ? "violet-600" : isDailyJobSeeker ? "emerald-600" : "blue-600";
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -401,7 +403,7 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
         <button
           onClick={handlePublish}
           disabled={isUploading}
-          className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase text-white shadow-lg active:scale-95 transition-all bg-${accentColor} ${isUploading ? "opacity-50" : ""}`}
+          className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase text-white shadow-lg active:scale-95 transition-all ${accentBgClass} ${isUploading ? "opacity-50" : ""}`}
         >
           {isUploading ? t("client_forms.uploading") : t("client_forms.publish")}
         </button>
