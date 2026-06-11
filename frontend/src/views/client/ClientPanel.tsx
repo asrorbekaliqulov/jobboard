@@ -30,7 +30,6 @@ import {
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
-import Banner3DCharacter from "../../components/Banner3DCharacter.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -417,9 +416,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </div>
           {/* 3D Character */}
           <div className="w-28 h-28 flex items-center justify-center relative shrink-0">
-            <Banner3DCharacter
-              variant={initialRole === UserRole.CANDIDATE_HUNTER ? "employer" : "worker"}
-              size={104}
+            <img
+              src="/vecteezy_distinctive-classic-concept-art-style-hyper-specific_60499717.png"
+              alt="3D character illustration"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
