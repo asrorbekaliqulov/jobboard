@@ -346,7 +346,7 @@
       "users": "users",
       "vacancies": "vacancies",
       "resumes": "resumes",
-      "professions": "job types & professions",
+      "professions": "professions",
       "regions": "regions",
       "districts": "districts",
       "works": "work types"
@@ -397,6 +397,9 @@
     "name_ru": "Name (RU)",
     "name_en": "Name (EN)",
     "is_active_platform": "Active on platform",
+    "parent_profession": "Parent profession",
+    "parent_work": "Parent work type",
+    "no_parent": "-- None (top-level) --",
     "confirm_profession": "Confirm profession",
     "region_property": "Region property",
     "confirm_region": "Confirm region",

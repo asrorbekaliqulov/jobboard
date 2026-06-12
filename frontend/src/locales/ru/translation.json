@@ -346,7 +346,7 @@
       "users": "пользователи",
       "vacancies": "вакансии",
       "resumes": "резюме",
-      "professions": "виды работ и профессии",
+      "professions": "профессии",
       "regions": "регионы",
       "districts": "районы",
       "works": "виды работ"
@@ -398,6 +398,9 @@
     "name_ru": "Название (RU)",
     "name_en": "Название (EN)",
     "is_active_platform": "Активно на платформе",
+    "parent_profession": "Основная профессия (parent)",
+    "parent_work": "Основной вид работы (parent)",
+    "no_parent": "-- Основной (без parent) --",
     "confirm_profession": "Подтвердить профессию",
     "region_property": "Свойство региона",
     "confirm_region": "Подтвердить регион",

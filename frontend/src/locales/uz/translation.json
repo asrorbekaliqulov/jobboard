@@ -353,7 +353,7 @@
       "users": "foydalanuvchilar",
       "vacancies": "vakansiyalar",
       "resumes": "rezyumelar",
-      "professions": "ish turlari va kasblar",
+      "professions": "kasblar",
       "regions": "hududlar",
       "districts": "tumanlar",
       "works": "ish turlari"
@@ -405,6 +405,9 @@
     "name_ru": "Nomi (RU)",
     "name_en": "Nomi (EN)",
     "is_active_platform": "Platformada faol",
+    "parent_profession": "Asosiy kasb (parent)",
+    "parent_work": "Asosiy ish turi (parent)",
+    "no_parent": "-- Asosiy (parent yo'q) --",
     "confirm_profession": "Kasbni tasdiqlash",
     "region_property": "Hudud xususiyati",
     "confirm_region": "Hududni tasdiqlash",
