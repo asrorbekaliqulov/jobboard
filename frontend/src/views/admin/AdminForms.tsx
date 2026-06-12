@@ -634,24 +634,55 @@ export const AdminResumeForm: React.FC<{
 };
 
 export const AdminProfessionForm: React.FC<{
-  initialData?: Profession;
-  onSave: (data: Profession) => void;
+  initialData?: any;
+  onSave: (data: any) => void;
   onCancel: () => void;
 }> = ({ initialData, onSave, onCancel }) => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState<Profession>(initialData?.id ? initialData : {
+  const { t, i18n } = useTranslation();
+  const isCategory = initialData?.__isCategory || false;
+  
+  const [formData, setFormData] = useState<any>(initialData?.id ? initialData : {
     id: 0,
     name_uz: '',
     name_ru: '',
     name_en: '',
-    is_active: true
+    is_active: true,
+    ...(isCategory ? { parent_id: null, __isCategory: true } : {})
   });
+
+  const [parentCategories, setParentCategories] = useState<any[]>([]);
+
+  const getLocalizedName = (item: any) => {
+    if (!item) return '';
+    const lang = i18n.language?.split('-')[0] || 'en';
+    return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz;
+  };
+
+  // Fetch parent categories for the dropdown when editing a category
+  React.useEffect(() => {
+    if (isCategory) {
+      import('../../services/adminApi.ts').then(({ adminApi }) => {
+        adminApi.professionCategories.list('', undefined, undefined, true, 1, 100)
+          .then(res => {
+            // Filter out the current category to prevent self-reference
+            const filtered = res.items.filter((c: any) => c.id !== formData.id);
+            setParentCategories(filtered);
+          })
+          .catch(console.error);
+      });
+    }
+  }, [isCategory, formData.id]);
 
   return (
     <div className="fixed inset-0 bg-white z-[1100] flex flex-col p-4 animate-in slide-in-from-right duration-300 overflow-y-auto">
       <div className="max-w-xl mx-auto w-full">
         <div className="flex justify-between items-center mb-10">
-          <h2 className="text-2xl font-black uppercase tracking-normal text-slate-900">{t('admin_forms.profession_property')}</h2>
+          <h2 className="text-2xl font-black uppercase tracking-normal text-slate-900">
+            {isCategory 
+              ? (t('admin_forms.category_property') || 'Kategoriya')
+              : t('admin_forms.profession_property')
+            }
+          </h2>
           <button onClick={onCancel} className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center  hover:bg-slate-100 transition-colors"><i className="fa-solid fa-xmark"></i></button>
         </div>
         <div className="space-y-6">
@@ -667,12 +698,40 @@ export const AdminProfessionForm: React.FC<{
             <p className="text-[10px] font-black  uppercase tracking-widest mb-2 ml-1">{t('admin_forms.name_en')}</p>
             <input value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
+
+          {/* Parent Category selector - only for categories */}
+          {isCategory && (
+            <div>
+              <p className="text-[10px] font-black  uppercase tracking-widest mb-2 ml-1">
+                {t('admin_forms.parent_category') || 'Parent Kategoriya'}
+              </p>
+              <select
+                value={formData.parent_id || ''}
+                onChange={e => setFormData({ ...formData, parent_id: e.target.value ? Number(e.target.value) : null })}
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900"
+              >
+                <option value="">{t('admin_forms.no_parent') || '-- Asosiy kategoriya (parent yo\'q) --'}</option>
+                {parentCategories.map((cat: any) => (
+                  <option key={cat.id} value={cat.id}>{getLocalizedName(cat)}</option>
+                ))}
+              </select>
+              <p className="text-[9px] text-slate-400 mt-1 ml-1">
+                {t('admin_forms.parent_hint') || 'Agar subcategory bo\'lsa, parent kategoriyani tanlang'}
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-slate-900" />
             <span className="text-xs font-black uppercase tracking-widest text-slate-500">{t('admin_forms.is_active_platform')}</span>
           </div>
           <div className="pt-10">
-            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">{t('admin_forms.confirm_profession')}</button>
+            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">
+              {isCategory 
+                ? (t('admin_forms.confirm_category') || 'Saqlash')
+                : t('admin_forms.confirm_profession')
+              }
+            </button>
           </div>
         </div>
       </div>

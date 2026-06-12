@@ -78,6 +78,7 @@ class ResumeService:
         limit: int = 100,
         user_id: Optional[int] = None,
         profession_id: Optional[int] = None,
+        profession_ids: Optional[List[int]] = None,
         region_id: Optional[int] = None,
         gender: Optional[str] = None,
         status: Optional[ResumeStatus] = None,
@@ -95,6 +96,11 @@ class ResumeService:
             query = query.where(Resume.user_id == user_id)
         if profession_id:
             query = query.where(Resume.profession_id == profession_id)
+        elif profession_ids is not None:
+            if profession_ids:
+                query = query.where(Resume.profession_id.in_(profession_ids))
+            else:
+                query = query.where(Resume.id == -1)
         if region_id:
             query = query.where(Resume.region_id == region_id)
         if gender and gender != "any" and gender != "all":
@@ -127,6 +133,7 @@ class ResumeService:
         db: AsyncSession,
         user_id: Optional[int] = None,
         profession_id: Optional[int] = None,
+        profession_ids: Optional[List[int]] = None,
         region_id: Optional[int] = None,
         gender: Optional[str] = None,
         status: Optional[ResumeStatus] = None,
@@ -140,6 +147,11 @@ class ResumeService:
             query = query.where(Resume.user_id == user_id)
         if profession_id:
             query = query.where(Resume.profession_id == profession_id)
+        elif profession_ids is not None:
+            if profession_ids:
+                query = query.where(Resume.profession_id.in_(profession_ids))
+            else:
+                query = query.where(Resume.id == -1)
         if region_id:
             query = query.where(Resume.region_id == region_id)
         if gender and gender != "any" and gender != "all":

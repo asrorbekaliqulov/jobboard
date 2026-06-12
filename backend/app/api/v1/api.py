@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import regions, professions, admin_endpoints, auth, vacancy, favourite, resume, analytics, works, daily_job_seekers
+from app.api.v1.endpoints import regions, professions, admin_endpoints, auth, vacancy, favourite, resume, analytics, works, daily_job_seekers, profession_categories
 
 api_router = APIRouter()
 
@@ -7,6 +7,7 @@ api_router.include_router(favourite.router, prefix="/favourite", tags=["Favourit
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(regions.router, prefix="/regions", tags=["Public Regions"])
 api_router.include_router(professions.router, prefix="/professions", tags=["Public Professions"])
+api_router.include_router(profession_categories.router, prefix="/profession-categories", tags=["Public Profession Categories"])
 api_router.include_router(vacancy.router, prefix="/vacancies", tags=["Vacancies"])
 api_router.include_router(resume.router, prefix="/resumes", tags=["Resumes"])
 api_router.include_router(works.router, prefix="/works", tags=["Works"])

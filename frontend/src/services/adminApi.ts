@@ -1,4 +1,4 @@
-import { Profession, Region, District, Work } from '../types.ts';
+import { Profession, ProfessionCategory, Region, District, Work } from '../types.ts';
 import { mainApi } from './api.ts';
 import { authService } from './auth.ts';
 
@@ -216,6 +216,47 @@ export const adminApi = {
                 headers: getAuthHeaders(),
             });
             if (!res.ok) throw new Error('Failed to delete work');
+        }
+    },
+
+    // Profession Categories
+    professionCategories: {
+        list: async (search?: string, isActive?: boolean, parentId?: number | null, topLevelOnly?: boolean, page: number = 1, perPage: number = 10): Promise<{ items: ProfessionCategory[], total: number }> => {
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (isActive !== undefined) params.append('is_active', isActive.toString());
+            if (parentId !== undefined && parentId !== null) params.append('parent_id', parentId.toString());
+            if (topLevelOnly) params.append('top_level_only', 'true');
+            params.append('skip', ((page - 1) * perPage).toString());
+            params.append('limit', perPage.toString());
+            const res = await fetch(`${API_BASE_URL}/profession-categories/?${params.toString()}`, { headers: getAuthHeaders() });
+            if (!res.ok) throw new Error('Failed to fetch profession categories');
+            return res.json();
+        },
+        create: async (data: Omit<ProfessionCategory, 'id' | 'children' | 'professions_count'>): Promise<ProfessionCategory> => {
+            const res = await fetch(`${API_BASE_URL}/profession-categories/`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error('Failed to create profession category');
+            return res.json();
+        },
+        update: async (id: string | number, data: Partial<ProfessionCategory>): Promise<ProfessionCategory> => {
+            const res = await fetch(`${API_BASE_URL}/profession-categories/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error('Failed to update profession category');
+            return res.json();
+        },
+        delete: async (id: string | number): Promise<void> => {
+            const res = await fetch(`${API_BASE_URL}/profession-categories/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) throw new Error('Failed to delete profession category');
         }
     }
 };

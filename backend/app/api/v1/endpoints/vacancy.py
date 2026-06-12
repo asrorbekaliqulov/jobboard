@@ -19,6 +19,7 @@ async def list_vacancies(
     limit: int = 100,
     user_id: Optional[int] = None,
     profession_id: Optional[int] = None,
+    category_id: Optional[int] = None,
     region_id: Optional[int] = None,
     status: Optional[VacancyStatus] = None,
     search: Optional[str] = None,
@@ -32,7 +33,25 @@ async def list_vacancies(
     List vacancies with filters. 
     By default, only ACTIVE vacancies are shown to public.
     If user_id is provided, it filters by that user.
+    category_id: filter by profession category (includes subcategory professions).
     """
+    # If category_id is provided, resolve to profession_ids
+    category_profession_ids = None
+    if category_id and not profession_id:
+        from app.models.profession import Profession as ProfModel, ProfessionCategory
+        from sqlalchemy import select as sa_select
+        # Get the category and its children IDs
+        cat_ids = [category_id]
+        children_q = await db.execute(
+            sa_select(ProfessionCategory.id).where(ProfessionCategory.parent_id == category_id)
+        )
+        cat_ids.extend([row[0] for row in children_q.all()])
+        # Get all profession IDs in these categories
+        prof_q = await db.execute(
+            sa_select(ProfModel.id).where(ProfModel.category_id.in_(cat_ids))
+        )
+        category_profession_ids = [row[0] for row in prof_q.all()]
+
     # Parse salary range
     salary_from, salary_till = None, None
     if salary_range:
@@ -69,6 +88,7 @@ async def list_vacancies(
         limit=limit, 
         user_id=user_id,
         profession_id=profession_id,
+        profession_ids=category_profession_ids,
         region_id=region_id,
         status=status,
         search=search,
@@ -83,6 +103,7 @@ async def list_vacancies(
         db,
         user_id=user_id,
         profession_id=profession_id,
+        profession_ids=category_profession_ids,
         region_id=region_id,
         status=status,
         search=search,
