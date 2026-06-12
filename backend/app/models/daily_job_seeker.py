@@ -3,6 +3,7 @@ from app.models.base import TimestampMixin
 from app.models.resume import Gender, ResumeStatus
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional
 
 daily_job_seeker_works = Table(
     "daily_job_seeker_works",
@@ -37,6 +38,17 @@ class Work(Base):
     name_ru: Mapped[str] = mapped_column(String(255))
     name_en: Mapped[str] = mapped_column(String(255))
     status: Mapped[bool] = mapped_column(default=True)
+
+    # Parent/child hierarchy
+    parent_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("works.id", ondelete="SET NULL"), nullable=True
+    )
+    parent: Mapped[Optional["Work"]] = relationship(
+        "Work", remote_side="Work.id", back_populates="children", lazy="joined"
+    )
+    children: Mapped[list["Work"]] = relationship(
+        "Work", back_populates="parent", lazy="selectin"
+    )
 
     daily_job_seekers: Mapped[list["DailyJobSeeker"]] = relationship(
         secondary=daily_job_seeker_works,

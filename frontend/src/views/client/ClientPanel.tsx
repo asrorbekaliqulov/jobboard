@@ -9,6 +9,7 @@ import {
   Profession,
   Region,
   User,
+  Work,
 } from "../../types.ts";
 import { useTranslation } from "react-i18next";
 import Layout from "../../components/Layout.tsx";
@@ -19,6 +20,7 @@ import {
   ConfirmModal,
 } from "../../components/Shared.tsx";
 import { professionService } from "../../services/professionService.ts";
+import { worksService } from "../../services/worksService.ts";
 import FilterModal from "../../components/FilterModal.tsx";
 import { regionService } from "../../services/regionService.ts";
 import {
@@ -140,6 +142,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     search: "",
   });
   const [professions, setProfessions] = useState<Profession[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [isProfLoading, setIsProfLoading] = useState(false);
   const [isRegionLoading, setIsRegionLoading] = useState(false);
@@ -161,6 +164,12 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   useEffect(() => {
     handleProfessionSearch("");
     handleRegionSearch("");
+    // Fetch works for the categories modal
+    if (authService.isAuthenticated()) {
+      worksService.getWorks({ limit: 200 })
+        .then(res => setWorks(res.items || []))
+        .catch(console.error);
+    }
   }, []);
 
   const prevRoleRef = useRef(initialRole);
@@ -474,14 +483,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
-      {/* Categories from backend */}
+      {/* Categories from backend - only parent professions */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
           <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
         <div className="grid grid-cols-4 gap-2.5">
-          {professions.slice(0, 8).map((prof, i) => {
+          {professions.filter(p => !p.parent_id).slice(0, 8).map((prof, i) => {
             const iconInfo = getProfessionIcon(prof);
             return (
               <button
@@ -975,7 +984,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
 
-      {/* All Categories Modal */}
+      {/* All Categories Modal - 2 columns, parent with child list */}
       {showAllCategories && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex flex-col">
           <div className="bg-white w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[90vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -990,39 +999,97 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <i className="fa-solid fa-xmark text-sm" />
               </button>
             </div>
-            {/* Scrollable category list */}
-            <div className="overflow-y-auto px-6 py-4 flex-1">
-              <div className="grid grid-cols-3 gap-3">
-                {[...professions]
-                  .sort((a, b) => {
-                    const nameA = getLocalizedName(a)?.toLowerCase() || "";
-                    const nameB = getLocalizedName(b)?.toLowerCase() || "";
-                    return nameA.localeCompare(nameB);
-                  })
-                  .map((prof) => {
-                    const iconInfo = getProfessionIcon(prof);
-                    return (
-                      <button
-                        key={prof.id}
-                        onClick={() => {
-                          setFilters({ ...filters, profession: String(prof.id) });
-                          setShowAllCategories(false);
-                          setActiveSubTab("mine");
-                        }}
-                        className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
-                        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
-                      >
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                          <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
+            {/* Scrollable - 2 column grid of parent categories */}
+            <div className="overflow-y-auto px-5 py-4 flex-1">
+              {/* Kasblar section */}
+              {professions.length > 0 && (
+                <div className="mb-5">
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                    <i className="fa-solid fa-briefcase text-indigo-500" />
+                    {t("home.professions_block")}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {professions.filter(p => !p.parent_id).map(parent => {
+                      const children = professions.filter(c => c.parent_id === parent.id);
+                      const iconInfo = getProfessionIcon(parent);
+                      return (
+                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          {/* Parent header */}
+                          <button
+                            onClick={() => {
+                              setFilters({ ...filters, profession: String(parent.id) });
+                              setShowAllCategories(false);
+                              setActiveSubTab("mine");
+                            }}
+                            className="flex items-center gap-2 mb-2 w-full active:scale-95 transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                              <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
+                            </div>
+                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                          </button>
+                          {/* Child list */}
+                          {children.length > 0 && (
+                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
+                              {children.map(child => (
+                                <button
+                                  key={child.id}
+                                  onClick={() => {
+                                    setFilters({ ...filters, profession: String(child.id) });
+                                    setShowAllCategories(false);
+                                    setActiveSubTab("mine");
+                                  }}
+                                  className="block w-full text-left text-[10px] font-semibold py-1 px-2 rounded-md transition-all active:scale-95 hover:bg-slate-50"
+                                  style={{ color: 'var(--text-secondary)' }}
+                                >
+                                  {getLocalizedName(child)}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-[10px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                          {getLocalizedName(prof)}
-                        </span>
-                      </button>
-                    );
-                  })}
-              </div>
-              {professions.length === 0 && (
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Ish turlari section */}
+              {works.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                    <i className="fa-solid fa-hammer text-amber-500" />
+                    {t("home.works_block")}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {works.filter(w => !w.parent_id).map(parent => {
+                      const children = works.filter(c => c.parent_id === parent.id);
+                      const iconInfo = getProfessionIcon(parent);
+                      return (
+                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                              <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
+                            </div>
+                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                          </div>
+                          {children.length > 0 && (
+                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
+                              {children.map(child => (
+                                <span key={child.id} className="block text-[10px] font-semibold py-1 px-2" style={{ color: 'var(--text-secondary)' }}>
+                                  {getLocalizedName(child)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {professions.length === 0 && works.length === 0 && (
                 <div className="py-12 text-center">
                   <i className="fa-solid fa-folder-open text-3xl mb-3" style={{ color: 'var(--text-muted)' }} />
                   <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t("home.categories_empty")}</p>
