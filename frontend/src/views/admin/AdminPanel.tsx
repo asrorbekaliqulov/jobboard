@@ -493,7 +493,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       <th className="px-4 py-6 text-[10px) font-black uppercase ">{t('admin_forms.name_ru')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_forms.name_en')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('client_forms.current_status')}</th>
-                      {activeTab === 'professions' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_panel.table.parent') || 'Parent'}</th>}
+                      {(activeTab === 'professions' || activeTab === 'works') && <th className="px-4 py-6 text-[10px] font-black uppercase ">Parent</th>}
                       {activeTab !== 'professions' && activeTab !== 'works' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{activeTab === 'regions' ? t('admin_panel.table.districts_count') : t('filters.region')}</th>}
                       <th className="px-4 py-6 text-[10px] font-black uppercase  text-right">{t('admin_panel.table.actions')}</th>
                     </tr>
@@ -554,15 +554,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_ru}</td>
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_en}</td>
                           <td className="px-4 py-6">{getStatusBadge(item)}</td>
-                          {activeTab === 'professions' && (
+                          {(activeTab === 'professions' || activeTab === 'works') && (
                             <td className="px-4 py-6">
                               {item.parent_id ? (
-                                <span className="bg-amber-50 text-amber-600 px-3 py-1 rounded-lg text-xs font-bold">
-                                  {getLocalizedName(professions.find((p: any) => p.id === item.parent_id)) || `ID: ${item.parent_id}`}
+                                <span className="bg-amber-50 text-amber-600 px-2 py-1 rounded-lg text-[10px] font-bold">
+                                  {getLocalizedName((activeTab === 'professions' ? professions : works).find((p: any) => p.id === item.parent_id)) || `ID: ${item.parent_id}`}
                                 </span>
                               ) : (
-                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">
-                                  {t('admin_panel.top_level') || 'Asosiy'}
+                                <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg text-[9px] font-bold uppercase">
+                                  {t('admin_panel.top_level')}
                                 </span>
                               )}
                             </td>
