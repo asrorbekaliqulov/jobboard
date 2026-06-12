@@ -57,8 +57,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
   // Determine initial selected category from current filter
   useEffect(() => {
-    if (tempFilters.profession && tempFilters.profession.startsWith('cat_')) {
-      const catId = parseInt(tempFilters.profession.replace('cat_', ''));
+    const profStr = String(tempFilters.profession || '');
+    if (profStr && profStr.startsWith('cat_')) {
+      const catId = parseInt(profStr.replace('cat_', ''));
       // Check if it's a top-level category or subcategory
       for (const cat of categories) {
         if (cat.id === catId) {
@@ -307,7 +308,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
             <SearchableSelect
               label=""
               options={professionOptions}
-              value={tempFilters.profession?.startsWith('cat_') ? '' : tempFilters.profession}
+              value={String(tempFilters.profession || '').startsWith('cat_') ? '' : tempFilters.profession}
               onChange={(val) => {
                 setTempFilters({ ...tempFilters, profession: val as string });
                 if (val) setSelectedCategoryId(null); // Clear category selection when profession directly selected
