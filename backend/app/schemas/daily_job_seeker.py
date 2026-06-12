@@ -13,6 +13,7 @@ class WorkBase(BaseModel):
     name_ru: str
     name_en: str
     status: bool = True
+    parent_id: Optional[int] = None
 
 
 class WorkCreate(WorkBase):
@@ -24,6 +25,7 @@ class WorkUpdate(BaseModel):
     name_ru: Optional[str] = None
     name_en: Optional[str] = None
     status: Optional[bool] = None
+    parent_id: Optional[int] = None
 
 
 class WorkRead(WorkBase):

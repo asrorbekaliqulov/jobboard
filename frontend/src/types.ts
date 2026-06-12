@@ -93,6 +93,8 @@ export interface Work {
   name_ru: string;
   name_en: string;
   status: boolean;
+  parent_id?: number | null;
+  children?: Work[];
 }
 
 export interface Vacancy {
