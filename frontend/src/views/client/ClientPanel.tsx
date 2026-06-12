@@ -491,17 +491,15 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
-      {/* Categories from backend */}
+      {/* Categories from backend - only parent professions */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
           <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
         <div className="grid grid-cols-4 gap-2.5">
-          {/* Show categories if available, otherwise fallback to professions */}
-          {(categories.length > 0 ? categories.slice(0, 7) : professions.slice(0, 7)).map((item: any, i: number) => {
-            const iconInfo = getProfessionIcon(item);
-            const isCategory = categories.length > 0;
+          {professions.filter(p => !p.parent_id).slice(0, 8).map((prof, i) => {
+            const iconInfo = getProfessionIcon(prof);
             return (
               <button
                 key={item.id}
@@ -1020,7 +1018,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
 
-      {/* All Categories Modal - Two blocks: Kasblar + Ish turlari */}
+      {/* All Categories Modal - 2 columns, parent with child list */}
       {showAllCategories && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex flex-col">
           <div className="bg-white w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[90vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -1035,44 +1033,38 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <i className="fa-solid fa-xmark text-sm" />
               </button>
             </div>
-            {/* Scrollable - two blocks */}
-            <div className="overflow-y-auto px-5 py-4 flex-1 space-y-5">
-              {/* Block 1: Kasblar */}
-              <div>
-                <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                  <i className="fa-solid fa-briefcase text-indigo-500" />
-                  {t("home.professions_block")}
-                </h4>
-                <div className="space-y-2">
-                  {(() => {
-                    const parentProfs = professions.filter(p => !p.parent_id);
-                    const childProfs = professions.filter(p => p.parent_id);
-                    return parentProfs.length > 0 ? parentProfs.map(parent => {
-                      const children = childProfs.filter(c => c.parent_id === parent.id);
+            {/* Scrollable - 2 column grid of parent categories */}
+            <div className="overflow-y-auto px-5 py-4 flex-1">
+              {/* Kasblar section */}
+              {professions.length > 0 && (
+                <div className="mb-5">
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                    <i className="fa-solid fa-briefcase text-indigo-500" />
+                    {t("home.professions_block")}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {professions.filter(p => !p.parent_id).map(parent => {
+                      const children = professions.filter(c => c.parent_id === parent.id);
                       const iconInfo = getProfessionIcon(parent);
                       return (
-                        <div key={parent.id} className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border-primary)' }}>
+                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          {/* Parent header */}
                           <button
                             onClick={() => {
                               setFilters({ ...filters, profession: String(parent.id) });
                               setShowAllCategories(false);
                               setActiveSubTab("mine");
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5"
-                            style={{ backgroundColor: `${iconInfo.color}06` }}
+                            className="flex items-center gap-2 mb-2 w-full active:scale-95 transition-all"
                           >
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
                               <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
                             </div>
-                            <span className="text-xs font-bold flex-1 text-left" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
-                            {children.length > 0 && (
-                              <span className="text-[9px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
-                                {children.length}
-                              </span>
-                            )}
+                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
                           </button>
+                          {/* Child list */}
                           {children.length > 0 && (
-                            <div className="px-3 pb-2 flex flex-wrap gap-1.5" style={{ backgroundColor: 'var(--bg-card)' }}>
+                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
                               {children.map(child => (
                                 <button
                                   key={child.id}
@@ -1081,8 +1073,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                                     setShowAllCategories(false);
                                     setActiveSubTab("mine");
                                   }}
-                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-all active:scale-95"
-                                  style={{ borderColor: 'var(--border-primary)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-muted)' }}
+                                  className="block w-full text-left text-[10px] font-semibold py-1 px-2 rounded-md transition-all active:scale-95 hover:bg-slate-50"
+                                  style={{ color: 'var(--text-secondary)' }}
                                 >
                                   {getLocalizedName(child)}
                                 </button>
@@ -1091,77 +1083,42 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                           )}
                         </div>
                       );
-                    }) : (
-                      <div className="grid grid-cols-3 gap-2">
-                        {professions.map(prof => {
-                          const iconInfo = getProfessionIcon(prof);
-                          return (
-                            <button key={prof.id} onClick={() => { setFilters({ ...filters, profession: String(prof.id) }); setShowAllCategories(false); setActiveSubTab("mine"); }}
-                              className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all active:scale-95"
-                              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
-                              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                                <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
-                              </div>
-                              <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(prof)}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Block 2: Ish turlari */}
+              {/* Ish turlari section */}
               {works.length > 0 && (
                 <div>
                   <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                     <i className="fa-solid fa-hammer text-amber-500" />
                     {t("home.works_block")}
                   </h4>
-                  <div className="space-y-2">
-                    {(() => {
-                      const parentWorks = works.filter(w => !w.parent_id);
-                      const childWorks = works.filter(w => w.parent_id);
-                      return parentWorks.length > 0 ? parentWorks.map(parent => {
-                        const children = childWorks.filter(c => c.parent_id === parent.id);
-                        const iconInfo = getProfessionIcon(parent);
-                        return (
-                          <div key={parent.id} className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border-primary)' }}>
-                            <div className="w-full flex items-center gap-3 px-3 py-2.5" style={{ backgroundColor: `${iconInfo.color}06` }}>
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                                <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
-                              </div>
-                              <span className="text-xs font-bold flex-1 text-left" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
-                              {children.length > 0 && (
-                                <span className="text-[9px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
-                                  {children.length}
-                                </span>
-                              )}
+                  <div className="grid grid-cols-2 gap-3">
+                    {works.filter(w => !w.parent_id).map(parent => {
+                      const children = works.filter(c => c.parent_id === parent.id);
+                      const iconInfo = getProfessionIcon(parent);
+                      return (
+                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                              <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
                             </div>
-                            {children.length > 0 && (
-                              <div className="px-3 pb-2 flex flex-wrap gap-1.5" style={{ backgroundColor: 'var(--bg-card)' }}>
-                                {children.map(child => (
-                                  <span key={child.id} className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold border"
-                                    style={{ borderColor: 'var(--border-primary)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-muted)' }}>
-                                    {getLocalizedName(child)}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
                           </div>
-                        );
-                      }) : (
-                        <div className="flex flex-wrap gap-2">
-                          {works.map(w => (
-                            <span key={w.id} className="px-3 py-2 rounded-xl text-[10px] font-bold border"
-                              style={{ borderColor: 'var(--border-primary)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-muted)' }}>
-                              {getLocalizedName(w)}
-                            </span>
-                          ))}
+                          {children.length > 0 && (
+                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
+                              {children.map(child => (
+                                <span key={child.id} className="block text-[10px] font-semibold py-1 px-2" style={{ color: 'var(--text-secondary)' }}>
+                                  {getLocalizedName(child)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       );
-                    })()}
+                    })}
                   </div>
                 </div>
               )}
