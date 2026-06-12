@@ -88,7 +88,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             maxLength={50}
           />
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            {type === "vacancy" ? "Kompaniya yoki tashkilot nomi" : "Ism (faqat harflar)"}
+            {type === "vacancy" ? t("form_hints.company_name_hint") : t("form_hints.name_letters_only")}
           </p>
         </div>
 
@@ -109,7 +109,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               maxLength={50}
             />
             <p className="text-[9px] text-gray-400 mt-1 ml-1">
-              Familiya (faqat harflar)
+              {t("form_hints.lastname_letters_only")}
             </p>
           </div>
         )}
@@ -125,11 +125,11 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               value={formData.middle_name || ""}
               onChange={(e) => handleNameChange("middle_name", e.target.value)}
               className={`w-full p-4 border border-gray-200 bg-white rounded-2xl text-sm font-bold outline-none transition-all duration-200 ${ringColor}`}
-              placeholder="Abdullayevich (ixtiyoriy)"
+              placeholder={t("form_hints.middlename_placeholder")}
               maxLength={50}
             />
             <p className="text-[9px] text-gray-400 mt-1 ml-1">
-              Sharif (ixtiyoriy maydon)
+              {t("form_hints.middlename_optional")}
             </p>
           </div>
         )}
@@ -154,7 +154,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               placeholder={t("client_forms.select_region")}
             />
             <p className="text-[9px] text-gray-400 mt-1 ml-1">
-              Ish joyi hududi
+              {t("form_hints.region_hint")}
             </p>
           </div>
         )}
@@ -197,7 +197,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             <option value={ItemStatus.DRAFT}>{t("client_forms.status.draft")}</option>
           </select>
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Faol holatda e'lon qilinadi
+            {t("form_hints.status_hint")}
           </p>
         </div>
       </div>

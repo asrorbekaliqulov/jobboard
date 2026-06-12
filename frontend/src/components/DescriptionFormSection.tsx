@@ -63,10 +63,10 @@ const DescriptionFormSection: React.FC<DescriptionFormSectionProps> = ({
           <FieldError fieldName="description" fieldErrors={fieldErrors} />
         </div>
         <div className="flex items-center gap-2 text-[9px] text-gray-400">
-          <span>{wordCount} so'z</span>
+          <span>{wordCount} {t("form_hints.desc_words")}</span>
           <span>•</span>
           <span className={wordCount < minLength ? "text-red-400" : wordCount > 200 ? "text-amber-500" : "text-green-500"}>
-            {minLength < wordCount && wordCount <= 200 ? "Yaxshi" : wordCount < minLength ? "Juda qisqa" : "Ko'p yozilgan"}
+            {minLength < wordCount && wordCount <= 200 ? t("form_hints.desc_good") : wordCount < minLength ? t("form_hints.desc_short") : t("form_hints.desc_long")}
           </span>
         </div>
       </div>
@@ -82,12 +82,12 @@ const DescriptionFormSection: React.FC<DescriptionFormSectionProps> = ({
       <div className="flex items-center justify-between text-[9px] text-gray-400 mt-2 ml-1">
         <span>
           {wordCount < minLength 
-            ? `Kamida ${minLength - wordCount} so'z qo'shing` 
-            : `${Math.max(0, maxLength - (formData.description?.length || 0))} belgi qoldi`
+            ? t("form_hints.desc_add_words", { count: minLength - wordCount })
+            : t("form_hints.desc_chars_left", { count: Math.max(0, maxLength - (formData.description?.length || 0)) })
           }
         </span>
         <span>
-          {(formData.description?.length || 0)} / {maxLength} belgi
+          {(formData.description?.length || 0)} / {maxLength} {t("form_hints.desc_chars_count")}
         </span>
       </div>
       
@@ -95,10 +95,10 @@ const DescriptionFormSection: React.FC<DescriptionFormSectionProps> = ({
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
           <div className="flex items-center gap-2 text-amber-600">
             <i className="fa-solid fa-lightbulb text-sm"></i>
-            <p className="text-xs font-semibold">Taklif:</p>
+            <p className="text-xs font-semibold">{t("form_hints.desc_tip_title")}</p>
           </div>
           <p className="text-xs text-amber-700 mt-1">
-            Tavsif qisqa ko'rinmoqda. Ko'proq ma'lumot qo'shish e'loningizni yanada jozibali qiladi.
+            {t("form_hints.desc_tip_text")}
           </p>
         </div>
       )}

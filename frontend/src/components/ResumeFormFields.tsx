@@ -97,7 +97,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
             className={inputClass("age")}
             placeholder="25"
           />
-          <p className="text-[9px] text-gray-400 mt-1 ml-1">14-70 yosh</p>
+          <p className="text-[9px] text-gray-400 mt-1 ml-1">{t("form_hints.age_range_hint")}</p>
         </div>
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1 text-gray-700">
@@ -112,7 +112,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
             className={`w-full p-4 border border-gray-200 bg-white rounded-2xl text-sm font-bold outline-none transition-all duration-200 ${ringColor}`}
             placeholder="3"
           />
-          <p className="text-[9px] text-gray-400 mt-1 ml-1">Yil hisobida</p>
+          <p className="text-[9px] text-gray-400 mt-1 ml-1">{t("form_hints.experience_hint")}</p>
         </div>
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1 text-gray-700">
@@ -236,7 +236,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
               emptyMessage={t("common.no_results")}
             />
             <p className="text-[9px] text-gray-400 mt-2 ml-1">
-              Bir nechta ish turini tanlashingiz mumkin
+              {t("form_hints.work_types_hint")}
             </p>
           </div>
         </>
@@ -255,7 +255,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file && file.size > 10 * 1024 * 1024) {
-                alert("Fayl hajmi 10MB dan kichik bo'lishi kerak");
+                alert(t("form_hints.file_too_large_10"));
                 return;
               }
               onPortfolioFileChange(file || null);
@@ -295,7 +295,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
           )}
         </div>
         <p className="text-[9px] text-gray-400 mt-1 ml-1">
-          PDF, Word, yoki rasm fayli (maks 10MB)
+          {t("form_hints.portfolio_hint")}
         </p>
       </div>
 
@@ -312,7 +312,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file && file.size > 50 * 1024 * 1024) {
-                alert("Video hajmi 50MB dan kichik bo'lishi kerak");
+                alert(t("form_hints.file_too_large_50"));
                 return;
               }
               onVideoFileChange(file || null);
@@ -352,7 +352,7 @@ const ResumeFormFields: React.FC<ResumeFormFieldsProps> = ({
           )}
         </div>
         <p className="text-[9px] text-gray-400 mt-1 ml-1">
-          Tanishish videosi (maks 50MB)
+          {t("form_hints.video_hint")}
         </p>
       </div>
     </FormSection>
