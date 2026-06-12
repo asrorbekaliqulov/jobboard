@@ -493,6 +493,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       <th className="px-4 py-6 text-[10px) font-black uppercase ">{t('admin_forms.name_ru')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_forms.name_en')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('client_forms.current_status')}</th>
+                      {activeTab === 'professions' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_panel.table.parent') || 'Parent'}</th>}
                       {activeTab !== 'professions' && activeTab !== 'works' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{activeTab === 'regions' ? t('admin_panel.table.districts_count') : t('filters.region')}</th>}
                       <th className="px-4 py-6 text-[10px] font-black uppercase  text-right">{t('admin_panel.table.actions')}</th>
                     </tr>
@@ -553,6 +554,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_ru}</td>
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_en}</td>
                           <td className="px-4 py-6">{getStatusBadge(item)}</td>
+                          {activeTab === 'professions' && (
+                            <td className="px-4 py-6">
+                              {item.parent_id ? (
+                                <span className="bg-amber-50 text-amber-600 px-3 py-1 rounded-lg text-xs font-bold">
+                                  {getLocalizedName(professions.find((p: any) => p.id === item.parent_id)) || `ID: ${item.parent_id}`}
+                                </span>
+                              ) : (
+                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">
+                                  {t('admin_panel.top_level') || 'Asosiy'}
+                                </span>
+                              )}
+                            </td>
+                          )}
                           {activeTab !== 'professions' && activeTab !== 'works' && (
                             <td className="px-4 py-6">
                               {activeTab === 'regions' ? (
@@ -623,7 +637,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={activeTab === 'users' ? 8 : (['professions', 'regions', 'districts', 'works'].includes(activeTab) ? ((activeTab === 'professions' || activeTab === 'works') ? 6 : 7) : 6)} className="p-20 text-center">
+                      <td colSpan={activeTab === 'users' ? 8 : (activeTab === 'professions' ? 7 : (['regions', 'districts'].includes(activeTab) ? 7 : 6))} className="p-20 text-center">
                         <p className="text-slate-300 font-bold italic">{t('admin_panel.no_records')}</p>
                       </td>
                     </tr>

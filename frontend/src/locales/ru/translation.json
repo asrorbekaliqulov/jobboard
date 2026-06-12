@@ -67,6 +67,9 @@
     "view_vacancies": "Смотреть вакансии",
     "view_workers": "Смотреть работников",
     "categories": "Категории",
+    "categories_empty": "Категории не найдены",
+    "more": "Ещё",
+    "subcategories": "подкатегорий",
     "recommendations": "Рекомендации для вас",
     "all": "Все",
     "no_vacancies": "Пока нет вакансий",
@@ -341,7 +344,7 @@
       "users": "пользователи",
       "vacancies": "вакансии",
       "resumes": "резюме",
-      "professions": "профессии",
+      "professions": "виды работ и профессии",
       "regions": "регионы",
       "districts": "районы",
       "works": "виды работ"

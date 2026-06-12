@@ -70,6 +70,7 @@ class VacancyService:
         limit: int = 100,
         user_id: Optional[int] = None,
         profession_id: Optional[int] = None,
+        profession_ids: Optional[List[int]] = None,
         region_id: Optional[int] = None,
         status: Optional[VacancyStatus] = None,
         search: Optional[str] = None,
@@ -90,6 +91,12 @@ class VacancyService:
             query = query.where(Vacancy.user_id == user_id)
         if profession_id:
             query = query.where(Vacancy.profession_id == profession_id)
+        elif profession_ids is not None:
+            if profession_ids:
+                query = query.where(Vacancy.profession_id.in_(profession_ids))
+            else:
+                # Empty list means no professions in category — return nothing
+                query = query.where(Vacancy.id == -1)
         if region_id:
             query = query.where(Vacancy.region_id == region_id)
         if status:
@@ -148,6 +155,7 @@ class VacancyService:
         db: AsyncSession,
         user_id: Optional[int] = None,
         profession_id: Optional[int] = None,
+        profession_ids: Optional[List[int]] = None,
         region_id: Optional[int] = None,
         status: Optional[VacancyStatus] = None,
         search: Optional[str] = None,
@@ -164,6 +172,11 @@ class VacancyService:
             query = query.where(Vacancy.user_id == user_id)
         if profession_id:
             query = query.where(Vacancy.profession_id == profession_id)
+        elif profession_ids is not None:
+            if profession_ids:
+                query = query.where(Vacancy.profession_id.in_(profession_ids))
+            else:
+                query = query.where(Vacancy.id == -1)
         if region_id:
             query = query.where(Vacancy.region_id == region_id)
         if status:

@@ -30,7 +30,7 @@ import {
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
-import { getProfessionIcon } from "../../utils/professionIcons.ts";
+import { getProfessionIcon, getCategoryColor } from "../../utils/professionIcons.ts";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -127,6 +127,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [searchText, setSearchText] = useState("");
   const [activeFilterChip, setActiveFilterChip] = useState("all");
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [categories, setCategories] = useState<Profession[]>([]);
 
   const [filters, setFilters] = useState({
     profession: "",
@@ -161,6 +162,12 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   useEffect(() => {
     handleProfessionSearch("");
     handleRegionSearch("");
+    // Fetch professions tree for categories display
+    if (authService.isAuthenticated()) {
+      professionService.getTree()
+        .then(setCategories)
+        .catch(console.error);
+    }
   }, []);
 
   const prevRoleRef = useRef(initialRole);
@@ -220,8 +227,15 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     // Only fetch from API when viewing "all" items (not mine/saved which are client-filtered)
     if (activeSubTab !== "all" && activeSubTab !== "mine") return;
     const fetchFilters: any = { status: ItemStatus.ACTIVE };
-    if (filters.profession)
-      fetchFilters.profession_id = parseInt(filters.profession);
+    if (filters.profession) {
+      const profValue = String(filters.profession);
+      if (profValue.startsWith('cat_')) {
+        // Category-based filter: send category_id to backend
+        fetchFilters.category_id = parseInt(profValue.replace('cat_', ''));
+      } else {
+        fetchFilters.profession_id = parseInt(profValue);
+      }
+    }
     if (filters.region) fetchFilters.region_id = parseInt(filters.region);
     if (filters.gender !== "all") fetchFilters.gender = filters.gender;
     if (filters.age_range) fetchFilters.age_range = filters.age_range;
@@ -481,14 +495,26 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
         <div className="grid grid-cols-4 gap-2.5">
-          {professions.slice(0, 8).map((prof, i) => {
-            const iconInfo = getProfessionIcon(prof);
+          {/* Show categories if available, otherwise fallback to professions */}
+          {(categories.length > 0 ? categories.slice(0, 7) : professions.slice(0, 7)).map((item: any, i: number) => {
+            const iconInfo = getProfessionIcon(item);
+            const isCategory = categories.length > 0;
             return (
               <button
-                key={prof.id}
+                key={item.id}
                 onClick={() => {
-                  setFilters({ ...filters, profession: String(prof.id) });
-                  setActiveSubTab("mine");
+                  if (isCategory && item.children && item.children.length > 0) {
+                    // Has subcategories - show all categories modal
+                    setShowAllCategories(true);
+                  } else if (isCategory) {
+                    // Category without subcategories - filter by category
+                    setFilters({ ...filters, profession: `cat_${item.id}` });
+                    setActiveSubTab("mine");
+                  } else {
+                    // Fallback: profession direct filter
+                    setFilters({ ...filters, profession: String(item.id) });
+                    setActiveSubTab("mine");
+                  }
                 }}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
                 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
@@ -496,10 +522,26 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
                   <i className={`fa-solid ${iconInfo.icon} text-lg`} style={{ color: iconInfo.color }} />
                 </div>
-                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(prof)}</span>
+                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(item)}</span>
+                {isCategory && item.children && item.children.length > 0 && (
+                  <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
+                    +{item.children.length}
+                  </span>
+                )}
               </button>
             );
           })}
+          {/* "Boshqa" button */}
+          <button
+            onClick={() => setShowAllCategories(true)}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
+            style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'var(--accent)' + '15' }}>
+              <i className="fa-solid fa-grip text-lg" style={{ color: 'var(--accent)' }} />
+            </div>
+            <span className="text-[9px] font-bold text-center leading-tight" style={{ color: 'var(--accent)' }}>{t("home.more")}</span>
+          </button>
         </div>
       </div>
 
@@ -975,7 +1017,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
 
-      {/* All Categories Modal */}
+      {/* All Categories Modal - with subcategory blocks */}
       {showAllCategories && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex flex-col">
           <div className="bg-white w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[90vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -990,39 +1032,105 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <i className="fa-solid fa-xmark text-sm" />
               </button>
             </div>
-            {/* Scrollable category list */}
-            <div className="overflow-y-auto px-6 py-4 flex-1">
-              <div className="grid grid-cols-3 gap-3">
-                {[...professions]
-                  .sort((a, b) => {
-                    const nameA = getLocalizedName(a)?.toLowerCase() || "";
-                    const nameB = getLocalizedName(b)?.toLowerCase() || "";
-                    return nameA.localeCompare(nameB);
-                  })
-                  .map((prof) => {
-                    const iconInfo = getProfessionIcon(prof);
-                    return (
+            {/* Scrollable content */}
+            <div className="overflow-y-auto px-5 py-4 flex-1 space-y-4">
+              {categories.length > 0 ? (
+                /* Show categories with subcategories */
+                categories.map((cat, catIdx) => {
+                  const catIcon = getProfessionIcon(cat);
+                  return (
+                    <div key={cat.id} className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border-primary)' }}>
+                      {/* Category header - clickable */}
                       <button
-                        key={prof.id}
                         onClick={() => {
-                          setFilters({ ...filters, profession: String(prof.id) });
-                          setShowAllCategories(false);
-                          setActiveSubTab("mine");
+                          if (!cat.children || cat.children.length === 0) {
+                            setFilters({ ...filters, profession: `cat_${cat.id}` });
+                            setShowAllCategories(false);
+                            setActiveSubTab("mine");
+                          }
                         }}
-                        className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
-                        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 transition-all"
+                        style={{ backgroundColor: `${catIcon.color}08` }}
                       >
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                          <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${catIcon.color}15` }}>
+                          <i className={`fa-solid ${catIcon.icon} text-base`} style={{ color: catIcon.color }} />
                         </div>
-                        <span className="text-[10px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                          {getLocalizedName(prof)}
-                        </span>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(cat)}</p>
+                          {cat.children && cat.children.length > 0 && (
+                            <p className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+                              {cat.children.length} {t("home.subcategories")}
+                            </p>
+                          )}
+                        </div>
+                        {(!cat.children || cat.children.length === 0) && (
+                          <i className="fa-solid fa-chevron-right text-xs" style={{ color: 'var(--text-muted)' }} />
+                        )}
                       </button>
-                    );
-                  })}
-              </div>
-              {professions.length === 0 && (
+                      {/* Subcategories grid */}
+                      {cat.children && cat.children.length > 0 && (
+                        <div className="px-4 pb-3 pt-1 grid grid-cols-2 gap-2" style={{ backgroundColor: 'var(--bg-card)' }}>
+                          {cat.children.map((sub) => {
+                            const subIcon = getProfessionIcon(sub);
+                            return (
+                              <button
+                                key={sub.id}
+                                onClick={() => {
+                                  setFilters({ ...filters, profession: `cat_${sub.id}` });
+                                  setShowAllCategories(false);
+                                  setActiveSubTab("mine");
+                                }}
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all active:scale-95"
+                                style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-muted)' }}
+                              >
+                                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${subIcon.color}15` }}>
+                                  <i className={`fa-solid ${subIcon.icon} text-[10px]`} style={{ color: subIcon.color }} />
+                                </div>
+                                <span className="text-[10px] font-bold leading-tight line-clamp-2 text-left" style={{ color: 'var(--text-secondary)' }}>
+                                  {getLocalizedName(sub)}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                /* Fallback: show professions as flat grid when no categories exist */
+                <div className="grid grid-cols-3 gap-3">
+                  {[...professions]
+                    .sort((a, b) => {
+                      const nameA = getLocalizedName(a)?.toLowerCase() || "";
+                      const nameB = getLocalizedName(b)?.toLowerCase() || "";
+                      return nameA.localeCompare(nameB);
+                    })
+                    .map((prof) => {
+                      const iconInfo = getProfessionIcon(prof);
+                      return (
+                        <button
+                          key={prof.id}
+                          onClick={() => {
+                            setFilters({ ...filters, profession: String(prof.id) });
+                            setShowAllCategories(false);
+                            setActiveSubTab("mine");
+                          }}
+                          className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
+                          style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
+                        >
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                            <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
+                          </div>
+                          <span className="text-[10px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                            {getLocalizedName(prof)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+              {categories.length === 0 && professions.length === 0 && (
                 <div className="py-12 text-center">
                   <i className="fa-solid fa-folder-open text-3xl mb-3" style={{ color: 'var(--text-muted)' }} />
                   <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t("home.categories_empty")}</p>

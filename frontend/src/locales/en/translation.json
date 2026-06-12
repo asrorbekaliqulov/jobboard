@@ -67,6 +67,9 @@
     "view_vacancies": "View vacancies",
     "view_workers": "View workers",
     "categories": "Categories",
+    "categories_empty": "No categories found",
+    "more": "More",
+    "subcategories": "subcategories",
     "recommendations": "Recommended for you",
     "all": "All",
     "no_vacancies": "No vacancies yet",
@@ -341,7 +344,7 @@
       "users": "users",
       "vacancies": "vacancies",
       "resumes": "resumes",
-      "professions": "professions",
+      "professions": "job types & professions",
       "regions": "regions",
       "districts": "districts",
       "works": "work types"

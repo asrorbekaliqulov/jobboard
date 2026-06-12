@@ -378,12 +378,13 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSaveAdminProfession = async (p: Profession) => {
+  const handleSaveAdminProfession = async (p: any) => {
     try {
-      if (p.id) {
-        await adminApi.professions.update(p.id, p);
+      const { id, children, ...data } = p;
+      if (id) {
+        await adminApi.professions.update(id, data);
       } else {
-        await adminApi.professions.create(p);
+        await adminApi.professions.create(data);
       }
       setAdminProfessionModal(null);
       setAdminRefreshSignal((s) => s + 1);

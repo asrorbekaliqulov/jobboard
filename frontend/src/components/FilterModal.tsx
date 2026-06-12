@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filters, Gender, WorkFormat, WorkType } from '../types.ts';
+import { Filters, Gender, WorkFormat, WorkType, Profession } from '../types.ts';
 import { SearchableSelect } from './Shared.tsx';
+import { professionService } from '../services/professionService.ts';
+import { getProfessionIcon } from '../utils/professionIcons.ts';
 
 interface FilterModalProps {
   filters: Filters;
@@ -34,12 +36,43 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [tempFilters, setTempFilters] = useState<Filters>(filters);
+  const [categories, setCategories] = useState<Profession[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [isCatLoading, setIsCatLoading] = useState(false);
 
   const getLocalizedName = (item: any) => {
     if (!item) return '';
     const lang = i18n.language.split('-')[0];
     return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz || item.name;
   };
+
+  // Load professions tree on mount
+  useEffect(() => {
+    setIsCatLoading(true);
+    professionService.getTree()
+      .then(setCategories)
+      .catch(console.error)
+      .finally(() => setIsCatLoading(false));
+  }, []);
+
+  // Determine initial selected category from current filter
+  useEffect(() => {
+    const profStr = String(tempFilters.profession || '');
+    if (profStr && profStr.startsWith('cat_')) {
+      const catId = parseInt(profStr.replace('cat_', ''));
+      // Check if it's a top-level category or subcategory
+      for (const cat of categories) {
+        if (cat.id === catId) {
+          setSelectedCategoryId(cat.id);
+          break;
+        }
+        if (cat.children?.some(c => c.id === catId)) {
+          setSelectedCategoryId(cat.id);
+          break;
+        }
+      }
+    }
+  }, [categories, tempFilters.profession]);
 
   const professionOptions = useMemo(
     () => [
@@ -70,11 +103,39 @@ const FilterModal: React.FC<FilterModalProps> = ({
       search: ''
     };
     setTempFilters(emptyFilters);
+    setSelectedCategoryId(null);
   };
 
   const applyFilters = () => {
     setFilters(tempFilters);
     onClose();
+  };
+
+  const handleCategorySelect = (catId: number) => {
+    const cat = categories.find(c => c.id === catId);
+    if (selectedCategoryId === catId) {
+      // Deselect
+      setSelectedCategoryId(null);
+      setTempFilters({ ...tempFilters, profession: '' });
+    } else {
+      setSelectedCategoryId(catId);
+      // If no subcategories, directly set as filter
+      if (!cat?.children || cat.children.length === 0) {
+        setTempFilters({ ...tempFilters, profession: `cat_${catId}` });
+      } else {
+        // Just show subcategories, don't set filter yet
+        setTempFilters({ ...tempFilters, profession: `cat_${catId}` });
+      }
+    }
+  };
+
+  const handleSubcategorySelect = (subId: number) => {
+    if (tempFilters.profession === `cat_${subId}`) {
+      // Deselect subcategory, revert to parent
+      setTempFilters({ ...tempFilters, profession: selectedCategoryId ? `cat_${selectedCategoryId}` : '' });
+    } else {
+      setTempFilters({ ...tempFilters, profession: `cat_${subId}` });
+    }
   };
 
   const handleAgeRangeChange = (range: string) => {
@@ -92,6 +153,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const isVacancyFilter = activeSection === "vacancies";
   const isWorkerFilter = activeSection === "workers" || activeSection === "daily-workers";
 
+  // Get currently selected category for subcategory display
+  const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[9999] flex items-end">
       <div 
@@ -103,13 +167,22 @@ const FilterModal: React.FC<FilterModalProps> = ({
           <h2 className="text-lg font-extrabold" style={{ color: 'var(--text-primary)' }}>
             {t('filters.title')}
           </h2>
-          <button 
-            onClick={onClose} 
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-            style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-secondary)' }}
-          >
-            <i className="fa-solid fa-xmark text-sm"></i>
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={clearFilters}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+              style={{ color: 'var(--accent)' }}
+            >
+              {t('filters.clear') || 'Tozalash'}
+            </button>
+            <button 
+              onClick={onClose} 
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-secondary)' }}
+            >
+              <i className="fa-solid fa-xmark text-sm"></i>
+            </button>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -150,7 +223,83 @@ const FilterModal: React.FC<FilterModalProps> = ({
             />
           </div>
 
-          {/* Profession */}
+          {/* Category Selection - Two Level */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider mb-2 ml-0.5" 
+                   style={{ color: 'var(--text-secondary)' }}>
+              {t('filters.category') || 'Kategoriya'}
+            </label>
+            
+            {isCatLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: 'var(--accent)' }}></div>
+              </div>
+            ) : categories.length > 0 ? (
+              <div className="space-y-2">
+                {/* Top-level category chips */}
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => {
+                    const isSelected = selectedCategoryId === cat.id;
+                    const iconInfo = getProfessionIcon(cat);
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => handleCategorySelect(cat.id)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 ${
+                          isSelected ? 'shadow-md' : ''
+                        }`}
+                        style={{
+                          backgroundColor: isSelected ? iconInfo.color : 'var(--bg-muted)',
+                          borderColor: isSelected ? iconInfo.color : 'var(--border-primary)',
+                          color: isSelected ? '#fff' : 'var(--text-primary)'
+                        }}
+                      >
+                        <i className={`fa-solid ${iconInfo.icon} text-[10px]`} />
+                        {getLocalizedName(cat)}
+                        {cat.children && cat.children.length > 0 && (
+                          <span className={`text-[9px] ${isSelected ? 'opacity-80' : ''}`}>
+                            ({cat.children.length})
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Subcategories - shown when a category with children is selected */}
+                {selectedCategory && selectedCategory.children && selectedCategory.children.length > 0 && (
+                  <div className="mt-3 p-3 rounded-xl border" style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
+                    <p className="text-[9px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
+                      {getLocalizedName(selectedCategory)} → {t('filters.subcategories') || 'Subkategoriyalar'}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedCategory.children.map((sub) => {
+                        const isSubSelected = tempFilters.profession === `cat_${sub.id}`;
+                        const subIcon = getProfessionIcon(sub);
+                        return (
+                          <button
+                            key={sub.id}
+                            onClick={() => handleSubcategorySelect(sub.id)}
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-all active:scale-95`}
+                            style={{
+                              backgroundColor: isSubSelected ? subIcon.color : 'var(--bg-card)',
+                              borderColor: isSubSelected ? subIcon.color : 'var(--border-primary)',
+                              color: isSubSelected ? '#fff' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <i className={`fa-solid ${subIcon.icon} text-[9px]`} />
+                            {getLocalizedName(sub)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Profession (individual) - fallback for direct profession search */}
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-wider mb-2 ml-0.5" 
                    style={{ color: 'var(--text-secondary)' }}>
@@ -159,8 +308,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
             <SearchableSelect
               label=""
               options={professionOptions}
-              value={tempFilters.profession}
-              onChange={(val) => setTempFilters({ ...tempFilters, profession: val as string })}
+              value={String(tempFilters.profession || '').startsWith('cat_') ? '' : tempFilters.profession}
+              onChange={(val) => {
+                setTempFilters({ ...tempFilters, profession: val as string });
+                if (val) setSelectedCategoryId(null); // Clear category selection when profession directly selected
+              }}
               onSearch={onProfessionSearch}
               loading={isProfLoading}
               placeholder={t('filters.all_professions')}
