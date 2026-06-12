@@ -30,6 +30,7 @@ import {
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
+import { getProfessionIcon } from "../../utils/professionIcons.ts";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -121,6 +122,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [activeFilterChip, setActiveFilterChip] = useState("all");
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const [filters, setFilters] = useState({
     profession: "",
@@ -473,35 +475,32 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
-      {/* Categories with 3D emojis */}
+      {/* Categories from backend */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
-          <button onClick={() => setActiveSubTab("mine")} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
+          <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
         <div className="grid grid-cols-4 gap-2.5">
-          {[
-            { icon: "masters" as const, labelKey: "home.cat.masters", emoji: "\ud83d\udc68\u200d\ud83d\udd27" },
-            { icon: "drivers" as const, labelKey: "home.cat.drivers", emoji: "\ud83d\ude9b" },
-            { icon: "construction" as const, labelKey: "home.cat.construction", emoji: "\ud83c\udfd7\ufe0f" },
-            { icon: "it" as const, labelKey: "home.cat.it", emoji: "\ud83d\udcbb" },
-            { icon: "trade" as const, labelKey: "home.cat.trade", emoji: "\ud83c\udfea" },
-            { icon: "service" as const, labelKey: "home.cat.service", emoji: "\ud83c\udfa7" },
-            { icon: "cooks" as const, labelKey: "home.cat.cooks", emoji: "\ud83d\udc68\u200d\ud83c\udf73" },
-            { icon: "other" as const, labelKey: "home.cat.other", emoji: "\u2022\u2022\u2022" },
-          ].map((cat, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveSubTab("mine")}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
-              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
-            >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'var(--bg-muted)' }}>
-                <Icon3D name={cat.icon} size={40} fallbackEmoji={cat.emoji} />
-              </div>
-              <span className="text-[9px] font-bold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>{t(cat.labelKey)}</span>
-            </button>
-          ))}
+          {professions.slice(0, 8).map((prof, i) => {
+            const iconInfo = getProfessionIcon(prof);
+            return (
+              <button
+                key={prof.id}
+                onClick={() => {
+                  setFilters({ ...filters, profession: String(prof.id) });
+                  setActiveSubTab("mine");
+                }}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
+                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                  <i className={`fa-solid ${iconInfo.icon} text-lg`} style={{ color: iconInfo.color }} />
+                </div>
+                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(prof)}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -555,7 +554,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           type="text"
           value={searchText}
           onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
-          placeholder="Vakansiya nomi yoki kompaniya"
+          placeholder={activeSection === "vacancies" ? "Vakansiya nomi yoki kompaniya" : "Ism yoki kasb nomi"}
           className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50"
         />
         <button
@@ -696,11 +695,19 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                   Qidiruv yoki filtrlarni o'zgartiring
                 </p>
                 <button
-                  onClick={handleEmptyStateAction}
+                  onClick={() => {
+                    if (initialRole === UserRole.CANDIDATE_HUNTER) {
+                      onAddVacancy();
+                    } else {
+                      onAddResume();
+                    }
+                  }}
                   className="mt-4 inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all"
                 >
-                  <i className="fa-solid fa-filter-circle-xmark text-xs" />
-                  Filtrlarni tozalash
+                  <i className="fa-solid fa-plus text-xs" />
+                  {initialRole === UserRole.CANDIDATE_HUNTER
+                    ? t("client_panel.post_vacancy")
+                    : t("client_forms.create") + " " + t("common.resume")}
                 </button>
               </div>
             )}
@@ -918,6 +925,65 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "mine" && renderVacanciesList()}
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
+
+      {/* All Categories Modal */}
+      {showAllCategories && createPortal(
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex flex-col">
+          <div className="bg-white w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[90vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+              <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
+              <button
+                onClick={() => setShowAllCategories(false)}
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-secondary)' }}
+              >
+                <i className="fa-solid fa-xmark text-sm" />
+              </button>
+            </div>
+            {/* Scrollable category list */}
+            <div className="overflow-y-auto px-6 py-4 flex-1">
+              <div className="grid grid-cols-3 gap-3">
+                {[...professions]
+                  .sort((a, b) => {
+                    const nameA = getLocalizedName(a)?.toLowerCase() || "";
+                    const nameB = getLocalizedName(b)?.toLowerCase() || "";
+                    return nameA.localeCompare(nameB);
+                  })
+                  .map((prof) => {
+                    const iconInfo = getProfessionIcon(prof);
+                    return (
+                      <button
+                        key={prof.id}
+                        onClick={() => {
+                          setFilters({ ...filters, profession: String(prof.id) });
+                          setShowAllCategories(false);
+                          setActiveSubTab("mine");
+                        }}
+                        className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all active:scale-95"
+                        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
+                      >
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                          <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
+                        </div>
+                        <span className="text-[10px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                          {getLocalizedName(prof)}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+              {professions.length === 0 && (
+                <div className="py-12 text-center">
+                  <i className="fa-solid fa-folder-open text-3xl mb-3" style={{ color: 'var(--text-muted)' }} />
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Kategoriyalar topilmadi</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Role Modal */}
       {isRoleModalOpen && createPortal(
