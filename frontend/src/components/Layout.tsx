@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({
 
   const tabs: NavTab[] = [
     { id: "all", labelKey: "nav.home", icon: "fa-house" },
-    { id: "mine", labelKey: role === UserRole.CANDIDATE_HUNTER ? "nav.vacancies" : role === UserRole.DAILY_JOB_SEEKER ? "nav.daily_workers" : "nav.workers", icon: role === UserRole.CANDIDATE_HUNTER ? "fa-briefcase" : "fa-users" },
+    { id: "mine", labelKey: role === UserRole.CANDIDATE_HUNTER ? "nav.workers" : "nav.vacancies", icon: role === UserRole.CANDIDATE_HUNTER ? "fa-users" : "fa-briefcase" },
     { id: "saved", labelKey: "nav.saved", icon: "fa-bookmark" },
     { id: "more", labelKey: "nav.profile", icon: "fa-user" },
   ];
