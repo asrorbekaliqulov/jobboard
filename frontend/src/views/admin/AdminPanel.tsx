@@ -637,7 +637,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={activeTab === 'users' ? 8 : (['professions', 'regions', 'districts', 'works'].includes(activeTab) ? ((activeTab === 'professions' || activeTab === 'works') ? 6 : 7) : 6)} className="p-20 text-center">
+                      <td colSpan={activeTab === 'users' ? 8 : (activeTab === 'professions' ? 7 : (['regions', 'districts'].includes(activeTab) ? 7 : 6))} className="p-20 text-center">
                         <p className="text-slate-300 font-bold italic">{t('admin_panel.no_records')}</p>
                       </td>
                     </tr>

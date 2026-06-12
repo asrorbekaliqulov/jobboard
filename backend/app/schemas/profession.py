@@ -23,8 +23,13 @@ class ProfessionUpdate(BaseModel):
     parent_id: Optional[int] = None
 
 
-class ProfessionRead(ProfessionBase):
+class ProfessionRead(BaseModel):
     id: int
+    name_uz: str
+    name_ru: str
+    name_en: str
+    is_active: bool
+    parent_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -32,7 +37,7 @@ class ProfessionRead(ProfessionBase):
 
 class ProfessionWithChildren(ProfessionRead):
     """Profession with nested children for tree display."""
-    children: List["ProfessionRead"] = []
+    children: List[ProfessionRead] = []
 
     class Config:
         from_attributes = True
@@ -40,4 +45,10 @@ class ProfessionWithChildren(ProfessionRead):
 
 class ProfessionList(BaseModel):
     items: list[ProfessionRead]
+    total: int
+
+
+class ProfessionTreeList(BaseModel):
+    """List of top-level professions with their children (tree view)."""
+    items: list[ProfessionWithChildren]
     total: int
