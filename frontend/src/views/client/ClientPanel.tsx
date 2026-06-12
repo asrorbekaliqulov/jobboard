@@ -498,24 +498,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
         <div className="grid grid-cols-4 gap-2.5">
-          {professions.filter(p => !p.parent_id).slice(0, 8).map((prof, i) => {
+          {professions.filter(p => !p.parent_id).slice(0, 7).map((prof) => {
             const iconInfo = getProfessionIcon(prof);
             return (
               <button
-                key={item.id}
+                key={prof.id}
                 onClick={() => {
-                  if (isCategory && item.children && item.children.length > 0) {
-                    // Has subcategories - show all categories modal
-                    setShowAllCategories(true);
-                  } else if (isCategory) {
-                    // Category without subcategories - filter by category
-                    setFilters({ ...filters, profession: `cat_${item.id}` });
-                    setActiveSubTab("mine");
-                  } else {
-                    // Fallback: profession direct filter
-                    setFilters({ ...filters, profession: String(item.id) });
-                    setActiveSubTab("mine");
-                  }
+                  setFilters({ ...filters, profession: String(prof.id) });
+                  setActiveSubTab("mine");
                 }}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
                 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
@@ -523,12 +513,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
                   <i className={`fa-solid ${iconInfo.icon} text-lg`} style={{ color: iconInfo.color }} />
                 </div>
-                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(item)}</span>
-                {isCategory && item.children && item.children.length > 0 && (
-                  <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
-                    +{item.children.length}
-                  </span>
-                )}
+                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(prof)}</span>
               </button>
             );
           })}
