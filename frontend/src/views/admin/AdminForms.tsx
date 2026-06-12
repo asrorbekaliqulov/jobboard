@@ -634,12 +634,11 @@ export const AdminResumeForm: React.FC<{
 };
 
 export const AdminProfessionForm: React.FC<{
-  initialData?: any;
-  onSave: (data: any) => void;
+  initialData?: Profession;
+  onSave: (data: Profession) => void;
   onCancel: () => void;
 }> = ({ initialData, onSave, onCancel }) => {
   const { t, i18n } = useTranslation();
-  
   const [formData, setFormData] = useState<any>(initialData?.id ? initialData : {
     id: 0,
     name_uz: '',
@@ -648,8 +647,7 @@ export const AdminProfessionForm: React.FC<{
     is_active: true,
     parent_id: null,
   });
-
-  const [parentProfessions, setParentProfessions] = useState<any[]>([]);
+  const [parentOptions, setParentOptions] = useState<any[]>([]);
 
   const getLocalizedName = (item: any) => {
     if (!item) return '';
@@ -657,17 +655,11 @@ export const AdminProfessionForm: React.FC<{
     return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz;
   };
 
-  // Fetch top-level professions for the parent dropdown
   React.useEffect(() => {
     import('../../services/adminApi.ts').then(({ adminApi }) => {
-      adminApi.professions.list('', undefined, 1, 200)
-        .then(res => {
-          // Filter out the current profession and show only those that can be parents
-          // (top-level = no parent, or any profession that isn't a child of this one)
-          const filtered = res.items.filter((p: any) => p.id !== formData.id);
-          setParentProfessions(filtered);
-        })
-        .catch(console.error);
+      adminApi.professions.list('', undefined, 1, 200).then(res => {
+        setParentOptions(res.items.filter((p: any) => p.id !== formData.id && !p.parent_id));
+      }).catch(console.error);
     });
   }, [formData.id]);
 
@@ -675,9 +667,7 @@ export const AdminProfessionForm: React.FC<{
     <div className="fixed inset-0 bg-white z-[1100] flex flex-col p-4 animate-in slide-in-from-right duration-300 overflow-y-auto">
       <div className="max-w-xl mx-auto w-full">
         <div className="flex justify-between items-center mb-10">
-          <h2 className="text-2xl font-black uppercase tracking-normal text-slate-900">
-            {t('admin_forms.profession_property')}
-          </h2>
+          <h2 className="text-2xl font-black uppercase tracking-normal text-slate-900">{t('admin_forms.profession_property')}</h2>
           <button onClick={onCancel} className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center  hover:bg-slate-100 transition-colors"><i className="fa-solid fa-xmark"></i></button>
         </div>
         <div className="space-y-6">
@@ -693,38 +683,19 @@ export const AdminProfessionForm: React.FC<{
             <p className="text-[10px] font-black  uppercase tracking-widest mb-2 ml-1">{t('admin_forms.name_en')}</p>
             <input value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
-
-          {/* Parent profession selector */}
           <div>
-            <p className="text-[10px] font-black  uppercase tracking-widest mb-2 ml-1">
-              {t('admin_forms.parent_profession') || 'Asosiy kasb (parent)'}
-            </p>
-            <select
-              value={formData.parent_id || ''}
-              onChange={e => setFormData({ ...formData, parent_id: e.target.value ? Number(e.target.value) : null })}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900"
-            >
-              <option value="">{t('admin_forms.no_parent') || '-- Asosiy (parent yo\'q) --'}</option>
-              {parentProfessions
-                .filter((p: any) => !p.parent_id) // Only show top-level as potential parents
-                .map((p: any) => (
-                  <option key={p.id} value={p.id}>{getLocalizedName(p)}</option>
-                ))
-              }
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1">{t('admin_forms.parent_profession') || 'Asosiy kasb (parent)'}</p>
+            <select value={formData.parent_id || ''} onChange={e => setFormData({ ...formData, parent_id: e.target.value ? Number(e.target.value) : null })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="">-- Asosiy (parent yo'q) --</option>
+              {parentOptions.map((p: any) => <option key={p.id} value={p.id}>{getLocalizedName(p)}</option>)}
             </select>
-            <p className="text-[9px] text-slate-400 mt-1 ml-1">
-              {t('admin_forms.parent_hint') || 'Sub-kasb bo\'lsa, asosiy kasbni tanlang. Masalan: "IT" → "Backend dasturlash"'}
-            </p>
           </div>
-
           <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-slate-900" />
             <span className="text-xs font-black uppercase tracking-widest text-slate-500">{t('admin_forms.is_active_platform')}</span>
           </div>
           <div className="pt-10">
-            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">
-              {t('admin_forms.confirm_profession')}
-            </button>
+            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">{t('admin_forms.confirm_profession')}</button>
           </div>
         </div>
       </div>
