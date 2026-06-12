@@ -77,7 +77,7 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
             <FieldError fieldName="phone" fieldErrors={fieldErrors} />
             {phoneError && (
               <p className="text-[10px] font-black text-red-400 uppercase tracking-widest">
-                Noto'g'ri format
+                {t("form_hints.invalid_phone")}
               </p>
             )}
           </div>
@@ -91,7 +91,7 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
             maxLength={20}
           />
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Telefon raqam (+998 90 123 45 67 formatida)
+            {t("form_hints.phone_hint")}
           </p>
         </div>
 
@@ -118,7 +118,7 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
             )}
           </div>
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Telegram username (@username formatida)
+            {t("form_hints.telegram_hint")}
           </p>
         </div>
 
@@ -139,7 +139,7 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
               value={formData.email || ""}
               onChange={(e) => handleEmailChange(e.target.value)}
               className={inputClass("email", emailError)}
-              placeholder="example@mail.com (ixtiyoriy)"
+              placeholder={t("form_hints.email_placeholder")}
               maxLength={100}
             />
             {formData.email && EMAIL_RE.test(formData.email) && (
@@ -149,7 +149,7 @@ const ContactsFormSection: React.FC<ContactsFormSectionProps> = ({
             )}
           </div>
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Email manzil (ixtiyoriy maydon)
+            {t("form_hints.email_hint")}
           </p>
         </div>
       </div>
