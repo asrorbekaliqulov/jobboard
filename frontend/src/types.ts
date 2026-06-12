@@ -63,6 +63,18 @@ export interface Profession {
   name_ru: string;
   name_en: string;
   is_active: boolean;
+  category_id?: number | null;
+}
+
+export interface ProfessionCategory {
+  id: number;
+  name_uz: string;
+  name_ru: string;
+  name_en: string;
+  is_active: boolean;
+  parent_id: number | null;
+  professions_count: number;
+  children?: ProfessionCategory[];
 }
 
 export interface District {

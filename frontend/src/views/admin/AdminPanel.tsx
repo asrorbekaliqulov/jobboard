@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Vacancy, Resume, Profession, Region, District, Work, AdminFilters } from '../../types.ts';
+import { User, Vacancy, Resume, Profession, ProfessionCategory, Region, District, Work, AdminFilters } from '../../types.ts';
 import { SearchableSelect, Pagination, ConfirmModal } from '../../components/Shared.tsx';
 import { adminApi } from '../../services/adminApi.ts';
 import { professionService } from '../../services/professionService.ts';
@@ -54,7 +54,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     return `${dd}.${mm}.${yyyy} ${HH}:${MM}:${SS}`;
   };
 
-  const [activeTab, setActiveTab] = useState<'users' | 'vacancies' | 'resumes' | 'professions' | 'regions' | 'districts' | 'works'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'vacancies' | 'resumes' | 'professions' | 'categories' | 'regions' | 'districts' | 'works'>('users');
   const [localUsers, setLocalUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [page, setPage] = useState(1);
@@ -67,6 +67,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const [professions, setProfessions] = useState<Profession[]>([]);
   const [totalProfessions, setTotalProfessions] = useState(0);
+  const [profCategories, setProfCategories] = useState<ProfessionCategory[]>([]);
+  const [totalCategories, setTotalCategories] = useState(0);
   const [regions, setRegions] = useState<Region[]>([]);
   const [totalRegions, setTotalRegions] = useState(0);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -97,6 +99,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         const { items, total } = await adminApi.professions.list(filters.search, activeFilter, page, perPage);
         setProfessions(items);
         setTotalProfessions(total);
+      } else if (activeTab === 'categories') {
+        const { items, total } = await adminApi.professionCategories.list(filters.search, activeFilter, undefined, false, page, perPage);
+        setProfCategories(items);
+        setTotalCategories(total);
       } else if (activeTab === 'regions') {
         const { items, total } = await adminApi.regions.list(filters.search, activeFilter, page, perPage);
         setRegions(items);
@@ -152,7 +158,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [activeTab, filters.search, filters.isActive, filters.selectedRegionId, filters.bot_blocked, filters.status, filters.selectedProfessionId, filters.age_from, filters.age_till, page]);
 
   useEffect(() => {
-    if (['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works'].includes(activeTab)) {
+    if (['users', 'vacancies', 'resumes', 'professions', 'categories', 'regions', 'districts', 'works'].includes(activeTab)) {
       fetchData();
     }
   }, [activeTab, filters.search, filters.isActive, filters.selectedRegionId, filters.bot_blocked, filters.status, filters.selectedProfessionId, filters.age_from, filters.age_till, page, refreshSignal, fetchData]);
@@ -169,6 +175,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     else if (activeTab === 'vacancies') list = localVacancies;
     else if (activeTab === 'resumes') list = localResumes;
     else if (activeTab === 'professions') list = professions;
+    else if (activeTab === 'categories') list = profCategories;
     else if (activeTab === 'regions') list = regions;
     else if (activeTab === 'districts') list = districts;
     else if (activeTab === 'works') list = works;
@@ -195,11 +202,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const pagedList = useMemo(() => {
     // For tabs that fetch their own data from server, data is already paginated
-    if (['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works'].includes(activeTab)) {
+    if (['users', 'vacancies', 'resumes', 'professions', 'categories', 'regions', 'districts', 'works'].includes(activeTab)) {
       if (activeTab === 'users') return localUsers;
       if (activeTab === 'vacancies') return localVacancies;
       if (activeTab === 'resumes') return localResumes;
       if (activeTab === 'professions') return professions;
+      if (activeTab === 'categories') return profCategories;
       if (activeTab === 'regions') return regions;
       if (activeTab === 'districts') return districts;
       if (activeTab === 'works') return works;
@@ -264,7 +272,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           </h1>
           <div className="flex p-1 rounded-2xl border overflow-x-auto max-w-[800px]" 
                style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
-            {(['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works'] as const).map(t_tab => (
+            {(['users', 'vacancies', 'resumes', 'professions', 'categories', 'regions', 'districts', 'works'] as const).map(t_tab => (
               <button 
                 key={t_tab} 
                 onClick={() => { setActiveTab(t_tab); setPage(1); }} 
@@ -334,7 +342,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
-          {['professions', 'regions', 'districts', 'users', 'works'].includes(activeTab) ? (
+          {['professions', 'categories', 'regions', 'districts', 'users', 'works'].includes(activeTab) ? (
             <div className="w-48">
               <p className="text-[10px] font-black  uppercase mb-2 ml-1">{t('admin_panel.account_status')}</p>
               <select value={filters.isActive} onChange={e => { setFilters({ ...filters, isActive: e.target.value }); setPage(1); }} className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm font-bold outline-none">
@@ -438,6 +446,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           <button
             onClick={() => {
               if (activeTab === 'professions') onEditProfession({} as any);
+              else if (activeTab === 'categories') onEditProfession({ __isCategory: true } as any);
               else if (activeTab === 'regions') onEditRegion({} as any);
               else if (activeTab === 'districts') onEditDistrict({} as any);
               else if (activeTab === 'vacancies') onEditVacancy({} as any);
@@ -457,10 +466,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 activeTab === 'vacancies' ? totalVacancies :
                   activeTab === 'resumes' ? totalResumes :
                     activeTab === 'professions' ? totalProfessions :
-                      activeTab === 'regions' ? totalRegions :
-                        activeTab === 'districts' ? totalDistricts :
-                          activeTab === 'works' ? totalWorks :
-                            activeList.length
+                      activeTab === 'categories' ? totalCategories :
+                        activeTab === 'regions' ? totalRegions :
+                          activeTab === 'districts' ? totalDistricts :
+                            activeTab === 'works' ? totalWorks :
+                              activeList.length
             }
           </span>
         </div>
@@ -486,14 +496,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_panel.table.last_login')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase  text-right">{t('admin_panel.table.actions')}</th>
                     </tr>
-                  ) : ['professions', 'regions', 'districts', 'works'].includes(activeTab) ? (
+                  ) : ['professions', 'categories', 'regions', 'districts', 'works'].includes(activeTab) ? (
                     <tr>
                       <th className="px-4 py-6 text-[10px] font-black uppercase  w-16">#</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_forms.name_uz')}</th>
                       <th className="px-4 py-6 text-[10px) font-black uppercase ">{t('admin_forms.name_ru')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_forms.name_en')}</th>
                       <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('client_forms.current_status')}</th>
-                      {activeTab !== 'professions' && activeTab !== 'works' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{activeTab === 'regions' ? t('admin_panel.table.districts_count') : t('filters.region')}</th>}
+                      {activeTab === 'categories' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{t('admin_panel.table.parent_category') || 'Parent'}</th>}
+                      {activeTab !== 'professions' && activeTab !== 'works' && activeTab !== 'categories' && <th className="px-4 py-6 text-[10px] font-black uppercase ">{activeTab === 'regions' ? t('admin_panel.table.districts_count') : t('filters.region')}</th>}
                       <th className="px-4 py-6 text-[10px] font-black uppercase  text-right">{t('admin_panel.table.actions')}</th>
                     </tr>
                   ) : (
@@ -546,14 +557,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             {item.last_login ? formatDateTime(item.last_login) : '-'}
                           </td>
                         </>
-                      ) : ['professions', 'regions', 'districts', 'works'].includes(activeTab) ? (
+                      ) : ['professions', 'categories', 'regions', 'districts', 'works'].includes(activeTab) ? (
                         <>
                           <td className="px-4 py-6 font-bold  text-xs">{(page - 1) * perPage + idx + 1}</td>
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_uz}</td>
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_ru}</td>
                           <td className="px-4 py-6 font-bold text-slate-900">{item.name_en}</td>
                           <td className="px-4 py-6">{getStatusBadge(item)}</td>
-                          {activeTab !== 'professions' && activeTab !== 'works' && (
+                          {activeTab === 'categories' && (
+                            <td className="px-4 py-6">
+                              {item.parent_id ? (
+                                <span className="bg-amber-50 text-amber-600 px-3 py-1 rounded-lg text-xs font-bold">
+                                  {getLocalizedName(profCategories.find((c: any) => c.id === item.parent_id)) || `ID: ${item.parent_id}`}
+                                </span>
+                              ) : (
+                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">
+                                  {t('admin_panel.top_level') || 'Top-level'}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          {activeTab !== 'professions' && activeTab !== 'works' && activeTab !== 'categories' && (
                             <td className="px-4 py-6">
                               {activeTab === 'regions' ? (
                                 <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-black">
@@ -613,6 +637,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             else if (activeTab === 'vacancies') onEditVacancy(item);
                             else if (activeTab === 'resumes') onEditResume(item);
                             else if (activeTab === 'professions') onEditProfession(item);
+                            else if (activeTab === 'categories') onEditProfession({ ...item, __isCategory: true } as any);
                             else if (activeTab === 'regions') onEditRegion(item);
                             else if (activeTab === 'districts') onEditDistrict(item);
                             else if (activeTab === 'works') onEditWork(item);
@@ -623,7 +648,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={activeTab === 'users' ? 8 : (['professions', 'regions', 'districts', 'works'].includes(activeTab) ? ((activeTab === 'professions' || activeTab === 'works') ? 6 : 7) : 6)} className="p-20 text-center">
+                      <td colSpan={activeTab === 'users' ? 8 : (['professions', 'categories', 'regions', 'districts', 'works'].includes(activeTab) ? ((activeTab === 'professions' || activeTab === 'works') ? 6 : (activeTab === 'categories' ? 7 : 7)) : 6)} className="p-20 text-center">
                         <p className="text-slate-300 font-bold italic">{t('admin_panel.no_records')}</p>
                       </td>
                     </tr>
@@ -640,10 +665,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   activeTab === 'vacancies' ? totalVacancies :
                     activeTab === 'resumes' ? totalResumes :
                       activeTab === 'professions' ? totalProfessions :
-                        activeTab === 'regions' ? totalRegions :
-                          activeTab === 'districts' ? totalDistricts :
-                            activeTab === 'works' ? totalWorks :
-                              activeList.length
+                        activeTab === 'categories' ? totalCategories :
+                          activeTab === 'regions' ? totalRegions :
+                            activeTab === 'districts' ? totalDistricts :
+                              activeTab === 'works' ? totalWorks :
+                                activeList.length
               }
               perPage={perPage}
               onChange={setPage}
