@@ -21,6 +21,7 @@ async def list_resumes(
     limit: int = 100,
     user_id: Optional[int] = None,
     profession_id: Optional[int] = None,
+    category_id: Optional[int] = None,
     region_id: Optional[int] = None,
     gender: Optional[str] = None,
     status: Optional[ResumeStatus] = None,
@@ -32,7 +33,20 @@ async def list_resumes(
     List resumes with filters. 
     By default, only ACTIVE resumes are shown to public.
     If user_id is provided, it filters by that user.
+    category_id: filter by profession category (includes subcategory professions).
     """
+    # If category_id is provided, resolve to profession_ids (parent profession + its children)
+    category_profession_ids = None
+    if category_id and not profession_id:
+        from app.models.profession import Profession as ProfModel
+        from sqlalchemy import select as sa_select
+        prof_ids = [category_id]
+        children_q = await db.execute(
+            sa_select(ProfModel.id).where(ProfModel.parent_id == category_id)
+        )
+        prof_ids.extend([row[0] for row in children_q.all()])
+        category_profession_ids = prof_ids
+
     age_from, age_till = None, None
     if age_range:
         try:
@@ -46,6 +60,7 @@ async def list_resumes(
         limit=limit, 
         user_id=user_id,
         profession_id=profession_id,
+        profession_ids=category_profession_ids,
         region_id=region_id,
         gender=gender,
         status=status,
@@ -57,6 +72,7 @@ async def list_resumes(
         db,
         user_id=user_id,
         profession_id=profession_id,
+        profession_ids=category_profession_ids,
         region_id=region_id,
         gender=gender,
         status=status,

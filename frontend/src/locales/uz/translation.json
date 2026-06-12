@@ -126,6 +126,8 @@
     "all_regions": "Barcha hududlar",
     "profession": "Kasb",
     "all_professions": "Barcha kasblar",
+    "category": "Kategoriya",
+    "subcategories": "Subkategoriyalar",
     "gender_preference": "Jins",
     "age_range": "Yosh oralig'i",
     "salary_range": "Maosh oralig'i",
@@ -351,7 +353,7 @@
       "users": "foydalanuvchilar",
       "vacancies": "vakansiyalar",
       "resumes": "rezyumelar",
-      "professions": "kasblar",
+      "professions": "ish turlari va kasblar",
       "regions": "hududlar",
       "districts": "tumanlar",
       "works": "ish turlari"
