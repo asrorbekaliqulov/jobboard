@@ -23,6 +23,7 @@ class VacancyService {
         limit?: number;
         user_id?: number;
         profession_id?: number;
+        category_id?: number;
         region_id?: number;
         status?: ItemStatus;
         search?: string;

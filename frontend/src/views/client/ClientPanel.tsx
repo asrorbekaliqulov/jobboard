@@ -32,7 +32,7 @@ import {
 import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
-import { getProfessionIcon } from "../../utils/professionIcons.ts";
+import { getProfessionIcon, getCategoryColor } from "../../utils/professionIcons.ts";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -129,6 +129,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [searchText, setSearchText] = useState("");
   const [activeFilterChip, setActiveFilterChip] = useState("all");
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [categories, setCategories] = useState<Profession[]>([]);
 
   const [filters, setFilters] = useState({
     profession: "",
@@ -229,8 +230,15 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     // Only fetch from API when viewing "all" items (not mine/saved which are client-filtered)
     if (activeSubTab !== "all" && activeSubTab !== "mine") return;
     const fetchFilters: any = { status: ItemStatus.ACTIVE };
-    if (filters.profession)
-      fetchFilters.profession_id = parseInt(filters.profession);
+    if (filters.profession) {
+      const profValue = String(filters.profession);
+      if (profValue.startsWith('cat_')) {
+        // Category-based filter: send category_id to backend
+        fetchFilters.category_id = parseInt(profValue.replace('cat_', ''));
+      } else {
+        fetchFilters.profession_id = parseInt(profValue);
+      }
+    }
     if (filters.region) fetchFilters.region_id = parseInt(filters.region);
     if (filters.gender !== "all") fetchFilters.gender = filters.gender;
     if (filters.age_range) fetchFilters.age_range = filters.age_range;
@@ -494,10 +502,20 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
             const iconInfo = getProfessionIcon(prof);
             return (
               <button
-                key={prof.id}
+                key={item.id}
                 onClick={() => {
-                  setFilters({ ...filters, profession: String(prof.id) });
-                  setActiveSubTab("mine");
+                  if (isCategory && item.children && item.children.length > 0) {
+                    // Has subcategories - show all categories modal
+                    setShowAllCategories(true);
+                  } else if (isCategory) {
+                    // Category without subcategories - filter by category
+                    setFilters({ ...filters, profession: `cat_${item.id}` });
+                    setActiveSubTab("mine");
+                  } else {
+                    // Fallback: profession direct filter
+                    setFilters({ ...filters, profession: String(item.id) });
+                    setActiveSubTab("mine");
+                  }
                 }}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
                 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
@@ -505,10 +523,26 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${iconInfo.color}15` }}>
                   <i className={`fa-solid ${iconInfo.icon} text-lg`} style={{ color: iconInfo.color }} />
                 </div>
-                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(prof)}</span>
+                <span className="text-[9px] font-bold text-center leading-tight line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{getLocalizedName(item)}</span>
+                {isCategory && item.children && item.children.length > 0 && (
+                  <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
+                    +{item.children.length}
+                  </span>
+                )}
               </button>
             );
           })}
+          {/* "Boshqa" button */}
+          <button
+            onClick={() => setShowAllCategories(true)}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all active:scale-95"
+            style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'var(--accent)' + '15' }}>
+              <i className="fa-solid fa-grip text-lg" style={{ color: 'var(--accent)' }} />
+            </div>
+            <span className="text-[9px] font-bold text-center leading-tight" style={{ color: 'var(--accent)' }}>{t("home.more")}</span>
+          </button>
         </div>
       </div>
 

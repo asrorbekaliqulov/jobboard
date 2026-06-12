@@ -41,3 +41,9 @@ class ProfessionWithChildren(ProfessionRead):
 class ProfessionList(BaseModel):
     items: list[ProfessionRead]
     total: int
+
+
+class ProfessionTreeList(BaseModel):
+    """List of top-level professions with their children (tree view)."""
+    items: list[ProfessionWithChildren]
+    total: int
