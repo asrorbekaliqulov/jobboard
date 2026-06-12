@@ -60,17 +60,20 @@
     "saved": "Saqlangan"
   },
   "home": {
-    "greeting": "Salom, {{name}} \ud83d\udc4b",
+    "greeting": "Salom, {{name}} 👋",
     "user": "Foydalanuvchi",
     "banner_title": "Siz uchun eng yaxshi\nish o'rinlarini topdik",
     "banner_employer": "Sizga mos ishchilarni\ntopdik",
     "view_vacancies": "Vakansiyalarni ko'rish",
     "view_workers": "Ishchilarni ko'rish",
     "categories": "Kategoriyalar",
+    "categories_empty": "Kategoriyalar topilmadi",
     "recommendations": "Siz uchun tavsiyalar",
     "all": "Barchasi",
     "no_vacancies": "Hozircha vakansiyalar yo'q",
     "no_vacancies_hint": "Tez orada yangi e'lonlar paydo bo'ladi",
+    "no_workers": "Hozircha ishchilar yo'q",
+    "no_workers_hint": "Tez orada yangi ishchilar paydo bo'ladi",
     "stats": {
       "workers": "Ishchi",
       "employers": "Ish beruvchi",
@@ -126,14 +129,31 @@
     "work_format": "Ish formati",
     "work_type": "Ish turi",
     "experience": "Tajriba",
+    "experience_years": "{{count}} yil",
     "clear": "Tozalash",
     "show_results": "Natijalarni ko'rish",
+    "work_format_options": {
+      "onsite": "Ofisda",
+      "remote": "Masofaviy"
+    },
+    "work_type_options": {
+      "fulltime": "To'liq kunlik",
+      "part_time": "Yarim kunlik"
+    },
+    "chips": {
+      "all": "Barchasi",
+      "new": "Yangi",
+      "onsite": "Ofis",
+      "remote": "Masofaviy",
+      "short_term": "Qisqa muddatli"
+    },
     "gender": {
       "all": "Barchasi",
       "male": "Erkak",
       "female": "Ayol",
       "any": "Ixtiyoriy"
-    }
+    },
+    "years_suffix": "yil"
   },
   "vacancy_card": {
     "schedule": "Jadval",
@@ -167,16 +187,24 @@
   "onboarding": {
     "preparing": "Ish joyi tayyorlanmoqda...",
     "title": "Ish Ko'p",
-    "ecosystem": "Ish qidirayotgan mutaxassislar va xodim izlayotgan ish beruvchilarni bog‘lovchi tizim",
+    "ecosystem": "Ish qidirayotgan mutaxassislar va xodim izlayotgan ish beruvchilarni bog'lovchi tizim",
     "internal_access": "Ichki kirish",
     "your_profile": "Sizning profilingiz",
     "select_objective": "Siz qaysi rol bilan kiryapsiz?",
+    "who_are_you": "Siz kimsiz?",
+    "choose_role": "O'zingizga mos rolni tanlang",
     "candidate": "Ishchi",
-    "candidate_desc": "Keyingi karyerangizni kashf qiling",
+    "candidate_title": "Ish qidiryapman",
+    "candidate_desc": "Yangi ish topish",
     "daily_job_seeker": "Kunlik ishchi",
-    "daily_job_seeker_desc": "Kunlik va qisqa muddatli ishlarni toping",
+    "daily_job_seeker_title": "Kunlik ishchi",
+    "daily_job_seeker_desc": "Kunlik daromad topish",
     "partner": "Ish beruvchi",
-    "partner_desc": "Malakali mutaxassislar toping",
+    "partner_title": "Ish beruvchiman",
+    "partner_desc": "Xodim topish",
+    "terms_agree": "Davom etish orqali siz",
+    "terms_link": "qoidalar",
+    "terms_suffix": "bilan rozilik bildirasiz",
     "failed_role": "Rolni saqlab bo'lmadi. Iltimos, qaytadan urunib ko'ring."
   },
   "client_panel": {
@@ -221,7 +249,16 @@
     "open_filters": "Filtrlarni ochish",
     "browse_all": "Barchasini ko'rish",
     "saved_main": "Saqlangan vakansiyalar/rezyumelar",
-    "saved_daily": "Saqlangan kunlik ishchilar"
+    "saved_daily": "Saqlangan kunlik ishchilar",
+    "role_switch": "Rolni almashtirish",
+    "sections": "Bo'limlar",
+    "select_role": "Rolni tanlang",
+    "cancel": "Bekor qilish",
+    "select_language": "Tilni tanlang",
+    "search_vacancy": "Vakansiya nomi yoki kompaniya",
+    "search_worker": "Ism yoki kasb nomi",
+    "empty_title": "Hech narsa topilmadi",
+    "empty_subtitle": "Qidiruv yoki filtrlarni o'zgartiring"
   },
   "client_forms": {
     "edit": "Tahrirlash",
@@ -261,7 +298,7 @@
     "phone": "Telefon",
     "telegram": "Telegram",
     "email": "Email",
-    "invalid_email": "Noto'g'ri email format",
+    "invalid_email": "Noto'g'ri email",
     "additional_workers": "Qo'shimcha ishchilar",
     "additional_workers_hint": "Siz bilan birga kelishi mumkin bo'lgan qo'shimcha ishchilar soni",
     "districts": "Tumanlar",
@@ -269,7 +306,7 @@
     "work_types": "Bajara oladigan ish turlari",
     "select_region": "Hududni tanlang",
     "select_profession": "Kasbni tanlang",
-    "required": "Majburiy maydon",
+    "required": "majburiy",
     "please_fill_required": "Barcha majburiy maydonlarni to'ldiring",
     "submit_error": "Saqlashda xatolik yuz berdi",
     "failed_upload": "Portfolio faylini yuklab bo'lmadi",
@@ -277,8 +314,6 @@
     "failed_image_upload": "Rasm faylini yuklab bo'lmadi",
     "upload_image": "Rasm yuklash",
     "image_file": "Rasm fayli",
-    "upload_image": "Rasm yuklash",
-    "invalid_email": "Noto'g'ri email",
     "salary": "Maosh",
     "from": "dan boshlab",
     "till": "gacha",
@@ -294,8 +329,7 @@
       "part-time": "Qisman kun",
       "contract": "Shartnoma",
       "temporary": "Vaqtincha"
-    },
-    "required": "majburiy"
+    }
   },
   "admin_panel": {
     "core": "Core",

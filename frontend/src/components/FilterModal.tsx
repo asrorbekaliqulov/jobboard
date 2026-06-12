@@ -307,7 +307,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                         : 'var(--text-primary)'
                     }}
                   >
-                    {format === WorkFormat.ONSITE ? 'Ofisda' : 'Masofaviy'}
+                    {format === WorkFormat.ONSITE ? t('filters.work_format_options.onsite') : t('filters.work_format_options.remote')}
                   </button>
                 ))}
               </div>
@@ -346,7 +346,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                         : 'var(--text-primary)'
                     }}
                   >
-                    {type === WorkType.FULLTIME ? "To'liq kunlik" : "Yarim kunlik"}
+                    {type === WorkType.FULLTIME ? t('filters.work_type_options.fulltime') : t('filters.work_type_options.part_time')}
                   </button>
                 ))}
               </div>
@@ -381,7 +381,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                       : 'var(--text-primary)'
                   }}
                 >
-                  {exp} yil
+                  {exp} {t('filters.years_suffix')}
                 </button>
               ))}
             </div>

@@ -108,12 +108,12 @@ const VacancyFormFields: React.FC<VacancyFormFieldsProps> = ({
           >
             {Object.values(WorkFormat).map((f) => (
               <option key={f} value={f}>
-                {f === WorkFormat.ONSITE ? "Ofisda" : "Masofaviy"}
+                {f === WorkFormat.ONSITE ? t("client_forms.work_format_options.onsite") : t("client_forms.work_format_options.remote")}
               </option>
             ))}
           </select>
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Ish joyi formati
+            {t("client_forms.work_format")}
           </p>
         </div>
         <div>
@@ -129,12 +129,12 @@ const VacancyFormFields: React.FC<VacancyFormFieldsProps> = ({
           >
             {Object.values(WorkType).map((f) => (
               <option key={f} value={f}>
-                {f === WorkType.FULLTIME ? "To'liq ish kunli" : "Yarim ish kunli"}
+                {f === WorkType.FULLTIME ? t("client_forms.work_type_options.fulltime") : t("client_forms.work_type_options.part-time")}
               </option>
             ))}
           </select>
           <p className="text-[9px] text-gray-400 mt-1 ml-1">
-            Ish turi
+            {t("client_forms.work_type")}
           </p>
         </div>
       </div>

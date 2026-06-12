@@ -22,7 +22,7 @@
   },
   "theme": {
     "light": "Светлая тема",
-    "dark": "Тёмная тема", 
+    "dark": "Тёмная тема",
     "system": "Системная",
     "toggle": "Переключить тему"
   },
@@ -60,7 +60,7 @@
     "saved": "Сохранённые"
   },
   "home": {
-    "greeting": "Привет, {{name}} \ud83d\udc4b",
+    "greeting": "Привет, {{name}} 👋",
     "user": "Пользователь",
     "banner_title": "Мы нашли лучшие\nвакансии для вас",
     "banner_employer": "Мы нашли подходящих\nработников для вас",
@@ -93,7 +93,10 @@
       "daily_jobs": "Подработка",
       "new": "Новинки",
       "saved": "Избранное"
-    }
+    },
+    "categories_empty": "Категории не найдены",
+    "no_workers": "Работников пока нет",
+    "no_workers_hint": "Скоро появятся новые специалисты"
   },
   "saved": {
     "empty": "Нет сохранённых объявлений",
@@ -127,7 +130,30 @@
       "female": "Женщина",
       "any": "Не имеет значения"
     },
-    "show_results": "Показать результаты"
+    "show_results": "Показать результаты",
+    "experience_years": "{{count}} лет",
+    "work_format_options": {
+      "onsite": "В офисе",
+      "remote": "Удалённо"
+    },
+    "work_type_options": {
+      "fulltime": "Полный день",
+      "part_time": "Неполный день"
+    },
+    "chips": {
+      "all": "Все",
+      "new": "Новые",
+      "onsite": "Офис",
+      "remote": "Удалённо",
+      "short_term": "Краткосрочные"
+    },
+    "age_range": "Возраст",
+    "salary_range": "Зарплата",
+    "work_format": "Формат работы",
+    "work_type": "Тип занятости",
+    "experience": "Опыт",
+    "clear": "Сбросить",
+    "years_suffix": "лет"
   },
   "vacancy_card": {
     "schedule": "График",
@@ -166,12 +192,20 @@
     "your_profile": "Ваш профиль",
     "select_objective": "В каком качестве вы входите?",
     "candidate": "Соискатель",
-    "candidate_desc": "Откройте следующий шаг своей карьеры",
-    "daily_job_seeker": "Кунлик ишчи",
-    "daily_job_seeker_desc": "Ищите подработку и краткосрочные заказы",
+    "candidate_desc": "Найти новую работу",
+    "daily_job_seeker": "Разнорабочий",
+    "daily_job_seeker_desc": "Ежедневный заработок",
     "partner": "Работодатель",
-    "partner_desc": "Найдите квалифицированных специалистов",
-    "failed_role": "Не удалось сохранить роль. Пожалуйста, попробуйте еще раз."
+    "partner_desc": "Найти сотрудников",
+    "failed_role": "Не удалось сохранить роль. Пожалуйста, попробуйте еще раз.",
+    "who_are_you": "Кто вы?",
+    "choose_role": "Выберите подходящую роль",
+    "candidate_title": "Ищу работу",
+    "daily_job_seeker_title": "Разнорабочий",
+    "partner_title": "Работодатель",
+    "terms_agree": "Продолжая, вы соглашаетесь с",
+    "terms_link": "правилами",
+    "terms_suffix": "платформы"
   },
   "client_panel": {
     "switch_title": "Смена рабочего режима",
@@ -215,7 +249,16 @@
     "open_filters": "Открыть фильтры",
     "browse_all": "Смотреть все",
     "saved_main": "Сохраненные вакансии/резюме",
-    "saved_daily": "Сохраненные кунлик ишчилар"
+    "saved_daily": "Сохранённые разнорабочие",
+    "role_switch": "Сменить роль",
+    "sections": "Разделы",
+    "select_role": "Выберите роль",
+    "cancel": "Отмена",
+    "select_language": "Выберите язык",
+    "search_vacancy": "Название вакансии или компании",
+    "search_worker": "Имя или профессия",
+    "empty_title": "Ничего не найдено",
+    "empty_subtitle": "Измените параметры поиска или фильтры"
   },
   "client_forms": {
     "edit": "Редактировать",

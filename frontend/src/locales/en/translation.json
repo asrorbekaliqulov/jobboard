@@ -60,7 +60,7 @@
     "saved": "Saved"
   },
   "home": {
-    "greeting": "Hello, {{name}} \ud83d\udc4b",
+    "greeting": "Hello, {{name}} 👋",
     "user": "User",
     "banner_title": "We found the best\njobs for you",
     "banner_employer": "We found matching\nworkers for you",
@@ -93,7 +93,10 @@
       "daily_jobs": "Daily jobs",
       "new": "Latest",
       "saved": "Saved"
-    }
+    },
+    "categories_empty": "No categories found",
+    "no_workers": "No workers yet",
+    "no_workers_hint": "New workers will appear soon"
   },
   "saved": {
     "empty": "No saved listings yet",
@@ -127,7 +130,30 @@
       "female": "Female",
       "any": "Any"
     },
-    "show_results": "Show results"
+    "show_results": "Show results",
+    "experience_years": "{{count}} years",
+    "work_format_options": {
+      "onsite": "On-site",
+      "remote": "Remote"
+    },
+    "work_type_options": {
+      "fulltime": "Full-time",
+      "part_time": "Part-time"
+    },
+    "chips": {
+      "all": "All",
+      "new": "New",
+      "onsite": "On-site",
+      "remote": "Remote",
+      "short_term": "Short-term"
+    },
+    "age_range": "Age range",
+    "salary_range": "Salary range",
+    "work_format": "Work format",
+    "work_type": "Work type",
+    "experience": "Experience",
+    "clear": "Clear",
+    "years_suffix": "yrs"
   },
   "vacancy_card": {
     "schedule": "Schedule",
@@ -166,12 +192,20 @@
     "your_profile": "Your profile",
     "select_objective": "Which role are you joining as?",
     "candidate": "Candidate",
-    "candidate_desc": "Discover the next step in your career",
+    "candidate_desc": "Find a new job",
     "daily_job_seeker": "Daily worker",
-    "daily_job_seeker_desc": "Find short-term and day-based jobs",
+    "daily_job_seeker_desc": "Earn daily income",
     "partner": "Employer",
-    "partner_desc": "Find qualified specialists",
-    "failed_role": "Failed to save role. Please try again."
+    "partner_desc": "Find employees",
+    "failed_role": "Failed to save role. Please try again.",
+    "who_are_you": "Who are you?",
+    "choose_role": "Choose a role that fits you",
+    "candidate_title": "Looking for work",
+    "daily_job_seeker_title": "Daily worker",
+    "partner_title": "Employer",
+    "terms_agree": "By continuing, you agree to the",
+    "terms_link": "terms",
+    "terms_suffix": "of the platform"
   },
   "client_panel": {
     "switch_title": "Switch work mode",
@@ -215,7 +249,16 @@
     "open_filters": "Open filters",
     "browse_all": "Browse all",
     "saved_main": "Saved vacancies/resumes",
-    "saved_daily": "Saved daily workers"
+    "saved_daily": "Saved daily workers",
+    "role_switch": "Switch role",
+    "sections": "Sections",
+    "select_role": "Select role",
+    "cancel": "Cancel",
+    "select_language": "Select language",
+    "search_vacancy": "Vacancy name or company",
+    "search_worker": "Name or profession",
+    "empty_title": "Nothing found",
+    "empty_subtitle": "Change your search or filters"
   },
   "client_forms": {
     "edit": "Edit",
