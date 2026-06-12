@@ -580,7 +580,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           type="text"
           value={searchText}
           onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
-          placeholder={activeSection === "vacancies" ? "Vakansiya nomi yoki kompaniya" : "Ism yoki kasb nomi"}
+          placeholder={activeSection === "vacancies" ? t("client_panel.search_vacancy") : t("client_panel.search_worker")}
           className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50"
         />
         <button
@@ -593,17 +593,23 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
       {/* Filter chips */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Barchasi", "Yangi", "Ofis", "Masofaviy", "Qisqamuddatli"].map((chip, i) => (
+        {[
+          { key: "all", label: t("filters.chips.all") },
+          { key: "new", label: t("filters.chips.new") },
+          { key: "onsite", label: t("filters.chips.onsite") },
+          { key: "remote", label: t("filters.chips.remote") },
+          { key: "short_term", label: t("filters.chips.short_term") },
+        ].map((chip) => (
           <button
-            key={chip}
-            onClick={() => setActiveFilterChip(i === 0 ? "all" : chip.toLowerCase())}
+            key={chip.key}
+            onClick={() => setActiveFilterChip(chip.key)}
             className={`filter-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
-              (i === 0 && activeFilterChip === "all") || activeFilterChip === chip.toLowerCase()
+              activeFilterChip === chip.key
                 ? "bg-indigo-600 text-white border-indigo-600"
                 : "bg-white text-slate-600 border-slate-200"
             }`}
           >
-            {chip}
+            {chip.label}
           </button>
         ))}
       </div>
@@ -715,10 +721,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                   <i className="fa-solid fa-magnifying-glass text-2xl text-slate-300" />
                 </div>
                 <p className="text-sm font-bold text-slate-400 mb-1">
-                  Hech narsa topilmadi
+                  {t("client_panel.empty_title")}
                 </p>
                 <p className="text-xs text-slate-300">
-                  Qidiruv yoki filtrlarni o'zgartiring
+                  {t("client_panel.empty_subtitle")}
                 </p>
                 <button
                   onClick={() => {
@@ -850,7 +856,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {/* Section Switcher - role-based sections */}
       <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-50">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">
-          Bo'limlar
+          {t("client_panel.sections")}
         </p>
         <div className={`grid gap-2 ${
           initialRole === UserRole.CANDIDATE_HUNTER ? "grid-cols-2" : "grid-cols-2"
@@ -902,7 +908,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </div>
           <div className="flex-1 text-left">
             <p className="text-sm font-bold text-slate-800">{t("client_panel.context")}</p>
-            <p className="text-xs text-slate-400">Rolni almashtirish</p>
+            <p className="text-xs text-slate-400">{t("client_panel.role_switch")}</p>
           </div>
           <i className="fa-solid fa-chevron-right text-xs text-slate-300" />
         </button>
@@ -1019,7 +1025,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               {professions.length === 0 && (
                 <div className="py-12 text-center">
                   <i className="fa-solid fa-folder-open text-3xl mb-3" style={{ color: 'var(--text-muted)' }} />
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Kategoriyalar topilmadi</p>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t("home.categories_empty")}</p>
                 </div>
               )}
             </div>
@@ -1033,7 +1039,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex items-end">
           <div className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 pb-10 slide-up-modal">
             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Rolni tanlang</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-4">{t("client_panel.select_role")}</h3>
             <div className="space-y-3">
               {[
                 { role: UserRole.JOB_SEEKER, label: t("role.candidate"), icon: "fa-user-graduate", color: "bg-blue-50 text-blue-600" },
@@ -1064,7 +1070,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               onClick={() => setIsRoleModalOpen(false)}
               className="w-full mt-4 py-3 text-slate-500 font-semibold text-sm"
             >
-              Bekor qilish
+              {t("client_panel.cancel")}
             </button>
           </div>
         </div>,
@@ -1076,7 +1082,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex items-end">
           <div className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 pb-10 slide-up-modal">
             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Tilni tanlang</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-4">{t("client_panel.select_language")}</h3>
             <div className="space-y-2">
               {LANGUAGES.map((l) => (
                 <button
@@ -1099,7 +1105,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               onClick={() => setIsLangModalOpen(false)}
               className="w-full mt-4 py-3 text-slate-500 font-semibold text-sm"
             >
-              Bekor qilish
+              {t("client_panel.cancel")}
             </button>
           </div>
         </div>,

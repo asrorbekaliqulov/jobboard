@@ -97,8 +97,8 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
       ) : (
         <div className="flex-1 flex flex-col fade-up">
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-black mb-2" style={{ color: 'var(--text-primary)' }}>Siz kimsiz?</h1>
-            <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>O'zingizga mos rolni tanlang</p>
+            <h1 className="text-3xl font-black mb-2" style={{ color: 'var(--text-primary)' }}>{t('onboarding.who_are_you')}</h1>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{t('onboarding.choose_role')}</p>
           </div>
 
           <div className="space-y-4 flex-1">
@@ -107,8 +107,8 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
                 <i className="fa-solid fa-magnifying-glass text-xl" style={{ color: 'var(--accent)' }} />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Ish qidiryapman</h3>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Yangi ish topish</p>
+                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.candidate_title')}</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.candidate_desc')}</p>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
@@ -118,8 +118,8 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
                 <i className="fa-solid fa-user-tie text-xl text-emerald-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Ish beruvchiman</h3>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Xodim topish</p>
+                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.partner_title')}</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.partner_desc')}</p>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
@@ -129,15 +129,15 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
                 <i className="fa-solid fa-bolt text-xl text-amber-500" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Kunlik ishchi</h3>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Kunlik daromad topish</p>
+                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.daily_job_seeker_title')}</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.daily_job_seeker_desc')}</p>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
           </div>
 
           <p className="text-center text-[11px] mt-8" style={{ color: 'var(--text-muted)' }}>
-            Davom etish orqali siz <span style={{ color: 'var(--accent)' }} className="font-medium">qoidalar</span> bilan rozilik bildirasiz
+            {t('onboarding.terms_agree')} <span style={{ color: 'var(--accent)' }} className="font-medium">{t('onboarding.terms_link')}</span> {t('onboarding.terms_suffix')}
           </p>
         </div>
       )}
