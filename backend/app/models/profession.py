@@ -1,6 +1,6 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List
+from typing import List, Optional
 from app.core.database import Base
 
 
@@ -26,4 +26,15 @@ class Profession(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     category_id: Mapped[int | None] = mapped_column(ForeignKey("profession_categories.id"), nullable=True)
-    category: Mapped["ProfessionCategory"] = relationship(back_populates="professions")
+    category: Mapped[Optional["ProfessionCategory"]] = relationship(back_populates="professions")
+
+    # Parent/child hierarchy
+    parent_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("professions.id", ondelete="SET NULL"), nullable=True
+    )
+    parent: Mapped[Optional["Profession"]] = relationship(
+        "Profession", remote_side="Profession.id", back_populates="children", lazy="joined"
+    )
+    children: Mapped[List["Profession"]] = relationship(
+        "Profession", back_populates="parent", lazy="selectin"
+    )

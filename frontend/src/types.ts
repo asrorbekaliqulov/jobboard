@@ -63,6 +63,8 @@ export interface Profession {
   name_ru: string;
   name_en: string;
   is_active: boolean;
+  parent_id?: number | null;
+  children?: Profession[];
 }
 
 export interface District {
@@ -91,6 +93,8 @@ export interface Work {
   name_ru: string;
   name_en: string;
   status: boolean;
+  parent_id?: number | null;
+  children?: Work[];
 }
 
 export interface Vacancy {

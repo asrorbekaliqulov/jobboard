@@ -638,14 +638,30 @@ export const AdminProfessionForm: React.FC<{
   onSave: (data: Profession) => void;
   onCancel: () => void;
 }> = ({ initialData, onSave, onCancel }) => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState<Profession>(initialData?.id ? initialData : {
+  const { t, i18n } = useTranslation();
+  const [formData, setFormData] = useState<any>(initialData?.id ? initialData : {
     id: 0,
     name_uz: '',
     name_ru: '',
     name_en: '',
-    is_active: true
+    is_active: true,
+    parent_id: null,
   });
+  const [parentOptions, setParentOptions] = useState<any[]>([]);
+
+  const getLocalizedName = (item: any) => {
+    if (!item) return '';
+    const lang = i18n.language?.split('-')[0] || 'en';
+    return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz;
+  };
+
+  React.useEffect(() => {
+    import('../../services/adminApi.ts').then(({ adminApi }) => {
+      adminApi.professions.list('', undefined, 1, 200).then(res => {
+        setParentOptions(res.items.filter((p: any) => p.id !== formData.id && !p.parent_id));
+      }).catch(console.error);
+    });
+  }, [formData.id]);
 
   return (
     <div className="fixed inset-0 bg-white z-[1100] flex flex-col p-4 animate-in slide-in-from-right duration-300 overflow-y-auto">
@@ -666,6 +682,13 @@ export const AdminProfessionForm: React.FC<{
           <div>
             <p className="text-[10px] font-black  uppercase tracking-widest mb-2 ml-1">{t('admin_forms.name_en')}</p>
             <input value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1">{t('admin_forms.parent_profession') || 'Asosiy kasb (parent)'}</p>
+            <select value={formData.parent_id || ''} onChange={e => setFormData({ ...formData, parent_id: e.target.value ? Number(e.target.value) : null })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="">-- Asosiy (parent yo'q) --</option>
+              {parentOptions.map((p: any) => <option key={p.id} value={p.id}>{getLocalizedName(p)}</option>)}
+            </select>
           </div>
           <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} className="w-5 h-5 accent-slate-900" />
@@ -796,14 +819,30 @@ export const AdminWorkForm: React.FC<{
   onSave: (data: Work) => void;
   onCancel: () => void;
 }> = ({ initialData, onSave, onCancel }) => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState<Work>(initialData?.id ? initialData : {
+  const { t, i18n } = useTranslation();
+  const [formData, setFormData] = useState<any>(initialData?.id ? initialData : {
     id: 0,
     name_uz: '',
     name_ru: '',
     name_en: '',
-    status: true
+    status: true,
+    parent_id: null,
   });
+  const [parentOptions, setParentOptions] = useState<any[]>([]);
+
+  const getLocalizedName = (item: any) => {
+    if (!item) return '';
+    const lang = i18n.language?.split('-')[0] || 'en';
+    return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz;
+  };
+
+  React.useEffect(() => {
+    import('../../services/adminApi.ts').then(({ adminApi }) => {
+      adminApi.works.list('', undefined, 1, 200).then(res => {
+        setParentOptions(res.items.filter((w: any) => w.id !== formData.id && !w.parent_id));
+      }).catch(console.error);
+    });
+  }, [formData.id]);
 
   return (
     <div className="fixed inset-0 bg-white z-[1100] flex flex-col p-4 animate-in slide-in-from-right duration-300 overflow-y-auto">
@@ -825,12 +864,19 @@ export const AdminWorkForm: React.FC<{
             <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1">{t('admin_forms.name_en')}</p>
             <input value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 ml-1">{t('admin_forms.parent_work') || 'Asosiy ish turi (parent)'}</p>
+            <select value={formData.parent_id || ''} onChange={e => setFormData({ ...formData, parent_id: e.target.value ? Number(e.target.value) : null })} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="">-- Asosiy (parent yo'q) --</option>
+              {parentOptions.map((w: any) => <option key={w.id} value={w.id}>{getLocalizedName(w)}</option>)}
+            </select>
+          </div>
           <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <input type="checkbox" checked={formData.status} onChange={e => setFormData({ ...formData, status: e.target.checked })} className="w-5 h-5 accent-slate-900" />
             <span className="text-xs font-black uppercase tracking-widest text-slate-500">{t('admin_forms.is_active_platform')}</span>
           </div>
           <div className="pt-10">
-            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">{t('admin_forms.confirm_work')}</button>
+            <button onClick={() => onSave(formData)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl active:scale-[0.98] transition-all">{t('admin_forms.confirm_work') || 'Saqlash'}</button>
           </div>
         </div>
       </div>
