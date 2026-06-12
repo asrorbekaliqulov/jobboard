@@ -104,9 +104,13 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   ];
 
   const sectionForRole = (role: UserRole): "vacancies" | "workers" | "daily-workers" => {
-    if (role === UserRole.DAILY_JOB_SEEKER) return "daily-workers";
-    if (role === UserRole.JOB_SEEKER) return "workers";
-    return "vacancies";
+    // Rolega qarab foydalanuvchi nimani KO'RISHI kerakligini aniqlash:
+    // Ishchi (JOB_SEEKER) — vakansiyalarni ko'radi (ish qidiradi)
+    // Ish beruvchi (CANDIDATE_HUNTER) — ishchilarni ko'radi (ishchi qidiradi)
+    // Kunlik ishchi (DAILY_JOB_SEEKER) — vakansiyalarni ko'radi (kunlik ish qidiradi)
+    if (role === UserRole.CANDIDATE_HUNTER) return "workers";
+    if (role === UserRole.DAILY_JOB_SEEKER) return "vacancies";
+    return "vacancies"; // JOB_SEEKER sees vacancies
   };
 
   const [activeSection, setActiveSection] = useState<"vacancies" | "workers" | "daily-workers">(
@@ -285,30 +289,25 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     let list: any[] = [];
 
     if (activeSection === "vacancies") {
-      if (activeSubTab === "all") {
+      if (activeSubTab === "all" || activeSubTab === "mine") {
+        // Both home and browse show all active vacancies
         list = vacancies.filter((v) => v.status === ItemStatus.ACTIVE);
-      } else if (activeSubTab === "mine") {
-        list = vacancies.filter((v) => v.user_id === currentUser?.id && v.status !== ItemStatus.DELETED);
       } else if (activeSubTab === "saved") {
         list = vacancies.filter(
           (v) => savedIds.includes(v.id) && (v.status === ItemStatus.ACTIVE || v.status === ItemStatus.ARCHIVED),
         );
       }
     } else if (activeSection === "workers") {
-      if (activeSubTab === "all") {
+      if (activeSubTab === "all" || activeSubTab === "mine") {
         list = resumes.filter((r) => r.status === ItemStatus.ACTIVE);
-      } else if (activeSubTab === "mine") {
-        list = resumes.filter((r) => r.user_id === currentUser?.id && r.status !== ItemStatus.DELETED);
       } else if (activeSubTab === "saved") {
         list = resumes.filter(
           (r) => savedIds.includes(r.id) && (r.status === ItemStatus.ACTIVE || r.status === ItemStatus.ARCHIVED),
         );
       }
     } else if (activeSection === "daily-workers") {
-      if (activeSubTab === "all") {
+      if (activeSubTab === "all" || activeSubTab === "mine") {
         list = dailyJobSeekers.filter((r) => r.status === ItemStatus.ACTIVE);
-      } else if (activeSubTab === "mine") {
-        list = dailyJobSeekers.filter((r) => r.user_id === currentUser?.id && r.status !== ItemStatus.DELETED);
       } else if (activeSubTab === "saved") {
         list = dailyJobSeekers.filter(
           (r) => savedDailyJobSeekerIds.includes(r.id) && (r.status === ItemStatus.ACTIVE || r.status === ItemStatus.ARCHIVED),
@@ -504,7 +503,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         </div>
       </div>
 
-      {/* Recommendations */}
+      {/* Recommendations - role-based */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.recommendations")}</h3>
@@ -517,27 +516,54 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </button>
         </div>
         <div className="space-y-3">
-          {vacancies.filter(v => v.status === ItemStatus.ACTIVE).slice(0, 3).map((vacancy, i) => (
-            <ClientVacancyExplorerCard
-              key={vacancy.id}
-              vacancy={vacancy}
-              isSaved={savedIds.includes(vacancy.id)}
-              onToggleSave={
-                initialRole === UserRole.CANDIDATE_HUNTER
-                  ? onToggleVacancySave
-                  : undefined
-              }
-              index={i}
-            />
-          ))}
-          {vacancies.filter(v => v.status === ItemStatus.ACTIVE).length === 0 && (
-            <div className="py-12 text-center">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
-                <i className="fa-solid fa-briefcase text-xl" style={{ color: 'var(--text-muted)' }} />
-              </div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{t("home.no_vacancies")}</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t("home.no_vacancies_hint")}</p>
-            </div>
+          {initialRole === UserRole.CANDIDATE_HUNTER ? (
+            // Ish beruvchi uchun — ishchilar (rezumelar) ko'rinadi
+            <>
+              {resumes.filter(r => r.status === ItemStatus.ACTIVE).slice(0, 3).map((resume, i) => (
+                <ClientResumeExplorerCard
+                  key={resume.id}
+                  resume={resume}
+                  isSaved={savedIds.includes(resume.id)}
+                  onToggleSave={onToggleResumeSave}
+                  index={i}
+                />
+              ))}
+              {resumes.filter(r => r.status === ItemStatus.ACTIVE).length === 0 && (
+                <div className="py-12 text-center">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                    <i className="fa-solid fa-users text-xl" style={{ color: 'var(--text-muted)' }} />
+                  </div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{t("home.no_workers") || "Ishchilar topilmadi"}</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t("home.no_workers_hint") || "Tez orada yangi ishchilar paydo bo'ladi"}</p>
+                </div>
+              )}
+            </>
+          ) : (
+            // Ishchi/Kunlik ishchi uchun — vakansiyalar ko'rinadi
+            <>
+              {vacancies.filter(v => v.status === ItemStatus.ACTIVE).slice(0, 3).map((vacancy, i) => (
+                <ClientVacancyExplorerCard
+                  key={vacancy.id}
+                  vacancy={vacancy}
+                  isSaved={savedIds.includes(vacancy.id)}
+                  onToggleSave={
+                    initialRole === UserRole.JOB_SEEKER
+                      ? onToggleVacancySave
+                      : undefined
+                  }
+                  index={i}
+                />
+              ))}
+              {vacancies.filter(v => v.status === ItemStatus.ACTIVE).length === 0 && (
+                <div className="py-12 text-center">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                    <i className="fa-solid fa-briefcase text-xl" style={{ color: 'var(--text-muted)' }} />
+                  </div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{t("home.no_vacancies")}</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t("home.no_vacancies_hint")}</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -582,8 +608,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
-      {/* Add button based on role/section */}
-      {activeSection === "vacancies" && initialRole === UserRole.CANDIDATE_HUNTER && (
+      {/* Add button - always shows user's own content creation based on role */}
+      {initialRole === UserRole.CANDIDATE_HUNTER && (
         <button
           onClick={onAddVacancy}
           className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100"
@@ -592,7 +618,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           {t("client_panel.post_vacancy")}
         </button>
       )}
-      {activeSection === "workers" && initialRole === UserRole.JOB_SEEKER && (
+      {initialRole === UserRole.JOB_SEEKER && (
         <button
           onClick={onAddResume}
           className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-blue-100"
@@ -601,7 +627,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           {t("client_forms.create")} {t("common.resume")}
         </button>
       )}
-      {activeSection === "daily-workers" && initialRole === UserRole.DAILY_JOB_SEEKER && (
+      {initialRole === UserRole.DAILY_JOB_SEEKER && (
         <button
           onClick={onAddResume}
           className="w-full py-3.5 bg-emerald-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-emerald-100"
@@ -821,30 +847,47 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         </p>
       </div>
 
-      {/* Section Switcher */}
+      {/* Section Switcher - role-based sections */}
       <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-50">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">
           Bo'limlar
         </p>
-        <div className="grid grid-cols-3 gap-2">
-          {([
-            { id: "vacancies", label: t("nav.vacancies"), icon: "fa-briefcase" },
-            { id: "workers", label: t("nav.workers") || "Ishchilar", icon: "fa-users" },
-            { id: "daily-workers", label: t("nav.daily_workers"), icon: "fa-people-group" },
-          ] as const).map((s) => (
-            <button
-              key={s.id}
-              onClick={() => { setActiveSection(s.id); setActiveSubTab("all"); setPage(1); }}
-              className={`py-3.5 rounded-xl text-[10px] font-bold uppercase tracking-wide border transition-all flex flex-col items-center gap-1.5 active:scale-95 ${
-                activeSection === s.id
-                  ? "bg-indigo-600 text-white border-transparent shadow-md"
-                  : "bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100"
-              }`}
-            >
-              <i className={`fa-solid ${s.icon} text-base`} />
-              {s.label}
-            </button>
-          ))}
+        <div className={`grid gap-2 ${
+          initialRole === UserRole.CANDIDATE_HUNTER ? "grid-cols-2" : "grid-cols-2"
+        }`}>
+          {(() => {
+            // Rolega qarab foydalanuvchiga mos bo'limlarni ko'rsatamiz
+            const sections: Array<{ id: "vacancies" | "workers" | "daily-workers"; label: string; icon: string }> = [];
+            
+            if (initialRole === UserRole.CANDIDATE_HUNTER) {
+              // Ish beruvchi: Ishchilar va Kunlik ishchilarni ko'radi (o'zi vakansiya beradi)
+              sections.push({ id: "workers", label: t("nav.workers") || "Ishchilar", icon: "fa-users" });
+              sections.push({ id: "daily-workers", label: t("nav.daily_workers"), icon: "fa-people-group" });
+            } else if (initialRole === UserRole.JOB_SEEKER) {
+              // Ishchi: Vakansiyalar va Kunlik ishlarni ko'radi (o'zi rezume yaratadi)
+              sections.push({ id: "vacancies", label: t("nav.vacancies"), icon: "fa-briefcase" });
+              sections.push({ id: "daily-workers", label: t("nav.daily_workers"), icon: "fa-people-group" });
+            } else {
+              // Kunlik ishchi: Vakansiyalar va Ishchilarni ko'radi
+              sections.push({ id: "vacancies", label: t("nav.vacancies"), icon: "fa-briefcase" });
+              sections.push({ id: "workers", label: t("nav.workers") || "Ishchilar", icon: "fa-users" });
+            }
+            
+            return sections.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => { setActiveSection(s.id); setActiveSubTab("mine"); setPage(1); }}
+                className={`py-3.5 rounded-xl text-[10px] font-bold uppercase tracking-wide border transition-all flex flex-col items-center gap-1.5 active:scale-95 ${
+                  activeSection === s.id
+                    ? "bg-indigo-600 text-white border-transparent shadow-md"
+                    : "bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100"
+                }`}
+              >
+                <i className={`fa-solid ${s.icon} text-base`} />
+                {s.label}
+              </button>
+            ));
+          })()}
         </div>
       </div>
 
@@ -892,14 +935,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     </div>
   );
 
-  // + tugmasi bosilganda
+  // + tugmasi bosilganda — foydalanuvchi o'z kontentini yaratadi
   const handlePlusPress = () => {
-    if (activeSection === "vacancies" || initialRole === UserRole.CANDIDATE_HUNTER) {
-      onAddVacancy();
-    } else if (activeSection === "daily-workers" || initialRole === UserRole.DAILY_JOB_SEEKER) {
-      onAddResume();
+    if (initialRole === UserRole.CANDIDATE_HUNTER) {
+      onAddVacancy(); // Ish beruvchi vakansiya yaratadi
+    } else if (initialRole === UserRole.DAILY_JOB_SEEKER) {
+      onAddResume(); // Kunlik ishchi e'lon yaratadi
     } else {
-      onAddResume();
+      onAddResume(); // Ishchi rezume yaratadi
     }
   };
 
