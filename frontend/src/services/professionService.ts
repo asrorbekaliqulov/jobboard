@@ -33,16 +33,29 @@ class ProfessionService {
         const data: Profession[] = Array.isArray(json) ? json : (json.items || []);
 
         const lang = i18n.language ? i18n.language.split('-')[0] : 'en';
-        // @ts-ignore
         const nameKey = `name_${lang}`;
 
         return data.sort((a, b) => {
-            // @ts-ignore
-            const nameA = (a[nameKey] || a.name_en || '').toString().toLowerCase();
-            // @ts-ignore
-            const nameB = (b[nameKey] || b.name_en || '').toString().toLowerCase();
+            const nameA = ((a as any)[nameKey] || a.name_en || '').toString().toLowerCase();
+            const nameB = ((b as any)[nameKey] || b.name_en || '').toString().toLowerCase();
             return nameA.localeCompare(nameB);
         });
+    }
+
+    /**
+     * Get professions as a tree (top-level with nested children).
+     * Used for home page category display and filter modal.
+     */
+    async getTree(): Promise<Profession[]> {
+        const response = await fetch(`${API_URL}/tree`, {
+            headers: this.getHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch professions tree');
+        }
+
+        return response.json();
     }
 }
 

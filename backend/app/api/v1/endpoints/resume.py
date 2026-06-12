@@ -35,20 +35,17 @@ async def list_resumes(
     If user_id is provided, it filters by that user.
     category_id: filter by profession category (includes subcategory professions).
     """
-    # If category_id is provided, resolve to profession_ids
+    # If category_id is provided, resolve to profession_ids (parent profession + its children)
     category_profession_ids = None
     if category_id and not profession_id:
-        from app.models.profession import Profession as ProfModel, ProfessionCategory
+        from app.models.profession import Profession as ProfModel
         from sqlalchemy import select as sa_select
-        cat_ids = [category_id]
+        prof_ids = [category_id]
         children_q = await db.execute(
-            sa_select(ProfessionCategory.id).where(ProfessionCategory.parent_id == category_id)
+            sa_select(ProfModel.id).where(ProfModel.parent_id == category_id)
         )
-        cat_ids.extend([row[0] for row in children_q.all()])
-        prof_q = await db.execute(
-            sa_select(ProfModel.id).where(ProfModel.category_id.in_(cat_ids))
-        )
-        category_profession_ids = [row[0] for row in prof_q.all()]
+        prof_ids.extend([row[0] for row in children_q.all()])
+        category_profession_ids = prof_ids
 
     age_from, age_till = None, None
     if age_range:

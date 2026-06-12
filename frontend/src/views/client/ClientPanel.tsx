@@ -7,7 +7,6 @@ import {
   DailyJobSeeker,
   ItemStatus,
   Profession,
-  ProfessionCategory,
   Region,
   User,
 } from "../../types.ts";
@@ -20,7 +19,6 @@ import {
   ConfirmModal,
 } from "../../components/Shared.tsx";
 import { professionService } from "../../services/professionService.ts";
-import { professionCategoryService } from "../../services/professionCategoryService.ts";
 import FilterModal from "../../components/FilterModal.tsx";
 import { regionService } from "../../services/regionService.ts";
 import {
@@ -129,7 +127,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [searchText, setSearchText] = useState("");
   const [activeFilterChip, setActiveFilterChip] = useState("all");
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [categories, setCategories] = useState<ProfessionCategory[]>([]);
+  const [categories, setCategories] = useState<Profession[]>([]);
 
   const [filters, setFilters] = useState({
     profession: "",
@@ -164,9 +162,9 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   useEffect(() => {
     handleProfessionSearch("");
     handleRegionSearch("");
-    // Fetch categories tree
+    // Fetch professions tree for categories display
     if (authService.isAuthenticated()) {
-      professionCategoryService.getCategoriesTree()
+      professionService.getTree()
         .then(setCategories)
         .catch(console.error);
     }
