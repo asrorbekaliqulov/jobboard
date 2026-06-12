@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filters, Gender, WorkFormat, WorkType, ProfessionCategory } from '../types.ts';
+import { Filters, Gender, WorkFormat, WorkType, Profession } from '../types.ts';
 import { SearchableSelect } from './Shared.tsx';
-import { professionCategoryService } from '../services/professionCategoryService.ts';
+import { professionService } from '../services/professionService.ts';
 import { getProfessionIcon } from '../utils/professionIcons.ts';
 
 interface FilterModalProps {
@@ -36,7 +36,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [tempFilters, setTempFilters] = useState<Filters>(filters);
-  const [categories, setCategories] = useState<ProfessionCategory[]>([]);
+  const [categories, setCategories] = useState<Profession[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [isCatLoading, setIsCatLoading] = useState(false);
 
@@ -46,10 +46,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
     return item[`name_${lang}`] || item.name_en || item.name_ru || item.name_uz || item.name;
   };
 
-  // Load categories on mount
+  // Load professions tree on mount
   useEffect(() => {
     setIsCatLoading(true);
-    professionCategoryService.getCategoriesTree()
+    professionService.getTree()
       .then(setCategories)
       .catch(console.error)
       .finally(() => setIsCatLoading(false));

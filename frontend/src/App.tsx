@@ -380,20 +380,11 @@ const App: React.FC = () => {
 
   const handleSaveAdminProfession = async (p: any) => {
     try {
-      if (p.__isCategory) {
-        // Handle category save
-        const { __isCategory, id, children, professions_count, ...catData } = p;
-        if (id) {
-          await adminApi.professionCategories.update(id, catData);
-        } else {
-          await adminApi.professionCategories.create(catData);
-        }
+      const { id, children, ...data } = p;
+      if (id) {
+        await adminApi.professions.update(id, data);
       } else {
-        if (p.id) {
-          await adminApi.professions.update(p.id, p);
-        } else {
-          await adminApi.professions.create(p);
-        }
+        await adminApi.professions.create(data);
       }
       setAdminProfessionModal(null);
       setAdminRefreshSignal((s) => s + 1);
@@ -478,13 +469,12 @@ const App: React.FC = () => {
         await adminApi.users.delete(id);
         setAdminRefreshSignal((s) => s + 1);
       } else if (type === "professions") await adminApi.professions.delete(id);
-      else if (type === "categories") await adminApi.professionCategories.delete(id);
       else if (type === "regions") await adminApi.regions.delete(id);
       else if (type === "districts") await adminApi.districts.delete(id);
       else if (type === "works") await adminApi.works.delete(id);
 
       if (
-        ["users", "professions", "categories", "regions", "districts", "works"].includes(type)
+        ["users", "professions", "regions", "districts", "works"].includes(type)
       ) {
         setAdminRefreshSignal((s) => s + 1);
       }

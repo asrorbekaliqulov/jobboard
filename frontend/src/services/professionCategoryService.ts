@@ -1,47 +1,19 @@
-import { ProfessionCategory } from '../types';
-import { mainApi } from './api';
-import { authService } from './auth';
-
-const API_URL = mainApi + '/api/v1/profession-categories';
+/**
+ * @deprecated - Use professionService.getTree() instead.
+ * This file is kept only for import compatibility during transition.
+ */
+import { Profession } from '../types';
+import { professionService } from './professionService';
 
 class ProfessionCategoryService {
-    private getHeaders() {
-        const token = authService.getToken();
-        return {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        };
+    async getCategoriesTree(): Promise<Profession[]> {
+        return professionService.getTree();
     }
 
-    /**
-     * Get all categories as a tree (top-level with nested children).
-     * Used for home page category display and filter modal.
-     */
-    async getCategoriesTree(): Promise<ProfessionCategory[]> {
-        const response = await fetch(`${API_URL}/`, {
-            headers: this.getHeaders()
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch profession categories');
-        }
-
-        return response.json();
-    }
-
-    /**
-     * Get subcategories of a specific category.
-     */
-    async getSubcategories(categoryId: number): Promise<ProfessionCategory[]> {
-        const response = await fetch(`${API_URL}/${categoryId}/subcategories`, {
-            headers: this.getHeaders()
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch subcategories');
-        }
-
-        return response.json();
+    async getSubcategories(parentId: number): Promise<Profession[]> {
+        const tree = await professionService.getTree();
+        const parent = tree.find(p => p.id === parentId);
+        return parent?.children || [];
     }
 }
 
