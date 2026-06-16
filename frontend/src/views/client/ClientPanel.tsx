@@ -599,8 +599,107 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   );
 
   // ─── VACANCIES TAB (mine) - Vacancies List Design ───────────────────────────
+  // Foydalanuvchining o'z e'lonlari
+  const myItems = useMemo(() => {
+    if (!currentUser) return [];
+    if (activeSection === "vacancies") {
+      return vacancies.filter((v) => v.user_id === Number(currentUser.id));
+    } else if (activeSection === "workers") {
+      return resumes.filter((r) => r.user_id === Number(currentUser.id));
+    } else {
+      return dailyJobSeekers.filter((r) => r.user_id === Number(currentUser.id));
+    }
+  }, [activeSection, vacancies, resumes, dailyJobSeekers, currentUser]);
+
   const renderVacanciesList = () => (
     <div className="space-y-4 px-4 pt-4 pb-4 fade-up">
+      {/* ─── My Own Items Section ──────────────────────────────────── */}
+      {myItems.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+              <i className="fa-solid fa-folder-open text-sm mr-2" style={{ color: 'var(--accent)' }} />
+              {activeSection === "vacancies" 
+                ? t("client_panel.my_vacancies") || "Mening vakansiyalarim"
+                : activeSection === "workers"
+                  ? t("client_panel.my_resumes") || "Mening rezumelarim"
+                  : t("client_panel.my_daily_posts") || "Mening e'lonlarim"}
+            </h2>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--accent)' + '15', color: 'var(--accent)' }}>
+              {myItems.length} ta
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {myItems.map((item: any, i: number) => {
+              const isVacancy = "company_name" in item;
+              if (isVacancy) {
+                return (
+                  <ClientVacancyOwnerCard
+                    key={`my-${item.id}`}
+                    vacancy={item}
+                    onEdit={onEditVacancy}
+                    onDelete={(id) => setDeleteTarget({ id, type: "v" })}
+                    index={i}
+                  />
+                );
+              }
+              return (
+                <ClientResumeOwnerCard
+                  key={`my-${item.id}`}
+                  resume={item}
+                  onEdit={activeSection === "daily-workers" ? (onEditDailyJobSeeker as any) : onEditResume}
+                  onDelete={(id) => setDeleteTarget({ id, type: activeSection === "daily-workers" ? "d" : "r" })}
+                  index={i}
+                />
+              );
+            })}
+          </div>
+
+          {/* Divider between my items and public items */}
+          <div className="flex items-center gap-3 pt-2">
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-primary)' }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+              {activeSection === "vacancies" 
+                ? t("client_panel.all_vacancies") || "Barcha vakansiyalar"
+                : activeSection === "workers"
+                  ? t("client_panel.all_resumes") || "Barcha rezumelar"
+                  : t("client_panel.all_daily") || "Barcha e'lonlar"}
+            </span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-primary)' }} />
+          </div>
+        </div>
+      )}
+
+      {/* Add button - always shows user's own content creation based on role */}
+      {initialRole === UserRole.CANDIDATE_HUNTER && (
+        <button
+          onClick={onAddVacancy}
+          className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100"
+        >
+          <i className="fa-solid fa-plus text-sm" />
+          {t("client_panel.post_vacancy")}
+        </button>
+      )}
+      {initialRole === UserRole.JOB_SEEKER && (
+        <button
+          onClick={onAddResume}
+          className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-blue-100"
+        >
+          <i className="fa-solid fa-plus text-sm" />
+          {t("client_forms.create")} {t("common.resume")}
+        </button>
+      )}
+      {initialRole === UserRole.DAILY_JOB_SEEKER && (
+        <button
+          onClick={onAddResume}
+          className="w-full py-3.5 bg-emerald-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-emerald-100"
+        >
+          <i className="fa-solid fa-plus text-sm" />
+          {t("client_forms.create")} {t("nav.daily_workers")}
+        </button>
+      )}
+
       {/* Search bar */}
       <div className="relative">
         <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
@@ -641,35 +740,6 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           </button>
         ))}
       </div>
-
-      {/* Add button - always shows user's own content creation based on role */}
-      {initialRole === UserRole.CANDIDATE_HUNTER && (
-        <button
-          onClick={onAddVacancy}
-          className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100"
-        >
-          <i className="fa-solid fa-plus text-sm" />
-          {t("client_panel.post_vacancy")}
-        </button>
-      )}
-      {initialRole === UserRole.JOB_SEEKER && (
-        <button
-          onClick={onAddResume}
-          className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-blue-100"
-        >
-          <i className="fa-solid fa-plus text-sm" />
-          {t("client_forms.create")} {t("common.resume")}
-        </button>
-      )}
-      {initialRole === UserRole.DAILY_JOB_SEEKER && (
-        <button
-          onClick={onAddResume}
-          className="w-full py-3.5 bg-emerald-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-emerald-100"
-        >
-          <i className="fa-solid fa-plus text-sm" />
-          {t("client_forms.create")} {t("nav.daily_workers")}
-        </button>
-      )}
 
       {/* Vacancy/Resume list */}
       <div className="space-y-3">

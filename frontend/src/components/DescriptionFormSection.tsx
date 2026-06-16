@@ -24,7 +24,7 @@ const DescriptionFormSection: React.FC<DescriptionFormSectionProps> = ({
 
   const accentColor = type === "vacancy" ? "purple" : isDailyJobSeeker ? "emerald" : "blue";
   const maxLength = type === "vacancy" ? 2000 : 1200;
-  const minLength = 50;
+  const minLength = 20;
 
   const handleDescriptionChange = (value: string) => {
     const words = value.trim().split(/\s+/).filter(word => word.length > 0);
