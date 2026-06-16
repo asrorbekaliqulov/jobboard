@@ -84,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({
   }, [activeSubTab]);
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+    <div className="relative flex flex-col h-screen max-w-md mx-auto overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <header className="px-5 py-3 flex justify-between items-center sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-primary)' }}>
         <div className="flex items-center gap-2">
@@ -157,7 +157,7 @@ const Layout: React.FC<LayoutProps> = ({
       {/* ─── Scroll to top ───────────────────────────────────────────── */}
       <button
         onClick={scrollToTop}
-        className={`fixed z-40 right-4 transition-all duration-300 ${
+        className={`absolute z-40 right-4 transition-all duration-300 ${
           showScrollTop ? "bottom-32 opacity-100 scale-100" : "bottom-32 opacity-0 scale-75 pointer-events-none"
         } w-10 h-10 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90`}
         style={{ background: 'var(--accent)' }}
@@ -166,8 +166,8 @@ const Layout: React.FC<LayoutProps> = ({
       </button>
 
       {/* ─── Bottom Navigation ───────────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-primary)', boxShadow: '0 -4px 12px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-md mx-auto flex items-center justify-around safe-bottom pt-3 pb-4">
+      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-primary)', boxShadow: '0 -4px 12px rgba(0,0,0,0.06)' }}>
+        <div className="flex items-center justify-around safe-bottom pt-3 pb-4">
           {/* First two tabs */}
           {tabs.slice(0, 2).map((tab) => {
             const isActive = activeSubTab === tab.id;

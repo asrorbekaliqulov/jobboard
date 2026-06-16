@@ -158,6 +158,32 @@ export const ClientVacancyExplorerCard: React.FC<{
       {/* ─── Expanded Content ───────────────────────────────────────────── */}
       <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="px-4 pb-4 pt-2 border-t border-slate-50 space-y-4 fade-up">
+          {/* Image */}
+          {vacancy.image_url && (
+            <div className="rounded-xl overflow-hidden">
+              <img
+                src={vacancy.image_url}
+                alt={getLocalizedName(vacancy.profession)}
+                className="w-full h-48 object-cover rounded-xl"
+              />
+            </div>
+          )}
+
+          {/* Video */}
+          {vacancy.video_url && (
+            <div className="rounded-xl overflow-hidden">
+              <video
+                src={vacancy.video_url}
+                controls
+                className="w-full rounded-xl"
+                preload="metadata"
+                playsInline
+              >
+                Brauzeringiz video formatini qo'llab-quvvatlamaydi.
+              </video>
+            </div>
+          )}
+
           {/* Description */}
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ish haqida ma'lumot</p>
@@ -292,8 +318,34 @@ export const ClientVacancyOwnerCard: React.FC<{
         </div>
       </div>
 
-      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up">
+      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up space-y-3">
+          {/* Image */}
+          {vacancy.image_url && (
+            <div className="rounded-xl overflow-hidden">
+              <img
+                src={vacancy.image_url}
+                alt={getLocalizedName(vacancy.profession)}
+                className="w-full h-40 object-cover rounded-xl"
+              />
+            </div>
+          )}
+
+          {/* Video */}
+          {vacancy.video_url && (
+            <div className="rounded-xl overflow-hidden">
+              <video
+                src={vacancy.video_url}
+                controls
+                className="w-full rounded-xl"
+                preload="metadata"
+                playsInline
+              >
+                Brauzeringiz video formatini qo'llab-quvvatlamaydi.
+              </video>
+            </div>
+          )}
+
           <RichTextDisplay content={vacancy.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
         </div>
       </div>
@@ -405,6 +457,21 @@ export const ClientResumeExplorerCard: React.FC<{
 
       <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="px-4 pb-4 pt-2 border-t border-slate-50 space-y-4 fade-up">
+          {/* Video */}
+          {resume.video && (
+            <div className="rounded-xl overflow-hidden">
+              <video
+                src={resume.video}
+                controls
+                className="w-full rounded-xl"
+                preload="metadata"
+                playsInline
+              >
+                Brauzeringiz video formatini qo'llab-quvvatlamaydi.
+              </video>
+            </div>
+          )}
+
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomzod haqida</p>
             <RichTextDisplay content={resume.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
@@ -492,8 +559,23 @@ export const ClientResumeOwnerCard: React.FC<{
         </div>
       </div>
 
-      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up">
+      <div className={`overflow-hidden transition-all duration-400 ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-3 pt-2 border-t border-slate-50 fade-up space-y-3">
+          {/* Video */}
+          {resume.video && (
+            <div className="rounded-xl overflow-hidden">
+              <video
+                src={resume.video}
+                controls
+                className="w-full rounded-xl"
+                preload="metadata"
+                playsInline
+              >
+                Brauzeringiz video formatini qo'llab-quvvatlamaydi.
+              </video>
+            </div>
+          )}
+
           <RichTextDisplay content={resume.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
         </div>
       </div>

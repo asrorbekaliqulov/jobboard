@@ -66,30 +66,34 @@ class ResumeService {
     }
 
     async createResume(resume: Partial<Resume>): Promise<Resume> {
+        const cleanedResume = this.sanitizeResumeData(resume);
         const response = await fetch(`${API_URL}`, {
             method: 'POST',
             headers: this.getHeaders(),
-            body: JSON.stringify(resume)
+            body: JSON.stringify(cleanedResume)
         });
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.detail || 'Failed to create resume');
+            const detail = Array.isArray(error.detail) ? error.detail[0]?.msg : (error.detail || 'Failed to create resume');
+            throw new Error(detail);
         }
 
         return response.json();
     }
 
     async updateResume(id: number, resume: Partial<Resume>): Promise<Resume> {
+        const cleanedResume = this.sanitizeResumeData(resume);
         const response = await fetch(`${API_URL}/${id}`, {
             method: 'PUT',
             headers: this.getHeaders(),
-            body: JSON.stringify(resume)
+            body: JSON.stringify(cleanedResume)
         });
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.detail || 'Failed to update resume');
+            const detail = Array.isArray(error.detail) ? error.detail[0]?.msg : (error.detail || 'Failed to update resume');
+            throw new Error(detail);
         }
 
         return response.json();
@@ -125,6 +129,33 @@ class ResumeService {
         }
 
         return response.json();
+    }
+
+    private sanitizeResumeData(data: Partial<Resume>): any {
+        const cleaned: any = { ...data };
+
+        // Remove metadata fields that shouldn't be in POST/PUT body
+        delete cleaned.id;
+        delete cleaned.created_at;
+        delete cleaned.updated_at;
+        delete cleaned.viewed_count;
+        delete cleaned.profession;
+        delete cleaned.region;
+        delete cleaned.user;
+
+        // Convert empty strings to null for optional fields (fixes 422 errors)
+        if (cleaned.email === '') cleaned.email = null;
+        if (cleaned.portfolio === '') cleaned.portfolio = null;
+        if (cleaned.video === '') cleaned.video = null;
+        if (cleaned.middle_name === '') cleaned.middle_name = null;
+
+        // Ensure numeric fields are numbers
+        if (cleaned.profession_id) cleaned.profession_id = Number(cleaned.profession_id);
+        if (cleaned.region_id) cleaned.region_id = Number(cleaned.region_id);
+        if (cleaned.age) cleaned.age = Number(cleaned.age);
+        if (cleaned.experience !== undefined && cleaned.experience !== null) cleaned.experience = Number(cleaned.experience);
+
+        return cleaned;
     }
 
     async deleteResume(id: number): Promise<void> {

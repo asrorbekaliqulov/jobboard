@@ -275,9 +275,12 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
     }
 
     // Description uzunligi tekshirish
-    if (formData.description && formData.description.length < 50) {
-      alert("Tavsif kamida 50 ta so'zdan iborat bo'lishi kerak");
-      return;
+    if (formData.description) {
+      const words = formData.description.trim().split(/\s+/).filter((w: string) => w.length > 0);
+      if (words.length < 20) {
+        alert("Tavsif kamida 20 ta so'zdan iborat bo'lishi kerak");
+        return;
+      }
     }
 
     isSubmittingRef.current = true;
@@ -347,6 +350,54 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
         delete cleanedData.id;
         delete cleanedData.user_id;
       }
+
+      // Optional string fieldlarni tozalash (bo'sh stringni null qilish)
+      if (cleanedData.email === '' || cleanedData.email === undefined) cleanedData.email = null;
+      if (cleanedData.portfolio === '' || cleanedData.portfolio === undefined) cleanedData.portfolio = null;
+      if (cleanedData.video === '' || cleanedData.video === undefined) cleanedData.video = null;
+      if (cleanedData.middle_name === '' || cleanedData.middle_name === undefined) cleanedData.middle_name = null;
+      if (cleanedData.image_url === '' || cleanedData.image_url === undefined) cleanedData.image_url = null;
+      if (cleanedData.video_url === '' || cleanedData.video_url === undefined) cleanedData.video_url = null;
+
+      // Resume uchun vacancy fieldlarini olib tashlash va aksincha
+      if (type === "resume") {
+        delete cleanedData.company_name;
+        delete cleanedData.work_format;
+        delete cleanedData.work_type;
+        delete cleanedData.work_hours;
+        delete cleanedData.schedule;
+        delete cleanedData.exp_from;
+        delete cleanedData.exp_till;
+        delete cleanedData.salary_from;
+        delete cleanedData.salary_till;
+        delete cleanedData.image_url;
+        delete cleanedData.video_url;
+        // Daily job seeker bo'lmasa, daily-specific fieldlarni olib tashlash
+        if (!isDailyJobSeeker) {
+          delete cleanedData.work_ids;
+          delete cleanedData.district_ids;
+          delete cleanedData.additional_workers;
+        }
+      } else {
+        // Vacancy uchun resume fieldlarini olib tashlash
+        delete cleanedData.first_name;
+        delete cleanedData.last_name;
+        delete cleanedData.middle_name;
+        delete cleanedData.age;
+        delete cleanedData.gender;
+        delete cleanedData.experience;
+        delete cleanedData.portfolio;
+        delete cleanedData.video;
+        delete cleanedData.work_ids;
+        delete cleanedData.district_ids;
+        delete cleanedData.additional_workers;
+      }
+
+      // Raqamli fieldlarni tekshirish
+      if (cleanedData.profession_id) cleanedData.profession_id = Number(cleanedData.profession_id);
+      if (cleanedData.region_id) cleanedData.region_id = Number(cleanedData.region_id);
+      if (cleanedData.age) cleanedData.age = Number(cleanedData.age);
+      if (cleanedData.experience !== undefined) cleanedData.experience = Number(cleanedData.experience);
 
       // Phone raqamni formatlash
       if (cleanedData.phone) {

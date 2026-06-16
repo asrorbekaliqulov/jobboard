@@ -40,13 +40,48 @@ class DailyJobSeekerService {
     return response.json();
   }
 
+  private sanitizeData(data: Partial<DailyJobSeeker>): any {
+    const cleaned: any = { ...data };
+
+    // Remove metadata fields that shouldn't be in POST/PUT body
+    delete cleaned.id;
+    delete cleaned.created_at;
+    delete cleaned.updated_at;
+    delete cleaned.viewed_count;
+    delete cleaned.profession;
+    delete cleaned.region;
+    delete cleaned.user;
+    delete cleaned.works;
+    delete cleaned.districts;
+
+    // Convert empty strings to null for optional fields (fixes 422 errors)
+    if (cleaned.email === '') cleaned.email = null;
+    if (cleaned.portfolio === '') cleaned.portfolio = null;
+    if (cleaned.video === '') cleaned.video = null;
+    if (cleaned.middle_name === '') cleaned.middle_name = null;
+    if (cleaned.profession_id === 0 || cleaned.profession_id === '') cleaned.profession_id = null;
+
+    // Ensure numeric fields are numbers
+    if (cleaned.region_id) cleaned.region_id = Number(cleaned.region_id);
+    if (cleaned.age) cleaned.age = Number(cleaned.age);
+    if (cleaned.experience !== undefined && cleaned.experience !== null) cleaned.experience = Number(cleaned.experience);
+    if (cleaned.additional_workers !== undefined && cleaned.additional_workers !== null) cleaned.additional_workers = Number(cleaned.additional_workers);
+
+    // Ensure array fields
+    if (!Array.isArray(cleaned.work_ids)) cleaned.work_ids = [];
+    if (!Array.isArray(cleaned.district_ids)) cleaned.district_ids = [];
+
+    return cleaned;
+  }
+
   async createDailyJobSeeker(
     data: Partial<DailyJobSeeker>,
   ): Promise<DailyJobSeeker> {
+    const cleanedData = this.sanitizeData(data);
     const response = await fetch(`${API_URL}/`, {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify(cleanedData),
     });
     if (!response.ok) {
       const error = await response.json();
@@ -63,10 +98,11 @@ class DailyJobSeekerService {
     id: number,
     data: Partial<DailyJobSeeker>,
   ): Promise<DailyJobSeeker> {
+    const cleanedData = this.sanitizeData(data);
     const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify(cleanedData),
     });
     if (!response.ok) {
       const error = await response.json();

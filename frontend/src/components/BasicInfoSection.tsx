@@ -47,8 +47,8 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   };
 
   const handleNameChange = (field: string, value: string) => {
-    // Faqat harflar, bo'sh joy va apostrofni qabul qilish
-    const cleanValue = value.replace(/[^a-zA-Zа-яёА-ЯЁ\u0400-\u04FF\s'`-]/g, '');
+    // Harflar, bo'sh joy, apostrof va oʻzbek harflarini qabul qilish
+    const cleanValue = value.replace(/[^a-zA-Zа-яёА-ЯЁ\u0400-\u04FF\u02BB\u02BC\s'`\u2018\u2019-]/g, '');
     setFormData({ ...formData, [field]: cleanValue });
   };
 
