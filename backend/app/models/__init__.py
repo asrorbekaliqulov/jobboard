@@ -7,6 +7,17 @@ from app.models.resume import Resume, ResumeStatus, Gender
 from app.models.daily_job_seeker import DailyJobSeeker, Work, daily_job_seeker_works
 from app.models.favourite import FavouriteVacancy, FavouriteResume, FavouriteDailyJobSeeker
 from app.models.channel_message import ChannelMessage, ChannelMessageEntity
+from app.models.ai_models import (
+    EmployerTrustRating,
+    EmployerReview,
+    TrustLevel,
+    AIMatchResult,
+    AIInterviewSession,
+    InterviewStatus,
+    AIFraudReport,
+    FraudSeverity,
+    AISalaryCache,
+)
 
 __all__ = [
     "Base",
@@ -32,4 +43,14 @@ __all__ = [
     "FavouriteDailyJobSeeker",
     "ChannelMessage",
     "ChannelMessageEntity",
+    # AI Models
+    "EmployerTrustRating",
+    "EmployerReview",
+    "TrustLevel",
+    "AIMatchResult",
+    "AIInterviewSession",
+    "InterviewStatus",
+    "AIFraudReport",
+    "FraudSeverity",
+    "AISalaryCache",
 ]

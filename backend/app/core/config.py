@@ -39,6 +39,15 @@ class Settings(BaseSettings):
         None  # e.g. https://storage.googleapis.com/BUCKET or custom CDN
     )
 
+    # AI / OpenAI Configuration
+    OPENAI_API_KEY: str = ""  # OpenAI API key for ChatGPT features
+    OPENAI_MODEL: str = "gpt-4o-mini"  # Model to use (cost-effective)
+    OPENAI_MAX_TOKENS: int = 2000  # Max tokens per response
+
+    # HeadHunter API Configuration
+    HH_API_BASE_URL: str = "https://api.hh.uz"  # HeadHunter Uzbekistan API
+    HH_API_TOKEN: str = ""  # Optional HH API token for higher limits
+
     @property
     def use_webhook(self) -> bool:
         """Returns True if webhook mode should be used, False for polling."""
@@ -48,6 +57,11 @@ class Settings(BaseSettings):
     def use_redis(self) -> bool:
         """Returns True if Redis URL is configured."""
         return bool(self.REDIS_URL and self.REDIS_URL.strip())
+
+    @property
+    def ai_enabled(self) -> bool:
+        """Returns True if OpenAI API key is configured."""
+        return bool(self.OPENAI_API_KEY and self.OPENAI_API_KEY.strip())
 
     class Config:
         env_file = ".env"
