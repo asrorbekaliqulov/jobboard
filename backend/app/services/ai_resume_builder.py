@@ -1,6 +1,7 @@
 """
 AI Resume Builder Service
 Oddiy gaplardan professional rezyume yaratadi.
+BARCHA maydonlarni to'ldiradi: ism, familiya, yosh, tajriba, kasb, telefon va h.k.
 """
 import json
 import logging
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class AIResumeBuilderService:
-    """Generates professional resume from simple text."""
+    """Generates professional resume from simple text - fills ALL fields."""
 
     @staticmethod
     async def build_resume(
@@ -36,21 +37,33 @@ class AIResumeBuilderService:
         target_lang = lang_map.get(request.language, "o'zbek")
 
         prompt = (
-            f"Ishchi haqidagi oddiy matn: \"{request.simple_text}\"\n"
+            f"Ishchi haqidagi matn: \"{request.simple_text}\"\n"
             f"Til: {target_lang}\n\n"
             f"Mavjud kasblar: {json.dumps(prof_list[:50], ensure_ascii=False)}\n\n"
-            "Ushbu matndan professional rezyume yozing.\n"
+            "Ushbu matndan BARCHA rezyume maydonlarini to'ldiring.\n"
+            "Agar matnda ma'lumot bo'lmasa, mantiqiy taxmin qiling.\n\n"
             "Javob JSON formatda:\n"
             "{\n"
-            '  "professional_summary": "Professional qisqacha tavsif (2-3 jumla)",\n'
-            '  "skills": ["konikma1", "konikma2"],\n'
-            '  "experience_description": "Tajriba haqida batafsil",\n'
-            '  "suggested_profession_id": null yoki ID raqam,\n'
+            '  "first_name": "Ism (matndan topilsa)",\n'
+            '  "last_name": "Familiya (matndan topilsa)",\n'
+            '  "age": raqam (matndan topilsa, yo\'qsa 25),\n'
+            '  "experience": tajriba yillari raqam (0 agar aytilmasa),\n'
+            '  "gender": "male" yoki "female" yoki "any",\n'
+            '  "phone": "telefon raqam (matndan topilsa)" yoki null,\n'
+            '  "telegram": "telegram username (matndan topilsa)" yoki null,\n'
+            '  "suggested_profession_id": eng mos kasb ID raqam yoki null,\n'
             '  "suggested_profession_name": "Kasb nomi",\n'
-            '  "formatted_resume_text": "Toliq tayyor rezyume matni"\n'
+            '  "professional_summary": "Professional qisqacha tavsif (2-3 jumla)",\n'
+            '  "skills": ["konikma1", "konikma2", "konikma3"],\n'
+            '  "experience_description": "Tajriba haqida batafsil (3-5 jumla)",\n'
+            '  "formatted_resume_text": "Toliq professional rezyume matni (description uchun)"\n'
             "}\n\n"
-            "Rezyume professional, aniq va ishonchli bo'lsin. "
-            "Faqat berilgan ma'lumotlar asosida yoz, o'ylab qo'shma."
+            "MUHIM QOIDALAR:\n"
+            "- formatted_resume_text — bu description maydoni uchun, professional va batafsil yoz (kamida 50 so'z)\n"
+            "- Agar matnda ism/familiya bo'lmasa, null qo'y\n"
+            "- Faqat berilgan ma'lumotlar asosida yoz, o'ylab qo'shma\n"
+            "- Tajriba yillari raqam bo'lsin (masalan: 5)\n"
+            "- gender: erkak bo'lsa 'male', ayol bo'lsa 'female', noaniq bo'lsa 'any'"
         )
 
         ai_response = await ai_chat_completion(
@@ -67,4 +80,12 @@ class AIResumeBuilderService:
             suggested_profession_id=result.get("suggested_profession_id"),
             suggested_profession_name=result.get("suggested_profession_name"),
             formatted_resume_text=result.get("formatted_resume_text", ""),
+            # New fields for form auto-fill
+            first_name=result.get("first_name"),
+            last_name=result.get("last_name"),
+            age=result.get("age"),
+            experience=result.get("experience"),
+            gender=result.get("gender"),
+            phone=result.get("phone"),
+            telegram=result.get("telegram"),
         )

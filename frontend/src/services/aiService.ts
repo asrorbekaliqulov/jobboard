@@ -75,6 +75,14 @@ export interface ResumeBuilderResponse {
   suggested_profession_id: number | null;
   suggested_profession_name: string | null;
   formatted_resume_text: string;
+  // Form auto-fill fields
+  first_name: string | null;
+  last_name: string | null;
+  age: number | null;
+  experience: number | null;
+  gender: string | null;
+  phone: string | null;
+  telegram: string | null;
 }
 
 export interface CareerSuggestion {

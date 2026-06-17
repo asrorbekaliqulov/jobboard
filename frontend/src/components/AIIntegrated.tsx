@@ -227,10 +227,19 @@ export const AIWriterSection: React.FC<AIWriterProps> = ({ type, onGenerated, us
         });
       } else {
         const r = await aiService.buildResume({ simple_text: text });
-        onGenerated({
+        // Fill ALL form fields from AI response
+        const formFields: any = {
           description: r.formatted_resume_text,
-          profession_id: r.suggested_profession_id,
-        });
+        };
+        if (r.suggested_profession_id) formFields.profession_id = r.suggested_profession_id;
+        if (r.first_name) formFields.first_name = r.first_name;
+        if (r.last_name) formFields.last_name = r.last_name;
+        if (r.age) formFields.age = r.age;
+        if (r.experience !== undefined && r.experience !== null) formFields.experience = r.experience;
+        if (r.gender) formFields.gender = r.gender;
+        if (r.phone) formFields.phone = r.phone;
+        if (r.telegram) formFields.telegram = r.telegram;
+        onGenerated(formFields);
       }
       setCollapsed(true);
     } catch (e: any) {

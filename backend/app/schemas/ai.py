@@ -19,7 +19,7 @@ class AIErrorResponse(BaseModel):
 
 class AIWorkerFinderRequest(BaseModel):
     """Ish beruvchi matnli e'lonini tahlil qilish uchun."""
-    description: str = Field(..., min_length=10, max_length=2000, description="E'lon matni yoki talab")
+    description: str = Field(..., min_length=3, max_length=2000, description="E'lon matni yoki talab")
     region_id: Optional[int] = None
     max_results: int = Field(default=10, ge=1, le=50)
 
@@ -44,7 +44,7 @@ class AIWorkerFinderResponse(BaseModel):
 
 class AIJobPostWriterRequest(BaseModel):
     """Oddiy matndan professional e'lon yaratish."""
-    simple_text: str = Field(..., min_length=5, max_length=500, description="Oddiy matn, masalan: 'Kafega ofitsiant kerak'")
+    simple_text: str = Field(..., min_length=3, max_length=500, description="Oddiy matn, masalan: 'Kafega ofitsiant kerak'")
     company_name: Optional[str] = None
     region_id: Optional[int] = None
     language: str = Field(default="uz", description="uz, ru, en")
@@ -65,7 +65,7 @@ class AIJobPostWriterResponse(BaseModel):
 
 class AIResumeBuilderRequest(BaseModel):
     """Oddiy gaplardan professional rezyume yaratish."""
-    simple_text: str = Field(..., min_length=10, max_length=1000, description="Masalan: 'Men elektrikman, 5 yil staj bor'")
+    simple_text: str = Field(..., min_length=3, max_length=2000, description="Masalan: 'Men elektrikman, 5 yil staj bor'")
     language: str = Field(default="uz")
 
 
@@ -76,6 +76,14 @@ class AIResumeBuilderResponse(BaseModel):
     suggested_profession_id: Optional[int] = None
     suggested_profession_name: Optional[str] = None
     formatted_resume_text: str  # Ready-to-use resume text
+    # Form auto-fill fields
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    age: Optional[int] = None
+    experience: Optional[int] = None
+    gender: Optional[str] = None
+    phone: Optional[str] = None
+    telegram: Optional[str] = None
 
 
 # ==================== 4. AI Career Advisor ====================
