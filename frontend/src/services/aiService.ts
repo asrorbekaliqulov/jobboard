@@ -282,3 +282,32 @@ export const aiService = {
   addCompanyReview: (data: { employer_user_id: number; company_name: string; salary_punctuality: number; working_conditions: number; communication: number; overall: number; comment?: string; is_anonymous?: boolean }) =>
     aiRequest<CompanyReviewResponse>('/company-trust/review', data),
 };
+
+
+
+// ==================== AI Agent Search ====================
+
+export interface AgentSearchResult {
+  id: number;
+  type: string; // "vacancy" or "resume"
+  title: string;
+  subtitle: string;
+  region: string;
+  score: number;
+  reason: string;
+  phone?: string;
+  telegram?: string;
+  salary?: string;
+  experience?: string | number;
+}
+
+export interface AgentSearchResponse {
+  items: AgentSearchResult[];
+  summary: string;
+  total: number;
+  search_type: string;
+}
+
+// Add to aiService object - but since it's already exported, add as separate export
+export const aiAgentSearch = (data: { query: string; role?: string; region_id?: number; limit?: number }) =>
+  aiRequest<AgentSearchResponse>('/agent-search', data);
