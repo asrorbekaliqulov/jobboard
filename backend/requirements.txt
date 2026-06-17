@@ -25,3 +25,7 @@ passlib[bcrypt]>=1.7.4
 
 # Storage
 google-cloud-storage>=2.14.0
+
+# AI & External APIs
+openai>=1.30.0
+httpx>=0.27.0
