@@ -34,6 +34,7 @@ import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
 import { getProfessionIcon, getCategoryColor } from "../../utils/professionIcons.ts";
 import AIPanel from "./AIPanel.tsx";
+import { AISearchResults, HHVacancyCard, useHHVacancies, AIBanner } from "../../components/AIIntegrated.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -119,7 +120,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [activeSection, setActiveSection] = useState<"vacancies" | "workers" | "daily-workers">(
     () => sectionForRole(initialRole),
   );
-  const [activeSubTab, setActiveSubTab] = useState<"all" | "mine" | "saved" | "ai" | "more">("all");
+  const [activeSubTab, setActiveSubTab] = useState<"all" | "mine" | "saved" | "more">("all");
   const [page, setPage] = useState(1);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
@@ -152,6 +153,9 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     id: string | number;
     type: "v" | "r" | "d";
   } | null>(null);
+
+  // HeadHunter vacancies (loaded once)
+  const hhVacancies = useHHVacancies(searchText);
 
   const professionOptions = useMemo(
     () => professions.map((p) => ({ value: p.id, label: getLocalizedName(p) })),
@@ -427,17 +431,17 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               </p>
               <h2 className="text-[17px] font-bold leading-tight mb-3 text-white">
                 {initialRole === UserRole.CANDIDATE_HUNTER 
-                  ? t("home.banner_employer") 
-                  : t("home.banner_title")}
+                  ? "🤖 AI sizga mos ishchi topdi!"
+                  : "🤖 AI sizga mos ish topdi!"}
               </h2>
               <button
                 onClick={() => setActiveSubTab("mine")}
                 className="bg-white/95 text-indigo-700 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-lg"
               >
-                <span className="text-sm">&#10024;</span>
+                <i className="fa-solid fa-robot text-sm" />
                 {initialRole === UserRole.CANDIDATE_HUNTER 
-                  ? t("home.view_workers") 
-                  : t("home.view_vacancies")}
+                  ? "Mos ishchilarni ko'rish"
+                  : "Mos vakansiyalarni ko'rish"}
                 <i className="fa-solid fa-chevron-right text-[9px]" />
               </button>
             </div>
@@ -742,6 +746,11 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         ))}
       </div>
 
+      {/* AI Search Results (Google-style) */}
+      {activeSection === "vacancies" && searchText.trim().length >= 3 && (
+        <AISearchResults searchText={searchText} userRole={initialRole} />
+      )}
+
       {/* Vacancy/Resume list */}
       <div className="space-y-3">
         {isNavigating ? (
@@ -751,59 +760,60 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
             {pagedItems.map((item: any, i: number) => {
               const isVacancy = "company_name" in item;
 
-              if (isVacancy) {
-                if (item.user_id === currentUser?.id) {
-                  return (
-                    <ClientVacancyOwnerCard
-                      key={item.id}
-                      vacancy={item}
-                      onEdit={onEditVacancy}
-                      onDelete={(id) => setDeleteTarget({ id, type: "v" })}
-                      index={i}
-                    />
-                  );
-                }
-                return (
-                  <ClientVacancyExplorerCard
-                    key={item.id}
-                    vacancy={item}
-                    isSaved={savedIds.includes(item.id)}
-                    onToggleSave={
-                      initialRole === UserRole.CANDIDATE_HUNTER
-                        ? onToggleVacancySave
-                        : undefined
-                    }
-                    index={i}
-                  />
-                );
-              }
-              if (item.user_id === currentUser?.id) {
-                return (
-                  <ClientResumeOwnerCard
-                    key={item.id}
-                    resume={item}
-                    onEdit={activeSection === "daily-workers" ? (onEditDailyJobSeeker as any) : onEditResume}
-                    onDelete={(id) => setDeleteTarget({ id, type: activeSection === "daily-workers" ? "d" : "r" })}
-                    index={i}
-                  />
-                );
-              }
+              // Insert HH vacancy after every 3rd item
+              const hhInsert = (activeSection === "vacancies" && i > 0 && i % 3 === 0 && hhVacancies.length > 0)
+                ? hhVacancies[Math.floor(i / 3) - 1] || null
+                : null;
+
               return (
-                <ClientResumeExplorerCard
-                  key={item.id}
-                  resume={item}
-                  isSaved={
-                    activeSection === "daily-workers"
-                      ? savedDailyJobSeekerIds.includes(item.id)
-                      : savedIds.includes(item.id)
-                  }
-                  onToggleSave={
-                    activeSection === "daily-workers"
-                      ? (initialRole === UserRole.DAILY_JOB_SEEKER ? onToggleDailyJobSeekerSave : undefined)
-                      : (initialRole === UserRole.JOB_SEEKER ? onToggleResumeSave : undefined)
-                  }
-                  index={i}
-                />
+                <React.Fragment key={item.id}>
+                  {hhInsert && <HHVacancyCard vacancy={hhInsert} />}
+                  {isVacancy ? (
+                    item.user_id === currentUser?.id ? (
+                      <ClientVacancyOwnerCard
+                        vacancy={item}
+                        onEdit={onEditVacancy}
+                        onDelete={(id) => setDeleteTarget({ id, type: "v" })}
+                        index={i}
+                      />
+                    ) : (
+                      <ClientVacancyExplorerCard
+                        vacancy={item}
+                        isSaved={savedIds.includes(item.id)}
+                        onToggleSave={
+                          initialRole === UserRole.CANDIDATE_HUNTER
+                            ? onToggleVacancySave
+                            : undefined
+                        }
+                        index={i}
+                      />
+                    )
+                  ) : (
+                    item.user_id === currentUser?.id ? (
+                      <ClientResumeOwnerCard
+                        resume={item}
+                        onEdit={activeSection === "daily-workers" ? (onEditDailyJobSeeker as any) : onEditResume}
+                        onDelete={(id) => setDeleteTarget({ id, type: activeSection === "daily-workers" ? "d" : "r" })}
+                        index={i}
+                      />
+                    ) : (
+                      <ClientResumeExplorerCard
+                        resume={item}
+                        isSaved={
+                          activeSection === "daily-workers"
+                            ? savedDailyJobSeekerIds.includes(item.id)
+                            : savedIds.includes(item.id)
+                        }
+                        onToggleSave={
+                          activeSection === "daily-workers"
+                            ? (initialRole === UserRole.DAILY_JOB_SEEKER ? onToggleDailyJobSeekerSave : undefined)
+                            : (initialRole === UserRole.JOB_SEEKER ? onToggleResumeSave : undefined)
+                        }
+                        index={i}
+                      />
+                    )
+                  )}
+                </React.Fragment>
               );
             })}
 
@@ -1072,7 +1082,6 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "all" && renderHomePage()}
       {activeSubTab === "mine" && renderVacanciesList()}
       {activeSubTab === "saved" && renderSavedList()}
-      {activeSubTab === "ai" && <AIPanel />}
       {activeSubTab === "more" && renderProfilePage()}
 
       {/* All Categories Modal - 2 columns, parent with child list */}

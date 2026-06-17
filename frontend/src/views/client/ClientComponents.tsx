@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n.ts";
 import { vacancyService } from "../../services/vacancyService.ts";
 import { resumeService } from "../../services/resumeService.ts";
+import { TranslateButton } from "../../components/AIIntegrated.tsx";
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 const getLocalizedName = (item: any) => {
@@ -148,6 +149,10 @@ export const ClientVacancyExplorerCard: React.FC<{
           <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-600">
             {t(`client_forms.work_type_options.${vacancy.work_type.toLowerCase()}`)}
           </span>
+          <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+            <i className="fa-solid fa-eye text-[9px]" />
+            {vacancy.viewed_count || 0}
+          </span>
           <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-500 ml-auto flex items-center gap-1">
             <i className="fa-regular fa-clock text-[9px]" />
             {vacancy.created_at ? getRelativeTime(vacancy.created_at, t) : ""}
@@ -186,8 +191,19 @@ export const ClientVacancyExplorerCard: React.FC<{
 
           {/* Description */}
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ish haqida ma'lumot</p>
-            <RichTextDisplay content={vacancy.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ish haqida ma'lumot</p>
+              <TranslateButton 
+                text={vacancy.description} 
+                onTranslated={(translated) => {
+                  const el = document.getElementById(`vacancy-desc-${vacancy.id}`);
+                  if (el) el.textContent = translated;
+                }} 
+              />
+            </div>
+            <div id={`vacancy-desc-${vacancy.id}`}>
+              <RichTextDisplay content={vacancy.description} className="text-[13px] text-slate-600 font-medium leading-relaxed" />
+            </div>
           </div>
 
           {/* Requirements */}
@@ -449,8 +465,8 @@ export const ClientResumeExplorerCard: React.FC<{
             {t(`gender.${resume.gender}`)}
           </span>
           <span className="px-3 py-1.5 bg-slate-50 rounded-lg text-[11px] font-semibold text-slate-500 ml-auto flex items-center gap-1">
-            <i className="fa-regular fa-clock text-[9px]" />
-            {resume.created_at ? getRelativeTime(resume.created_at, t) : ""}
+            <i className="fa-solid fa-eye text-[9px]" />
+            {resume.viewed_count || 0}
           </span>
         </div>
       </div>
