@@ -57,7 +57,8 @@ class HeadHunterService:
             params["experience"] = experience
 
         headers = {
-            "User-Agent": "JobBoard/1.0 (job-board-app)",
+            "User-Agent": "ISHKOP-JobBoard/1.0 (https://ishkop.uz; info@ishkop.uz)",
+            "Accept": "application/json",
         }
         if settings.HH_API_TOKEN:
             headers["Authorization"] = f"Bearer {settings.HH_API_TOKEN}"
@@ -136,7 +137,8 @@ class HeadHunterService:
     async def get_vacancy_detail(vacancy_id: str) -> Optional[dict]:
         """Get detailed info about a specific HH vacancy."""
         headers = {
-            "User-Agent": "JobBoard/1.0 (job-board-app)",
+            "User-Agent": "ISHKOP-JobBoard/1.0 (https://ishkop.uz; info@ishkop.uz)",
+            "Accept": "application/json",
         }
         if settings.HH_API_TOKEN:
             headers["Authorization"] = f"Bearer {settings.HH_API_TOKEN}"
