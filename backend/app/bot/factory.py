@@ -5,6 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from app.core.config import settings
 from app.core.i18n import i18n_middleware
 from app.bot.handlers.start import router as start_router
+from app.bot.handlers.ai_search import router as ai_search_router
 
 
 bot = Bot(token=settings.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -20,3 +21,4 @@ else:
 dp = Dispatcher(storage=storage)
 i18n_middleware.setup(dp)
 dp.include_router(start_router)
+dp.include_router(ai_search_router)  # AI text + voice search handler

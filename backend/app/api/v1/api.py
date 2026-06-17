@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     regions, professions, admin_endpoints, auth, vacancy,
     favourite, resume, analytics, works, daily_job_seekers,
-    ai, headhunter,
+    ai, headhunter, likes,
 )
 
 api_router = APIRouter()
@@ -21,3 +21,4 @@ api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytic
 # AI Features
 api_router.include_router(ai.router, prefix="/ai", tags=["AI Features"])
 api_router.include_router(headhunter.router, prefix="/hh", tags=["HeadHunter Integration"])
+api_router.include_router(likes.router, prefix="/likes", tags=["Likes"])
