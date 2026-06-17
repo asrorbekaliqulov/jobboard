@@ -81,26 +81,28 @@ def _format_result(item: dict, index: int) -> str:
     return "\n".join(lines)
 
 
-def _format_hh_result(item, index: int) -> str:
-    """Format HeadHunter vacancy for Telegram."""
+def _format_hh_card(item) -> str:
+    """Format a single HeadHunter vacancy as a card message."""
     salary_text = ""
     if item.salary_from and item.salary_till:
-        salary_text = f"{item.salary_from:,} - {item.salary_till:,}".replace(",", " ")
+        salary_text = f"💰 {item.salary_from:,} - {item.salary_till:,} {item.salary_currency}".replace(",", " ")
     elif item.salary_from:
-        salary_text = f"{item.salary_from:,}+".replace(",", " ")
+        salary_text = f"💰 {item.salary_from:,}+ {item.salary_currency}".replace(",", " ")
     elif item.salary_till:
-        salary_text = f"{item.salary_till:,} gacha".replace(",", " ")
+        salary_text = f"💰 {item.salary_till:,} gacha {item.salary_currency}".replace(",", " ")
 
-    lines = [f"<b>{index}. {item.title}</b> 🌐"]
-    lines.append(f"   🏢 {item.company_name}")
-    parts = []
+    lines = [
+        f"💼 <b>{item.title}</b>",
+        f"🏢 {item.company_name}",
+    ]
     if item.region:
-        parts.append(f"📍 {item.region}")
+        lines.append(f"📍 {item.region}")
     if salary_text:
-        parts.append(f"💰 {salary_text} {item.salary_currency}")
-    if parts:
-        lines.append("   " + " | ".join(parts))
-    lines.append(f"   🔗 <a href='{item.url}'>hh.uz da ko'rish</a>")
+        lines.append(salary_text)
+    if item.experience:
+        lines.append(f"🧠 {item.experience}")
+    if item.description_short:
+        lines.append(f"\n{item.description_short[:200]}")
 
     return "\n".join(lines)
 
@@ -138,13 +140,39 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
             header = f"🤖 <b>\"{query}\"</b> bo'yicha {len(items)} ta {search_type_label} topildi:\n"
             formatted = [_format_result(item, i + 1) for i, item in enumerate(items)]
             text = header + "\n\n".join(formatted)
+
+            # WebApp button
+            webapp_url = _get_webapp_url(query)
+            webapp_kb = types.InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [types.InlineKeyboardButton(
+                        text="📱 Ilovada barchasini ko'rish",
+                        web_app=types.WebAppInfo(url=webapp_url),
+                    )]
+                ]
+            )
+            await message.answer(text, reply_markup=webapp_kb, parse_mode="HTML")
         else:
             # Fallback: HeadHunter search
             hh_items = await _hh_fallback_search(query, limit=5)
             if hh_items:
-                header = f"📋 <b>\"{query}\"</b> — bazada topilmadi.\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta vakansiya:\n"
-                formatted = [_format_hh_result(item, i + 1) for i, item in enumerate(hh_items)]
-                text = header + "\n\n".join(formatted)
+                # Send header
+                await message.answer(
+                    f"📋 <b>\"{query}\"</b> — bazada topilmadi.\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta vakansiya:",
+                    parse_mode="HTML"
+                )
+                # Send each HH vacancy as separate message with link button
+                for item in hh_items:
+                    hh_text = _format_hh_card(item)
+                    hh_kb = types.InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [types.InlineKeyboardButton(
+                                text="🔗 hh.uz da ochish",
+                                url=item.url,
+                            )]
+                        ]
+                    )
+                    await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
             else:
                 text = (
                     f"😕 <b>\"{query}\"</b> bo'yicha natija topilmadi.\n\n"
@@ -152,18 +180,7 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
                     "• Kasb nomini aniqroq yozing (masalan: \"oshpaz\", \"haydovchi\")\n"
                     "• Qisqaroq so'z ishlating"
                 )
-
-        # WebApp button
-        webapp_url = _get_webapp_url(query)
-        webapp_kb = types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [types.InlineKeyboardButton(
-                    text="📱 Ilovada barchasini ko'rish",
-                    web_app=types.WebAppInfo(url=webapp_url),
-                )]
-            ]
-        )
-        await message.answer(text, reply_markup=webapp_kb, parse_mode="HTML")
+                await message.answer(text, parse_mode="HTML")
 
     except Exception as e:
         logger.error(f"Bot search error: {e}")
@@ -221,26 +238,41 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
             header = f"🎤 <b>\"{transcribed_text}\"</b> — {len(items)} ta {search_type_label}:\n"
             formatted = [_format_result(item, i + 1) for i, item in enumerate(items)]
             text = header + "\n\n".join(formatted)
+
+            webapp_url = _get_webapp_url(transcribed_text)
+            webapp_kb = types.InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [types.InlineKeyboardButton(
+                        text="📱 Ilovada barchasini ko'rish",
+                        web_app=types.WebAppInfo(url=webapp_url),
+                    )]
+                ]
+            )
+            await status_msg.edit_text(text, reply_markup=webapp_kb, parse_mode="HTML")
         else:
-            # HH fallback
+            # HH fallback - send each as separate message
             hh_items = await _hh_fallback_search(transcribed_text, limit=5)
             if hh_items:
-                header = f"🎤 <b>\"{transcribed_text}\"</b>\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta:\n"
-                formatted = [_format_hh_result(item, i + 1) for i, item in enumerate(hh_items)]
-                text = header + "\n\n".join(formatted)
+                await status_msg.edit_text(
+                    f"🎤 <b>\"{transcribed_text}\"</b> — bazada topilmadi.\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta vakansiya:",
+                    parse_mode="HTML"
+                )
+                for item in hh_items:
+                    hh_text = _format_hh_card(item)
+                    hh_kb = types.InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [types.InlineKeyboardButton(
+                                text="🔗 hh.uz da ochish",
+                                url=item.url,
+                            )]
+                        ]
+                    )
+                    await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
             else:
-                text = f"😕 <b>\"{transcribed_text}\"</b> bo'yicha natija topilmadi."
-
-        webapp_url = _get_webapp_url(transcribed_text)
-        webapp_kb = types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [types.InlineKeyboardButton(
-                    text="📱 Ilovada barchasini ko'rish",
-                    web_app=types.WebAppInfo(url=webapp_url),
-                )]
-            ]
-        )
-        await status_msg.edit_text(text, reply_markup=webapp_kb, parse_mode="HTML")
+                await status_msg.edit_text(
+                    f"😕 <b>\"{transcribed_text}\"</b> bo'yicha natija topilmadi.",
+                    parse_mode="HTML"
+                )
 
     except Exception as e:
         logger.error(f"Voice search error: {e}")
