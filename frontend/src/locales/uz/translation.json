@@ -57,7 +57,8 @@
     "my_vacancies": "Vakansiyalarim",
     "resumes": "Rezyumalar",
     "my_resumes": "Rezyumelarim",
-    "saved": "Saqlangan"
+    "saved": "Saqlangan",
+    "ai": "AI"
   },
   "home": {
     "greeting": "Salom, {{name}} 👋",

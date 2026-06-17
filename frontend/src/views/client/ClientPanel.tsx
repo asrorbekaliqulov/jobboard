@@ -33,6 +33,7 @@ import { useToast } from "../../components/Toast.tsx";
 import { SkeletonList } from "../../components/SkeletonCard.tsx";
 import Icon3D from "../../components/Icon3D.tsx";
 import { getProfessionIcon, getCategoryColor } from "../../utils/professionIcons.ts";
+import AIPanel from "./AIPanel.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -118,7 +119,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
   const [activeSection, setActiveSection] = useState<"vacancies" | "workers" | "daily-workers">(
     () => sectionForRole(initialRole),
   );
-  const [activeSubTab, setActiveSubTab] = useState<"all" | "mine" | "saved" | "more">("all");
+  const [activeSubTab, setActiveSubTab] = useState<"all" | "mine" | "saved" | "ai" | "more">("all");
   const [page, setPage] = useState(1);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
@@ -1071,6 +1072,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "all" && renderHomePage()}
       {activeSubTab === "mine" && renderVacanciesList()}
       {activeSubTab === "saved" && renderSavedList()}
+      {activeSubTab === "ai" && <AIPanel />}
       {activeSubTab === "more" && renderProfilePage()}
 
       {/* All Categories Modal - 2 columns, parent with child list */}

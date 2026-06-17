@@ -57,7 +57,8 @@
     "my_vacancies": "Мои вакансии",
     "resumes": "Резюме",
     "my_resumes": "Мои резюме",
-    "saved": "Сохранённые"
+    "saved": "Сохранённые",
+    "ai": "AI"
   },
   "home": {
     "greeting": "Привет, {{name}} 👋",
