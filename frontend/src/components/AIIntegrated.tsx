@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { aiService } from "../services/aiService.ts";
+import { aiService, aiAgentSearch, AgentSearchResult } from "../services/aiService.ts";
 import { headhunterService, HHVacancy } from "../services/headhunterService.ts";
 import { UserRole } from "../types.ts";
 
@@ -18,44 +18,35 @@ interface AISearchResultsProps {
 
 export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, userRole }) => {
   const { t } = useTranslation();
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<AgentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searched, setSearched] = useState("");
+  const [summary, setSummary] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (searchText.trim().length < 3) {
         setResults([]);
         setSearched("");
+        setSummary("");
         return;
       }
       if (searchText === searched) return;
       setLoading(true);
       try {
-        // Both roles use findWorkers API - it searches resumes for employers
-        // For job seekers, we still call findWorkers but the results represent
-        // "matching content" based on the search text
-        const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
-        setResults((r.workers || []).map((w: any) => ({
-          id: w.resume_id,
-          title: userRole === UserRole.CANDIDATE_HUNTER ? w.full_name : w.profession,
-          subtitle: userRole === UserRole.CANDIDATE_HUNTER
-            ? `${w.profession} • ${w.experience} yil`
-            : `${w.full_name} • ${w.experience} yil tajriba`,
-          location: w.region,
-          score: w.match_score,
-          reason: w.match_reason,
-          type: userRole === UserRole.CANDIDATE_HUNTER ? "worker" : "vacancy",
-        })));
+        const role = userRole === UserRole.CANDIDATE_HUNTER ? "candidate_hunter" : "job_seeker";
+        const r = await aiAgentSearch({ query: searchText, role, limit: 8 });
+        setResults(r.items || []);
+        setSummary(r.summary || "");
         setSearched(searchText);
       } catch (e) {
-        console.error("AI search failed:", e);
+        console.error("AI agent search failed:", e);
         setResults([]);
       } finally {
         setLoading(false);
       }
-    }, 1500);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, [searchText, userRole]);
@@ -71,6 +62,7 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
       </div>
     );
   }
+  if (results.length === 0 && searched) return null;
   if (results.length === 0) return null;
 
   const displayResults = showAll ? results : results.slice(0, 2);
@@ -80,18 +72,22 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
       <div className="flex items-center gap-2 px-1">
         <i className="fa-solid fa-robot text-xs text-indigo-500" />
         <span className="text-[11px] font-bold text-indigo-600">AI natijalar</span>
+        {summary && <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>— {summary}</span>}
         <div className="flex-1 h-px bg-indigo-100" />
       </div>
-      {displayResults.map((w: any, i: number) => (
+      {displayResults.map((item, i: number) => (
         <div key={i} className="p-3 rounded-xl border border-indigo-100" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{w.title}</p>
-              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{w.subtitle} • {w.location}</p>
-              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>{w.reason}</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                {item.subtitle} • {item.region}
+                {item.salary && ` • ${item.salary} so'm`}
+              </p>
+              {item.reason && <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>{item.reason}</p>}
             </div>
             <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-600 shrink-0">
-              {w.score}%
+              {item.score}%
             </span>
           </div>
         </div>

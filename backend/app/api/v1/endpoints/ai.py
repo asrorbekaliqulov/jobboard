@@ -436,3 +436,96 @@ async def ai_company_review(
     except Exception as e:
         logger.error(f"AI Company Review error: {e}")
         raise HTTPException(status_code=500, detail="AI xizmatida xatolik yuz berdi")
+
+
+
+# ==================== AI Agent Search (Smart Search) ====================
+
+from pydantic import BaseModel as PydanticBaseModel
+from typing import Optional as Opt, List as Lst
+
+class AgentSearchRequest(PydanticBaseModel):
+    query: str
+    role: str = "job_seeker"  # "job_seeker" or "candidate_hunter"
+    region_id: Opt[int] = None
+    limit: int = 10
+
+class AgentSearchResponse(PydanticBaseModel):
+    items: Lst[dict]
+    summary: str
+    total: int
+    search_type: str
+
+
+@router.post("/agent-search", response_model=AgentSearchResponse)
+async def ai_agent_search(
+    request: AgentSearchRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    AI Agent Search - aqlli qidiruv.
+    1. So'rovni tahlil qiladi (intent, kasblar, hudud)
+    2. Bazadan mos natijalarni topadi
+    3. AI natijalarni moslik bo'yicha tartiblaydi
+    """
+    _check_ai_enabled()
+    try:
+        from app.services.ai_agent_search import AIAgentSearchService
+        # Use actual user role
+        role = current_user.role.value if current_user.role else request.role
+        result = await AIAgentSearchService.search(
+            db=db,
+            query=request.query,
+            role=role,
+            region_id=request.region_id,
+            limit=request.limit,
+        )
+        return AgentSearchResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        logger.error(f"AI Agent Search error: {e}")
+        raise HTTPException(status_code=500, detail="AI qidiruvda xatolik yuz berdi")
+
+
+
+# ==================== Voice Transcription (for WebApp) ====================
+
+from fastapi import UploadFile, File
+
+@router.post("/voice-transcribe")
+async def ai_voice_transcribe(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Transcribe voice audio to text using OpenAI Whisper.
+    Used by WebApp when Web Speech API is not available (Telegram WebApp).
+    """
+    _check_ai_enabled()
+    try:
+        from openai import AsyncOpenAI
+        from io import BytesIO
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+
+        # Read uploaded file
+        content = await file.read()
+        audio_file = BytesIO(content)
+        audio_file.name = file.filename or "voice.webm"
+
+        # Transcribe
+        transcription = await client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file,
+            language="uz",
+        )
+
+        return {"text": transcription.text.strip()}
+
+    except Exception as e:
+        logger.error(f"Voice transcription error: {e}")
+        raise HTTPException(status_code=500, detail="Ovozni matnga aylantirib bo'lmadi")

@@ -1,8 +1,12 @@
 /**
- * Voice Search Button - Uses Web Speech API (SpeechRecognition)
- * Mikrofon tugmasi - ovozni matnga aylantirib qidiruv maydoniga yozadi
+ * Voice Search Button
+ * Strategy:
+ * 1. Try Web Speech API (works in Chrome, some Android browsers)
+ * 2. Fallback: MediaRecorder → send audio to backend for Whisper transcription
+ * 3. If neither works, show alert
  */
 import React, { useState, useRef, useCallback } from "react";
+import { mainApi } from "../services/api.ts";
 
 interface VoiceSearchButtonProps {
   onResult: (text: string) => void;
@@ -10,42 +14,116 @@ interface VoiceSearchButtonProps {
 
 export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }) => {
   const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  // Try Web Speech API first
+  const tryWebSpeechAPI = useCallback((): boolean => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return false;
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "uz-UZ";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.continuous = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript.trim()) onResult(transcript.trim());
+        setIsListening(false);
+      };
+      recognition.onerror = () => {
+        setIsListening(false);
+        // If Web Speech fails, try MediaRecorder
+        startMediaRecorder();
+      };
+      recognition.onend = () => setIsListening(false);
+
+      recognitionRef.current = recognition;
+      recognition.start();
+      return true;
+    } catch {
+      return false;
+    }
+  }, [onResult]);
+
+  // Fallback: MediaRecorder → backend Whisper
+  const startMediaRecorder = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        setIsListening(false);
+        setIsProcessing(true);
+
+        try {
+          const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("file", audioBlob, "voice.webm");
+
+          const token = localStorage.getItem("auth_token");
+          const res = await fetch(`${mainApi}/api/v1/ai/voice-transcribe`, {
+            method: "POST",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.text?.trim()) {
+              onResult(data.text.trim());
+            }
+          }
+        } catch (e) {
+          console.error("Voice transcription failed:", e);
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsListening(true);
+
+      // Auto-stop after 10 seconds
+      setTimeout(() => {
+        if (mediaRecorderRef.current?.state === "recording") {
+          mediaRecorderRef.current.stop();
+        }
+      }, 10000);
+    } catch (e) {
+      console.error("MediaRecorder failed:", e);
+      setIsListening(false);
+      alert("Mikrofonga ruxsat berilmadi. Brauzer sozlamalarini tekshiring.");
+    }
+  }, [onResult]);
 
   const startListening = useCallback(() => {
-    // Check browser support
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Brauzeringiz ovozli qidiruvni qo'llab-quvvatlamaydi");
-      return;
+    // Try Web Speech API first
+    if (!tryWebSpeechAPI()) {
+      // Fallback to MediaRecorder
+      startMediaRecorder();
     }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "uz-UZ"; // O'zbek tili
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
-
-    recognition.onstart = () => setIsListening(true);
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      if (transcript.trim()) {
-        onResult(transcript.trim());
-      }
-      setIsListening(false);
-    };
-
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-
-    recognitionRef.current = recognition;
-    recognition.start();
-  }, [onResult]);
+  }, [tryWebSpeechAPI, startMediaRecorder]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
+    }
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
     }
     setIsListening(false);
   }, []);
@@ -53,14 +131,19 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
   return (
     <button
       onClick={isListening ? stopListening : startListening}
+      disabled={isProcessing}
       className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 ${
-        isListening
-          ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-200"
-          : "bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-indigo-500"
+        isProcessing
+          ? "bg-amber-100 text-amber-600"
+          : isListening
+            ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-200"
+            : "bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-indigo-500"
       }`}
-      title={isListening ? "To'xtatish" : "Ovozli qidiruv"}
+      title={isProcessing ? "Tahlil qilinmoqda..." : isListening ? "To'xtatish" : "Ovozli qidiruv"}
     >
-      <i className={`fa-solid ${isListening ? "fa-stop" : "fa-microphone"} text-xs`} />
+      <i className={`fa-solid ${
+        isProcessing ? "fa-spinner fa-spin" : isListening ? "fa-stop" : "fa-microphone"
+      } text-xs`} />
     </button>
   );
 };
