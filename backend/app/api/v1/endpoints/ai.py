@@ -521,7 +521,6 @@ async def ai_voice_transcribe(
         transcription = await client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file,
-            language="uz",
         )
 
         return {"text": transcription.text.strip()}
