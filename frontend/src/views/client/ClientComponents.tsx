@@ -6,6 +6,7 @@ import i18n from "../../i18n.ts";
 import { vacancyService } from "../../services/vacancyService.ts";
 import { resumeService } from "../../services/resumeService.ts";
 import { TranslateButton } from "../../components/AIIntegrated.tsx";
+import { likeService } from "../../services/likeService.ts";
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 const getLocalizedName = (item: any) => {
@@ -53,12 +54,37 @@ export const ClientVacancyExplorerCard: React.FC<{
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [bookmarkAnim, setBookmarkAnim] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [trustScore, setTrustScore] = useState<number | null>(null);
+  const [trustLevel, setTrustLevel] = useState<string | null>(null);
 
   useEffect(() => {
     if (isExpanded) {
       vacancyService.registerView(vacancy.id).catch(console.error);
+      // Fetch company trust when expanded
+      if (trustScore === null && vacancy.company_name) {
+        import("../../services/aiService.ts").then(({ aiService }) => {
+          aiService.getCompanyTrust({ company_name: vacancy.company_name })
+            .then(r => { setTrustScore(r.overall_score); setTrustLevel(r.trust_level); })
+            .catch(() => {});
+        });
+      }
     }
   }, [isExpanded, vacancy.id]);
+
+  useEffect(() => {
+    likeService.getStatus("vacancy", vacancy.id)
+      .then(r => { setLiked(r.liked); setLikeCount(r.like_count); })
+      .catch(() => {});
+  }, [vacancy.id]);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    likeService.toggle("vacancy", vacancy.id)
+      .then(r => { setLiked(r.liked); setLikeCount(r.like_count); })
+      .catch(() => {});
+  };
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -68,6 +94,13 @@ export const ClientVacancyExplorerCard: React.FC<{
   };
 
   const itemIsNew = vacancy.created_at && isNew(vacancy.created_at);
+
+  // Fraud/spam detection (client-side quick check)
+  const fraudIndicators: string[] = [];
+  if (vacancy.salary_till && vacancy.salary_till > 50000000) fraudIndicators.push("Juda yuqori maosh");
+  if (!vacancy.phone || vacancy.phone.length < 9) fraudIndicators.push("Telefon raqam yo'q");
+  if (vacancy.description && /depozit|oldindan.*to'lov|investitsiya|mlm/i.test(vacancy.description)) fraudIndicators.push("Shubhali matn");
+  const isSuspicious = fraudIndicators.length >= 2;
 
   return (
     <div
@@ -100,6 +133,13 @@ export const ClientVacancyExplorerCard: React.FC<{
                   NEW
                 </span>
               )}
+              {/* Fraud/Spam warning badge */}
+              {isSuspicious && (
+                <span className="shrink-0 px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-md uppercase cursor-help"
+                  title={fraudIndicators.join(", ")}>
+                  <i className="fa-solid fa-triangle-exclamation mr-0.5 text-[8px]" />SPAM
+                </span>
+              )}
             </div>
 
             {/* Location */}
@@ -111,7 +151,7 @@ export const ClientVacancyExplorerCard: React.FC<{
             </div>
           </div>
 
-          {/* Bookmark */}
+          {/* Bookmark & Like */}
           {onToggleSave && (
             <button
               onClick={handleBookmark}
@@ -129,7 +169,7 @@ export const ClientVacancyExplorerCard: React.FC<{
         </div>
 
         {/* Salary */}
-        <div className="mt-3">
+        <div className="mt-3 flex items-center justify-between">
           <span className="text-[15px] font-bold text-slate-900">
             {vacancy.salary_from || vacancy.salary_till
               ? vacancy.salary_from && vacancy.salary_till
@@ -139,6 +179,11 @@ export const ClientVacancyExplorerCard: React.FC<{
                   : `${formatSalary(vacancy.salary_till)} so'mgacha`
               : t("vacancy_card.negotiable")}
           </span>
+          {/* Like button */}
+          <button onClick={handleLike} className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all active:scale-90">
+            <i className={`fa-${liked ? 'solid' : 'regular'} fa-heart text-sm ${liked ? 'text-red-500' : 'text-slate-300'}`} />
+            {likeCount > 0 && <span className="text-[10px] font-bold text-slate-400">{likeCount}</span>}
+          </button>
         </div>
 
         {/* Tags row */}
@@ -163,6 +208,24 @@ export const ClientVacancyExplorerCard: React.FC<{
       {/* ─── Expanded Content ───────────────────────────────────────────── */}
       <div className={`overflow-hidden transition-all duration-400 ease-in-out ${isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="px-4 pb-4 pt-2 border-t border-slate-50 space-y-4 fade-up">
+          {/* Fraud Warning (if suspicious) */}
+          {isSuspicious && (
+            <div className="p-3 rounded-xl border border-red-200 bg-red-50">
+              <div className="flex items-center gap-2 mb-1.5">
+                <i className="fa-solid fa-shield-exclamation text-red-500 text-sm" />
+                <span className="text-xs font-bold text-red-700">Ehtiyot bo'ling!</span>
+              </div>
+              <ul className="space-y-1">
+                {fraudIndicators.map((indicator, idx) => (
+                  <li key={idx} className="text-[11px] text-red-600 flex items-center gap-1.5">
+                    <i className="fa-solid fa-circle text-[4px]" />
+                    {indicator}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] text-red-500 mt-1.5">Bu e'lon shubhali belgilarga ega. Oldindan pul to'lamang!</p>
+            </div>
+          )}
           {/* Image */}
           {vacancy.image_url && (
             <div className="rounded-xl overflow-hidden">
@@ -245,6 +308,26 @@ export const ClientVacancyExplorerCard: React.FC<{
           {/* Contacts */}
           <div className="space-y-2">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Kontaktlar</p>
+            {/* Company Trust Rating */}
+            {trustScore !== null && trustScore > 0 && (
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 mb-2">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <i key={star} className={`fa-solid fa-star text-[10px] ${star <= Math.round(trustScore!) ? 'text-amber-400' : 'text-slate-200'}`} />
+                  ))}
+                </div>
+                <span className="text-[11px] font-bold text-slate-600">{trustScore.toFixed(1)}/5</span>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                  trustLevel === 'excellent' ? 'bg-green-100 text-green-700' :
+                  trustLevel === 'good' ? 'bg-emerald-100 text-emerald-700' :
+                  trustLevel === 'poor' ? 'bg-orange-100 text-orange-700' :
+                  trustLevel === 'dangerous' ? 'bg-red-100 text-red-700' :
+                  'bg-slate-100 text-slate-600'
+                }`}>
+                  {trustLevel === 'excellent' ? "A'lo" : trustLevel === 'good' ? 'Yaxshi' : trustLevel === 'poor' ? 'Yomon' : trustLevel === 'dangerous' ? 'Xavfli' : "O'rtacha"}
+                </span>
+              </div>
+            )}
             {vacancy.phone && (
               <a href={`tel:${vacancy.phone}`} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-indigo-50 transition-colors group">
                 <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">

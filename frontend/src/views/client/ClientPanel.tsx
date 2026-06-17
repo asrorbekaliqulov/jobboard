@@ -35,6 +35,7 @@ import Icon3D from "../../components/Icon3D.tsx";
 import { getProfessionIcon, getCategoryColor } from "../../utils/professionIcons.ts";
 import AIPanel from "./AIPanel.tsx";
 import { AISearchResults, HHVacancyCard, useHHVacancies, AIBanner } from "../../components/AIIntegrated.tsx";
+import { VoiceSearchButton } from "../../components/VoiceSearch.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
@@ -713,14 +714,18 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           value={searchText}
           onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
           placeholder={activeSection === "vacancies" ? t("client_panel.search_vacancy") : t("client_panel.search_worker")}
-          className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50"
+          className="w-full pl-11 pr-24 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50"
         />
-        <button
-          onClick={() => setIsFilterModalOpen(true)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500"
-        >
-          <i className="fa-solid fa-sliders text-xs" />
-        </button>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+          {/* Voice Search Button */}
+          <VoiceSearchButton onResult={(text) => { setSearchText(text); setPage(1); }} />
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500"
+          >
+            <i className="fa-solid fa-sliders text-xs" />
+          </button>
+        </div>
       </div>
 
       {/* Filter chips */}
