@@ -33,31 +33,21 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
       if (searchText === searched) return;
       setLoading(true);
       try {
-        if (userRole === UserRole.CANDIDATE_HUNTER) {
-          // Ish beruvchi — bazadan ishchi qidiradi
-          const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
-          setResults((r.workers || []).map((w: any) => ({
-            id: w.resume_id,
-            title: w.full_name,
-            subtitle: `${w.profession} • ${w.experience} yil`,
-            location: w.region,
-            score: w.match_score,
-            reason: w.match_reason,
-            type: "worker",
-          })));
-        } else {
-          // Ish qidiruvchi — bazadan vakansiya qidiradi (worker-finder orqali)
-          const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
-          setResults((r.workers || []).map((w: any) => ({
-            id: w.resume_id,
-            title: w.full_name,
-            subtitle: `${w.profession} • ${w.experience} yil`,
-            location: w.region,
-            score: w.match_score,
-            reason: w.match_reason,
-            type: "vacancy",
-          })));
-        }
+        // Both roles use findWorkers API - it searches resumes for employers
+        // For job seekers, we still call findWorkers but the results represent
+        // "matching content" based on the search text
+        const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
+        setResults((r.workers || []).map((w: any) => ({
+          id: w.resume_id,
+          title: userRole === UserRole.CANDIDATE_HUNTER ? w.full_name : w.profession,
+          subtitle: userRole === UserRole.CANDIDATE_HUNTER
+            ? `${w.profession} • ${w.experience} yil`
+            : `${w.full_name} • ${w.experience} yil tajriba`,
+          location: w.region,
+          score: w.match_score,
+          reason: w.match_reason,
+          type: userRole === UserRole.CANDIDATE_HUNTER ? "worker" : "vacancy",
+        })));
         setSearched(searchText);
       } catch (e) {
         console.error("AI search failed:", e);

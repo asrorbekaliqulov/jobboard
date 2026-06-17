@@ -752,7 +752,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       </div>
 
       {/* AI Search Results (Google-style) */}
-      {activeSection === "vacancies" && searchText.trim().length >= 3 && (
+      {searchText.trim().length >= 3 && (
         <AISearchResults searchText={searchText} userRole={initialRole} />
       )}
 
