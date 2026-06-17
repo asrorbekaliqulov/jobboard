@@ -962,6 +962,81 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         </p>
       </div>
 
+      {/* ─── My Posts Management ─────────────────────────────────────── */}
+      <div className="rounded-2xl p-4 card-shadow border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            <i className="fa-solid fa-folder-open mr-1.5" style={{ color: 'var(--accent)' }} />
+            {initialRole === UserRole.CANDIDATE_HUNTER ? "Mening vakansiyalarim" : "Mening e'lonlarim"}
+          </p>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(99,102,241,0.1)', color: 'var(--accent)' }}>
+            {(initialRole === UserRole.CANDIDATE_HUNTER
+              ? vacancies.filter(v => v.user_id === Number(currentUser?.id))
+              : initialRole === UserRole.DAILY_JOB_SEEKER
+                ? dailyJobSeekers.filter(d => d.user_id === Number(currentUser?.id))
+                : resumes.filter(r => r.user_id === Number(currentUser?.id))
+            ).length} ta
+          </span>
+        </div>
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {(() => {
+            const myPosts: any[] = initialRole === UserRole.CANDIDATE_HUNTER
+              ? vacancies.filter(v => v.user_id === Number(currentUser?.id))
+              : initialRole === UserRole.DAILY_JOB_SEEKER
+                ? dailyJobSeekers.filter(d => d.user_id === Number(currentUser?.id))
+                : resumes.filter(r => r.user_id === Number(currentUser?.id));
+            if (myPosts.length === 0) {
+              return (
+                <div className="text-center py-6">
+                  <i className="fa-solid fa-inbox text-2xl mb-2" style={{ color: 'var(--text-muted)' }} />
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Hali e'lon joylamagansiz</p>
+                  <button onClick={() => initialRole === UserRole.CANDIDATE_HUNTER ? onAddVacancy() : onAddResume()}
+                    className="mt-2 px-4 py-2 rounded-xl text-xs font-bold text-white active:scale-95 transition-all"
+                    style={{ backgroundColor: 'var(--accent)' }}>
+                    <i className="fa-solid fa-plus mr-1" />Yangi qo'shish
+                  </button>
+                </div>
+              );
+            }
+            return myPosts.map((item: any) => {
+              const isVacancy = "company_name" in item;
+              const statusColor = item.status === "active" ? "#16a34a" : item.status === "archived" ? "#f59e0b" : "#6b7280";
+              return (
+                <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl border" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-muted)' }}>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: statusColor + '15' }}>
+                    <i className={`fa-solid ${isVacancy ? 'fa-briefcase' : 'fa-user'} text-sm`} style={{ color: statusColor }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                      {isVacancy ? item.company_name : `${item.first_name} ${item.last_name}`}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: statusColor + '20', color: statusColor }}>
+                        {item.status === "active" ? "Aktiv" : item.status === "archived" ? "Arxiv" : "Qoralama"}
+                      </span>
+                      <span className="text-[9px] flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
+                        <i className="fa-solid fa-eye text-[7px]" /> {item.viewed_count || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button onClick={() => isVacancy ? onEditVacancy(item) : onEditResume(item)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all"
+                      style={{ backgroundColor: 'rgba(99,102,241,0.1)', color: 'var(--accent)' }}>
+                      <i className="fa-solid fa-pen text-[10px]" />
+                    </button>
+                    <button onClick={() => setDeleteTarget({ id: item.id, type: isVacancy ? "v" : "r" })}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all bg-red-50 text-red-400">
+                      <i className="fa-solid fa-trash text-[10px]" />
+                    </button>
+                  </div>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </div>
+
       {/* Section Switcher - role-based sections */}
       <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-50">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">

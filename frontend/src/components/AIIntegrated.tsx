@@ -34,12 +34,29 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
       setLoading(true);
       try {
         if (userRole === UserRole.CANDIDATE_HUNTER) {
+          // Ish beruvchi — bazadan ishchi qidiradi
           const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
-          setResults(r.workers || []);
+          setResults((r.workers || []).map((w: any) => ({
+            id: w.resume_id,
+            title: w.full_name,
+            subtitle: `${w.profession} • ${w.experience} yil`,
+            location: w.region,
+            score: w.match_score,
+            reason: w.match_reason,
+            type: "worker",
+          })));
         } else {
-          // For job seekers - use salary analytics or match
+          // Ish qidiruvchi — bazadan vakansiya qidiradi (worker-finder orqali)
           const r = await aiService.findWorkers({ description: searchText, max_results: 5 });
-          setResults(r.workers || []);
+          setResults((r.workers || []).map((w: any) => ({
+            id: w.resume_id,
+            title: w.full_name,
+            subtitle: `${w.profession} • ${w.experience} yil`,
+            location: w.region,
+            score: w.match_score,
+            reason: w.match_reason,
+            type: "vacancy",
+          })));
         }
         setSearched(searchText);
       } catch (e) {
@@ -48,7 +65,7 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
       } finally {
         setLoading(false);
       }
-    }, 1500); // Debounce 1.5s
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [searchText, userRole]);
@@ -79,12 +96,12 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
         <div key={i} className="p-3 rounded-xl border border-indigo-100" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{w.full_name}</p>
-              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{w.profession} • {w.experience} yil • {w.region}</p>
-              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>{w.match_reason}</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{w.title}</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{w.subtitle} • {w.location}</p>
+              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>{w.reason}</p>
             </div>
             <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-600 shrink-0">
-              {w.match_score}%
+              {w.score}%
             </span>
           </div>
         </div>
