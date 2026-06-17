@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     OPENAI_MAX_TOKENS: int = 2000  # Max tokens per response
 
     # HeadHunter API Configuration
-    HH_API_BASE_URL: str = "https://api.hh.uz"  # HeadHunter Uzbekistan API
+    HH_API_BASE_URL: str = "https://api.hh.ru"  # HH API (works for Uzbekistan with area=97)
     HH_API_TOKEN: str = ""  # Optional HH API token for higher limits
 
     @property

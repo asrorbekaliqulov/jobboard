@@ -28,6 +28,79 @@ async def _get_user(telegram_id: str):
         return result.scalar_one_or_none()
 
 
+# Multi-language messages
+MESSAGES = {
+    "uz": {
+        "searching": "🔍 Qidirmoqda...",
+        "found_vacancies": "ta vakansiya topildi",
+        "found_workers": "ta ishchi topildi",
+        "not_found_local": "bazada topilmadi",
+        "hh_found": "HeadHunter.uz dan",
+        "not_found": "bo'yicha natija topilmadi",
+        "advice": "Kasb nomini aniqroq yozing (masalan: \"oshpaz\", \"haydovchi\")",
+        "open_app": "📱 Ilovada barchasini ko'rish",
+        "open_hh": "🔗 hh.uz da ochish",
+        "voice_processing": "🎤 Ovoz tahlil qilinmoqda...",
+        "voice_understood": "Tushundim",
+        "voice_failed": "Ovozingizni tushunib bo'lmadi. Qayta urinib ko'ring.",
+        "voice_unavailable": "🎤 Ovozli qidiruv hozirda ishlamayapti.",
+        "start_first": "Iltimos, avval /start buyrug'ini yuboring.",
+        "error": "❌ Qidiruvda xatolik. Keyinroq urinib ko'ring.",
+        "match": "Moslik",
+    },
+    "ru": {
+        "searching": "🔍 Ищем...",
+        "found_vacancies": "вакансий найдено",
+        "found_workers": "работников найдено",
+        "not_found_local": "в базе не найдено",
+        "hh_found": "С HeadHunter.uz",
+        "not_found": "ничего не найдено",
+        "advice": "Укажите точнее профессию (например: \"повар\", \"водитель\")",
+        "open_app": "📱 Открыть в приложении",
+        "open_hh": "🔗 Открыть на hh.uz",
+        "voice_processing": "🎤 Анализируем голос...",
+        "voice_understood": "Понял",
+        "voice_failed": "Не удалось распознать. Попробуйте еще раз.",
+        "voice_unavailable": "🎤 Голосовой поиск пока недоступен.",
+        "start_first": "Пожалуйста, сначала отправьте /start.",
+        "error": "❌ Ошибка поиска. Попробуйте позже.",
+        "match": "Совпадение",
+    },
+    "en": {
+        "searching": "🔍 Searching...",
+        "found_vacancies": "vacancies found",
+        "found_workers": "workers found",
+        "not_found_local": "not found in database",
+        "hh_found": "From HeadHunter.uz",
+        "not_found": "no results found",
+        "advice": "Try a more specific profession name (e.g. \"cook\", \"driver\")",
+        "open_app": "📱 View in app",
+        "open_hh": "🔗 Open on hh.uz",
+        "voice_processing": "🎤 Processing voice...",
+        "voice_understood": "Got it",
+        "voice_failed": "Could not understand. Please try again.",
+        "voice_unavailable": "🎤 Voice search is currently unavailable.",
+        "start_first": "Please send /start first.",
+        "error": "❌ Search error. Please try later.",
+        "match": "Match",
+    },
+}
+
+
+def _get_lang(user) -> str:
+    """Get user's language or default to uz."""
+    if user and user.language:
+        lang = user.language.value if hasattr(user.language, 'value') else str(user.language)
+        return lang.lower() if lang.lower() in MESSAGES else "uz"
+    return "uz"
+
+
+def _msg(user, key: str) -> str:
+    """Get localized message for user."""
+    lang = _get_lang(user)
+    return MESSAGES.get(lang, MESSAGES["uz"]).get(key, MESSAGES["uz"][key])
+
+
 async def _agent_search(query: str, role: str, limit: int = 5) -> dict:
     """Run AI Agent Search."""
     from app.services.ai_agent_search import AIAgentSearchService
@@ -51,7 +124,7 @@ async def _hh_fallback_search(query: str, limit: int = 5) -> list:
         return []
 
 
-def _format_result(item: dict, index: int) -> str:
+def _format_result(item: dict, index: int, lang: str = "uz") -> str:
     """Format a single search result for Telegram message."""
     title = item.get("title", "—")
     subtitle = item.get("subtitle", "")
@@ -60,6 +133,8 @@ def _format_result(item: dict, index: int) -> str:
     phone = item.get("phone", "")
     salary = item.get("salary", "")
     experience = item.get("experience", "")
+
+    match_word = MESSAGES.get(lang, MESSAGES["uz"])["match"]
 
     lines = [f"<b>{index}. {title}</b>"]
     if subtitle:
@@ -76,7 +151,7 @@ def _format_result(item: dict, index: int) -> str:
     if phone:
         lines.append(f"   📞 {phone}")
     if score > 0:
-        lines.append(f"   ✅ Moslik: {score}%")
+        lines.append(f"   ✅ {match_word}: {score}%")
 
     return "\n".join(lines)
 
@@ -129,6 +204,8 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
 
     try:
         role = user.role.value if user.role else "job_seeker"
+        lang = _get_lang(user)
+        m = lambda key: _msg(user, key)
 
         # Run AI Agent Search
         result = await _agent_search(query, role, limit=5)
@@ -136,9 +213,9 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
 
         if items:
             # Format results
-            search_type_label = "vakansiya" if result.get("search_type") == "vacancy" else "ishchi"
-            header = f"🤖 <b>\"{query}\"</b> bo'yicha {len(items)} ta {search_type_label} topildi:\n"
-            formatted = [_format_result(item, i + 1) for i, item in enumerate(items)]
+            search_type_label = m("found_vacancies") if result.get("search_type") == "vacancy" else m("found_workers")
+            header = f"🤖 <b>\"{query}\"</b> — {len(items)} {search_type_label}:\n"
+            formatted = [_format_result(item, i + 1, lang) for i, item in enumerate(items)]
             text = header + "\n\n".join(formatted)
 
             # WebApp button
@@ -146,7 +223,7 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
             webapp_kb = types.InlineKeyboardMarkup(
                 inline_keyboard=[
                     [types.InlineKeyboardButton(
-                        text="📱 Ilovada barchasini ko'rish",
+                        text=m("open_app"),
                         web_app=types.WebAppInfo(url=webapp_url),
                     )]
                 ]
@@ -158,7 +235,7 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
             if hh_items:
                 # Send header
                 await message.answer(
-                    f"📋 <b>\"{query}\"</b> — bazada topilmadi.\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta vakansiya:",
+                    f"📋 <b>\"{query}\"</b> — {m('not_found_local')}.\n\n🌐 {m('hh_found')} {len(hh_items)} ta:",
                     parse_mode="HTML"
                 )
                 # Send each HH vacancy as separate message with link button
@@ -167,7 +244,7 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
                     hh_kb = types.InlineKeyboardMarkup(
                         inline_keyboard=[
                             [types.InlineKeyboardButton(
-                                text="🔗 hh.uz da ochish",
+                                text=m("open_hh"),
                                 url=item.url,
                             )]
                         ]
@@ -175,10 +252,8 @@ async def handle_text_search(message: types.Message, i18n: I18nContext):
                     await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
             else:
                 text = (
-                    f"😕 <b>\"{query}\"</b> bo'yicha natija topilmadi.\n\n"
-                    "💡 Maslahat:\n"
-                    "• Kasb nomini aniqroq yozing (masalan: \"oshpaz\", \"haydovchi\")\n"
-                    "• Qisqaroq so'z ishlating"
+                    f"😕 <b>\"{query}\"</b> — {m('not_found')}.\n\n"
+                    f"💡 {m('advice')}"
                 )
                 await message.answer(text, parse_mode="HTML")
 
@@ -196,10 +271,12 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
         return
 
     if not settings.ai_enabled:
-        await message.answer("🎤 Ovozli qidiruv hozirda ishlamayapti.")
+        await message.answer(_msg(user, "voice_unavailable"))
         return
 
-    status_msg = await message.answer("🎤 Ovoz tahlil qilinmoqda...")
+    m = lambda key: _msg(user, key)
+    lang = _get_lang(user)
+    status_msg = await message.answer(m("voice_processing"))
 
     try:
         # Download voice
@@ -223,10 +300,10 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
 
         transcribed_text = transcription.text.strip()
         if not transcribed_text:
-            await status_msg.edit_text("🎤 Ovozingizni tushunib bo'lmadi. Qayta urinib ko'ring.")
+            await status_msg.edit_text(m("voice_failed"))
             return
 
-        await status_msg.edit_text(f"🎤 <b>\"{transcribed_text}\"</b>\n\n🔍 Qidirmoqda...", parse_mode="HTML")
+        await status_msg.edit_text(f"🎤 {m('voice_understood')}: <b>\"{transcribed_text}\"</b>", parse_mode="HTML")
 
         # AI Agent Search
         role = user.role.value if user.role else "job_seeker"
@@ -234,16 +311,16 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
         items = result.get("items", [])
 
         if items:
-            search_type_label = "vakansiya" if result.get("search_type") == "vacancy" else "ishchi"
-            header = f"🎤 <b>\"{transcribed_text}\"</b> — {len(items)} ta {search_type_label}:\n"
-            formatted = [_format_result(item, i + 1) for i, item in enumerate(items)]
+            search_type_label = m("found_vacancies") if result.get("search_type") == "vacancy" else m("found_workers")
+            header = f"🎤 <b>\"{transcribed_text}\"</b> — {len(items)} {search_type_label}:\n"
+            formatted = [_format_result(item, i + 1, lang) for i, item in enumerate(items)]
             text = header + "\n\n".join(formatted)
 
             webapp_url = _get_webapp_url(transcribed_text)
             webapp_kb = types.InlineKeyboardMarkup(
                 inline_keyboard=[
                     [types.InlineKeyboardButton(
-                        text="📱 Ilovada barchasini ko'rish",
+                        text=m("open_app"),
                         web_app=types.WebAppInfo(url=webapp_url),
                     )]
                 ]
@@ -254,7 +331,7 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
             hh_items = await _hh_fallback_search(transcribed_text, limit=5)
             if hh_items:
                 await status_msg.edit_text(
-                    f"🎤 <b>\"{transcribed_text}\"</b> — bazada topilmadi.\n\n🌐 HeadHunter.uz dan {len(hh_items)} ta vakansiya:",
+                    f"🎤 <b>\"{transcribed_text}\"</b> — {m('not_found_local')}.\n\n🌐 {m('hh_found')} {len(hh_items)} ta:",
                     parse_mode="HTML"
                 )
                 for item in hh_items:
@@ -262,7 +339,7 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
                     hh_kb = types.InlineKeyboardMarkup(
                         inline_keyboard=[
                             [types.InlineKeyboardButton(
-                                text="🔗 hh.uz da ochish",
+                                text=m("open_hh"),
                                 url=item.url,
                             )]
                         ]
@@ -270,10 +347,10 @@ async def handle_voice_search(message: types.Message, i18n: I18nContext):
                     await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
             else:
                 await status_msg.edit_text(
-                    f"😕 <b>\"{transcribed_text}\"</b> bo'yicha natija topilmadi.",
+                    f"😕 <b>\"{transcribed_text}\"</b> — {m('not_found')}.",
                     parse_mode="HTML"
                 )
 
     except Exception as e:
         logger.error(f"Voice search error: {e}")
-        await status_msg.edit_text("❌ Ovozli qidiruvda xatolik. Matn bilan qidirib ko'ring.")
+        await status_msg.edit_text(m("error"))
