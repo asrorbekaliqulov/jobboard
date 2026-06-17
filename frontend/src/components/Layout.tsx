@@ -5,7 +5,7 @@ import ThemeToggle from "./ThemeToggle.tsx";
 import { useTheme } from "../hooks/useTheme.ts";
 
 type Section = "vacancies" | "workers" | "daily-workers";
-type SubTab = "all" | "mine" | "saved" | "more";
+type SubTab = "all" | "mine" | "saved" | "ai" | "more";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -53,6 +53,7 @@ const Layout: React.FC<LayoutProps> = ({
     { id: "all", labelKey: "nav.home", icon: "fa-house" },
     { id: "mine", labelKey: role === UserRole.CANDIDATE_HUNTER ? "nav.workers" : "nav.vacancies", icon: role === UserRole.CANDIDATE_HUNTER ? "fa-users" : "fa-briefcase" },
     { id: "saved", labelKey: "nav.saved", icon: "fa-bookmark" },
+    { id: "ai", labelKey: "nav.ai", icon: "fa-robot" },
     { id: "more", labelKey: "nav.profile", icon: "fa-user" },
   ];
 
@@ -177,8 +178,8 @@ const Layout: React.FC<LayoutProps> = ({
                 onClick={() => onSubTabChange(tab.id)}
                 className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:scale-90"
               >
-                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '25px', color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
-                <span className="text-[11px] font-bold mt-2" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '22px', color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
+                <span className="text-[10px] font-bold mt-1.5" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
                   {t(tab.labelKey)}
                 </span>
               </button>
@@ -186,17 +187,17 @@ const Layout: React.FC<LayoutProps> = ({
           })}
 
           {/* Center + button */}
-          <div className="flex items-center justify-center px-3">
+          <div className="flex items-center justify-center px-1">
             <button
               onClick={onPlusPress}
-              className="w-16 h-16 rounded-full flex items-center justify-center -mt-8 shadow-xl text-white active:scale-90 transition-all"
+              className="w-14 h-14 rounded-full flex items-center justify-center -mt-7 shadow-xl text-white active:scale-90 transition-all"
               style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)' }}
             >
-              <i className="fa-solid fa-plus text-2xl" />
+              <i className="fa-solid fa-plus text-xl" />
             </button>
           </div>
 
-          {/* Last two tabs */}
+          {/* Last three tabs */}
           {tabs.slice(2).map((tab) => {
             const isActive = activeSubTab === tab.id;
             return (
@@ -205,8 +206,8 @@ const Layout: React.FC<LayoutProps> = ({
                 onClick={() => onSubTabChange(tab.id)}
                 className="flex-1 flex flex-col items-center justify-center py-2 transition-all active:scale-90"
               >
-                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '25px', color: isActive ? 'var(--accent)' : 'var(--text-muted)' }} />
-                <span className="text-[11px] font-bold mt-2" style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <i className={`fa-solid ${tab.icon}`} style={{ fontSize: '22px', color: isActive ? (tab.id === 'ai' ? '#8b5cf6' : 'var(--accent)') : 'var(--text-muted)' }} />
+                <span className="text-[10px] font-bold mt-1.5" style={{ color: isActive ? (tab.id === 'ai' ? '#8b5cf6' : 'var(--accent)') : 'var(--text-muted)' }}>
                   {t(tab.labelKey)}
                 </span>
               </button>

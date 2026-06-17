@@ -57,7 +57,8 @@
     "my_vacancies": "My Vacancies",
     "resumes": "Resumes",
     "my_resumes": "My Resumes",
-    "saved": "Saved"
+    "saved": "Saved",
+    "ai": "AI"
   },
   "home": {
     "greeting": "Hello, {{name}} 👋",
