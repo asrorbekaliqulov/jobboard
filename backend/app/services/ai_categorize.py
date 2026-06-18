@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import func
 
 from app.models.profession import Profession
 from app.services.ai_core import ai_chat_completion, parse_ai_json
@@ -125,6 +126,17 @@ class AICategorizeService:
         Creates new parents if needed, updates parent_id for children.
         Returns summary of changes.
         """
+        # Fix PostgreSQL sequence (prevents duplicate key errors)
+        try:
+            await db.execute(
+                select(func.setval(
+                    'professions_id_seq',
+                    select(func.max(Profession.id)).scalar_subquery()
+                ))
+            )
+        except Exception:
+            pass  # Non-critical, sequence might already be correct
+
         changes_made = 0
         parents_created = 0
         errors = []
@@ -135,19 +147,30 @@ class AICategorizeService:
             # Create parent if doesn't exist
             if not parent_id:
                 try:
-                    new_parent = Profession(
-                        name_uz=group.get("parent_name_uz", "Boshqa"),
-                        name_ru=group.get("parent_name_ru", "Другое"),
-                        name_en=group.get("parent_name_en", "Other"),
-                        is_active=True,
-                        parent_id=None,
+                    # Check if profession with this name already exists
+                    existing = await db.execute(
+                        select(Profession).where(
+                            Profession.name_uz == group.get("parent_name_uz", "")
+                        )
                     )
-                    db.add(new_parent)
-                    await db.flush()
-                    parent_id = new_parent.id
-                    parents_created += 1
+                    existing_prof = existing.scalar_one_or_none()
+                    if existing_prof:
+                        parent_id = existing_prof.id
+                    else:
+                        new_parent = Profession(
+                            name_uz=group.get("parent_name_uz", "Boshqa"),
+                            name_ru=group.get("parent_name_ru", "Другое"),
+                            name_en=group.get("parent_name_en", "Other"),
+                            is_active=True,
+                            parent_id=None,
+                        )
+                        db.add(new_parent)
+                        await db.flush()
+                        parent_id = new_parent.id
+                        parents_created += 1
                 except Exception as e:
-                    errors.append(f"Parent yaratishda xato: {group.get('parent_name_uz')}: {e}")
+                    await db.rollback()
+                    errors.append(f"Parent: {group.get('parent_name_uz')}: {e}")
                     continue
 
             # Update children's parent_id
