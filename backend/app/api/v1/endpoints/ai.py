@@ -472,8 +472,8 @@ async def ai_agent_search(
     _check_ai_enabled()
     try:
         from app.services.ai_agent_search import AIAgentSearchService
-        # Use actual user role
-        role = current_user.role.value if current_user.role else request.role
+        # Use role from request (frontend sends current active role)
+        role = request.role
         result = await AIAgentSearchService.search(
             db=db,
             query=request.query,
