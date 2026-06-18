@@ -1179,7 +1179,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                 <i className="fa-solid fa-xmark text-sm" />
               </button>
             </div>
-            {/* Scrollable - 2 column grid of parent categories */}
+            {/* Scrollable - Parent categories with full child lists */}
             <div className="overflow-y-auto px-5 py-4 flex-1">
               {/* Kasblar section */}
               {professions.length > 0 && (
@@ -1188,29 +1188,35 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                     <i className="fa-solid fa-briefcase text-indigo-500" />
                     {t("home.professions_block")}
                   </h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     {professions.filter(p => !p.parent_id).map(parent => {
                       const children = professions.filter(c => c.parent_id === parent.id);
                       const iconInfo = getProfessionIcon(parent);
                       return (
-                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
-                          {/* Parent header */}
+                        <div key={parent.id} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          {/* Parent header - clickable */}
                           <button
                             onClick={() => {
-                              setFilters({ ...filters, profession: String(parent.id) });
+                              setFilters({ ...filters, profession: `cat_${parent.id}` });
                               setShowAllCategories(false);
                               setActiveSubTab("mine");
                             }}
-                            className="flex items-center gap-2 mb-2 w-full active:scale-95 transition-all"
+                            className="flex items-center gap-3 w-full active:scale-[0.98] transition-all"
                           >
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                              <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
+                            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                              <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
                             </div>
-                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                            <div className="flex-1 text-left">
+                              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                              {children.length > 0 && (
+                                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{children.length} ta yo'nalish</p>
+                              )}
+                            </div>
+                            <i className="fa-solid fa-chevron-right text-[10px]" style={{ color: 'var(--text-muted)' }} />
                           </button>
-                          {/* Child list */}
+                          {/* All children - full list */}
                           {children.length > 0 && (
-                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
+                            <div className="mt-3 pt-3 border-t flex flex-wrap gap-1.5" style={{ borderColor: 'var(--border-primary)' }}>
                               {children.map(child => (
                                 <button
                                   key={child.id}
@@ -1219,8 +1225,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                                     setShowAllCategories(false);
                                     setActiveSubTab("mine");
                                   }}
-                                  className="block w-full text-left text-[10px] font-semibold py-1 px-2 rounded-md transition-all active:scale-95 hover:bg-slate-50"
-                                  style={{ color: 'var(--text-secondary)' }}
+                                  className="px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95 border"
+                                  style={{ borderColor: `${iconInfo.color}30`, color: iconInfo.color, backgroundColor: `${iconInfo.color}08` }}
                                 >
                                   {getLocalizedName(child)}
                                 </button>
@@ -1241,22 +1247,28 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                     <i className="fa-solid fa-hammer text-amber-500" />
                     {t("home.works_block")}
                   </h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     {works.filter(w => !w.parent_id).map(parent => {
                       const children = works.filter(c => c.parent_id === parent.id);
                       const iconInfo = getProfessionIcon(parent);
                       return (
-                        <div key={parent.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
-                              <i className={`fa-solid ${iconInfo.icon} text-xs`} style={{ color: iconInfo.color }} />
+                        <div key={parent.id} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconInfo.color}15` }}>
+                              <i className={`fa-solid ${iconInfo.icon} text-base`} style={{ color: iconInfo.color }} />
                             </div>
-                            <span className="text-xs font-bold text-left leading-tight" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                            <div className="flex-1">
+                              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{getLocalizedName(parent)}</span>
+                              {children.length > 0 && (
+                                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{children.length} ta turi</p>
+                              )}
+                            </div>
                           </div>
                           {children.length > 0 && (
-                            <div className="space-y-1 pl-2 border-l-2" style={{ borderColor: `${iconInfo.color}30` }}>
+                            <div className="mt-3 pt-3 border-t flex flex-wrap gap-1.5" style={{ borderColor: 'var(--border-primary)' }}>
                               {children.map(child => (
-                                <span key={child.id} className="block text-[10px] font-semibold py-1 px-2" style={{ color: 'var(--text-secondary)' }}>
+                                <span key={child.id} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border"
+                                  style={{ borderColor: `${iconInfo.color}30`, color: iconInfo.color, backgroundColor: `${iconInfo.color}08` }}>
                                   {getLocalizedName(child)}
                                 </span>
                               ))}
