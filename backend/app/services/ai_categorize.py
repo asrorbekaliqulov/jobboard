@@ -51,14 +51,16 @@ class AICategorizeService:
             "VAZIFA:\n"
             "1. Kasblarni mantiqiy guruhlarga ajrating (masalan: IT, Tibbiyot, Ta'lim, Qurilish...)\n"
             "2. Har bir guruh uchun PARENT kasb tanlang yoki yangi nom bering\n"
-            "3. Agar bazada shu guruhga mos parent bor bo'lsa (masalan: 'Dasturchi' IT uchun) - o'shani ishlating\n"
+            "3. Agar bazada shu guruhga mos parent bor bo'lsa - o'shani ishlating\n"
             "4. Agar yo'q bo'lsa - yangi parent nomi bering\n"
             "5. Hech qanday kasbni o'chirmang, faqat guruhlang\n\n"
             "MUHIM QOIDALAR:\n"
+            "- BARCHA kasblarni guruhlang! Birontasini ham tashlab ketmang!\n"
             "- Har bir kasb faqat BITTA guruhga tegishli bo'lishi kerak\n"
             "- Umumiy kasblar (masalan 'Boshqa') parent bo'lmasin\n"
             "- Parent nomi guruhni aniq ifodalashi kerak\n"
-            "- Agar kasb allaqachon to'g'ri parent_id ga ega bo'lsa, o'zgartirmang\n\n"
+            "- Agar kasb allaqachon to'g'ri parent_id ga ega bo'lsa, o'zgartirmang\n"
+            "- Agar qaysi guruhga kirishini bilmasangiz 'Boshqa xizmatlar' guruhiga qo'shing\n\n"
             "Javob formati:\n"
             "{\n"
             '  "groups": [\n'
@@ -86,6 +88,21 @@ class AICategorizeService:
             return {"groups": [], "error": f"AI xatolik: {str(e)}"}
 
         groups = result_data.get("groups", [])
+
+        # Find uncategorized professions and add them to "Boshqa" group
+        all_categorized_ids = set()
+        for group in groups:
+            all_categorized_ids.update(group.get("children_ids", []))
+
+        uncategorized = [p for p in all_profs if p.id not in all_categorized_ids]
+        if uncategorized:
+            groups.append({
+                "parent_name_uz": "Boshqa xizmatlar",
+                "parent_name_ru": "Прочие услуги",
+                "parent_name_en": "Other Services",
+                "parent_existing_id": None,
+                "children_ids": [p.id for p in uncategorized],
+            })
 
         # Enrich with current profession names for preview
         prof_map = {p.id: p for p in all_profs}
