@@ -50,3 +50,42 @@ async def delete_profession(profession_id: int, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="Profession not found")
     await ProfessionService.delete(db, profession)
     return {"detail": "Profession deleted"}
+
+
+
+# ==================== AI Auto-Categorize ====================
+
+@router.post("/ai-categorize/preview")
+async def ai_categorize_preview(db: AsyncSession = Depends(get_db)):
+    """
+    AI avtomatik saralash - OLDINDAN KO'RISH.
+    Hech narsa o'zgarmaydi, faqat AI taklif qilgan guruhlarni ko'rsatadi.
+    """
+    from app.services.ai_categorize import AICategorizeService
+    from app.core.config import settings
+    if not settings.ai_enabled:
+        raise HTTPException(status_code=503, detail="AI xizmati sozlanmagan")
+    return await AICategorizeService.generate_categories(db)
+
+
+@router.post("/ai-categorize/apply")
+async def ai_categorize_apply(groups: list, db: AsyncSession = Depends(get_db)):
+    """
+    AI saralashni TASDIQLASH va bazaga qo'llash.
+    Admin preview ko'rib, tasdiqlagan guruhlarni yuboradi.
+    """
+    from app.services.ai_categorize import AICategorizeService
+    from app.core.config import settings
+    if not settings.ai_enabled:
+        raise HTTPException(status_code=503, detail="AI xizmati sozlanmagan")
+    return await AICategorizeService.apply_categories(db, groups)
+
+
+@router.post("/ai-categorize/revert")
+async def ai_categorize_revert(db: AsyncSession = Depends(get_db)):
+    """
+    AI saralashni BEKOR QILISH.
+    Barcha parent_id larni NULL ga o'zgartiradi (kasblar o'chirilmaydi).
+    """
+    from app.services.ai_categorize import AICategorizeService
+    return await AICategorizeService.revert_categories(db)

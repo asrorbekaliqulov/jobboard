@@ -4,6 +4,7 @@ import { User, Vacancy, Resume, Profession, Region, District, Work, AdminFilters
 import { SearchableSelect, Pagination, ConfirmModal } from '../../components/Shared.tsx';
 import { adminApi } from '../../services/adminApi.ts';
 import { professionService } from '../../services/professionService.ts';
+import AICategorizePanel from '../../components/AICategorizePanel.tsx';
 import { regionService } from '../../services/regionService.ts';
 import { vacancyService } from '../../services/vacancyService.ts';
 import { resumeService } from '../../services/resumeService.ts';
@@ -464,6 +465,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             }
           </span>
         </div>
+
+        {/* AI Auto-Categorize Panel (only for professions tab) */}
+        {activeTab === 'professions' && <AICategorizePanel onRefresh={() => fetchData()} />}
 
         {/* Data Table */}
         <div className="border border-slate-100 rounded-[2.5rem] overflow-hidden bg-white shadow-sm flex-1 flex flex-col min-h-[500px]">
