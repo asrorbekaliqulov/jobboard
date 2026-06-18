@@ -122,10 +122,16 @@ const AICategorizePanel: React.FC<Props> = ({ onRefresh }) => {
         </div>
         <div className="flex gap-2">
           {!preview && !applied && (
-            <button onClick={handlePreview} disabled={loading}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 disabled:opacity-50 active:scale-95 transition-all">
-              {loading ? <><i className="fa-solid fa-spinner fa-spin mr-1" /> Tahlil qilinmoqda...</> : <><i className="fa-solid fa-wand-magic-sparkles mr-1" /> Avtomatik saralash</>}
-            </button>
+            <>
+              <button onClick={handlePreview} disabled={loading}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 disabled:opacity-50 active:scale-95 transition-all">
+                {loading ? <><i className="fa-solid fa-spinner fa-spin mr-1" /> Tahlil qilinmoqda...</> : <><i className="fa-solid fa-wand-magic-sparkles mr-1" /> Avtomatik saralash</>}
+              </button>
+              <button onClick={handleRevert} disabled={loading}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 disabled:opacity-50 active:scale-95 transition-all">
+                <i className="fa-solid fa-rotate-left mr-1" /> Orqaga qaytarish
+              </button>
+            </>
           )}
           {preview && !applied && (
             <>
