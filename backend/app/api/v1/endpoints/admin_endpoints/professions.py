@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.services.profession import ProfessionService
@@ -69,7 +69,7 @@ async def ai_categorize_preview(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/ai-categorize/apply")
-async def ai_categorize_apply(groups: list, db: AsyncSession = Depends(get_db)):
+async def ai_categorize_apply(groups: list = Body(...), db: AsyncSession = Depends(get_db)):
     """
     AI saralashni TASDIQLASH va bazaga qo'llash.
     Admin preview ko'rib, tasdiqlagan guruhlarni yuboradi.
