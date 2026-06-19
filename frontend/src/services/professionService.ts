@@ -19,6 +19,7 @@ class ProfessionService {
         if (search) {
             query.append('search', search);
         }
+        query.append('limit', '500');  // Get all professions
 
         const response = await fetch(`${API_URL}/?${query.toString()}`, {
             headers: this.getHeaders()
