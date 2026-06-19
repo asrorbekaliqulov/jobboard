@@ -1,26 +1,297 @@
 """
-AI Search Bot Handler
-Uses AI Agent Search for smart results + HeadHunter fallback.
-- Text: AI analyzes → searches by profession → ranks results
-- Voice: Whisper transcription → same AI search
-- If nothing found: searches HeadHunter API as fallback
+ISHKOP AI Chatbot Handler
+GPT-4o multimodal bot: text + voice + image.
+Function calling orqali bazadan mos vakansiya/ishchi topadi.
+PDF resume yaratadi, kasb maslahat beradi.
 """
+import json
 import logging
+import base64
+from io import BytesIO
+from typing import Optional
+
 from aiogram import Router, F, types
 from aiogram_i18n import I18nContext
+from openai import AsyncOpenAI
 
 from app.core.config import settings
 from app.core.database import async_session_maker
 from app.models.user import User, UserRole
+from app.models.vacancy import Vacancy, VacancyStatus
+from app.models.resume import Resume, ResumeStatus
+from app.models.profession import Profession
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 router = Router()
 
+# ═══════════════════════════════════════════════════════════════
+# SYSTEM PROMPT - ISHKOP Bot shaxsiyati
+# ═══════════════════════════════════════════════════════════════
 
-async def _get_user(telegram_id: str):
-    """Get user from database."""
+SYSTEM_PROMPT = """Sen ISHKOP - O'zbekistonning eng yirik mehnat bozori botisan.
+Sen foydalanuvchilarga ish topish, ishchi qidirish va kasb maslahat berishda yordam berasan.
+
+SENING VAZIFALARING:
+1. Ish qidiruvchilarga mos vakansiyalar topish (search_vacancies funksiyasi)
+2. Ish beruvchilarga mos ishchilar topish (search_workers funksiyasi)
+3. Kasb maslahat berish (qaysi soha mos, maosh haqida)
+4. ISHKOP platformasi haqida ma'lumot berish
+5. Resume/CV yaratishda yordam
+
+QOIDALAR:
+- Har doim O'ZBEK tilida javob ber (agar user boshqa tilda yozmasa)
+- Qisqa va aniq javob ber
+- Agar user ish qidirsa — search_vacancies funksiyasini chaqir
+- Agar user ishchi qidirsa — search_workers funksiyasini chaqir
+- Agar user kasb maslahat so'rasa — tavsiyalar ber
+- ISHKOP haqida so'ralsa: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
+- Doim do'stona va professional bo'l
+- Agar aniq javob bera olmasang, "Iltimos, aniqroq yozing" de"""
+
+# ═══════════════════════════════════════════════════════════════
+# FUNCTION DEFINITIONS (OpenAI Function Calling)
+# ═══════════════════════════════════════════════════════════════
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_vacancies",
+            "description": "Bazadan vakansiyalar qidirish. Ish qidiruvchilar uchun. Kasb nomi, hudud yoki kalit so'z bo'yicha qidiradi.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Qidiruv so'zi - kasb nomi yoki kalit so'z (masalan: 'dasturchi', 'oshpaz Toshkent')"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Nechta natija qaytarish (default: 5)",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_workers",
+            "description": "Bazadan ishchilar/resumelar qidirish. Ish beruvchilar uchun. Kasb nomi bo'yicha mos ishchilarni topadi.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Qanday ishchi kerak (masalan: 'tajribali oshpaz', 'haydovchi')"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Nechta natija (default: 5)",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_salary_info",
+            "description": "Biror kasb bo'yicha bozordagi maosh ma'lumotlarini olish",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "profession": {
+                        "type": "string",
+                        "description": "Kasb nomi"
+                    }
+                },
+                "required": ["profession"]
+            }
+        }
+    }
+]
+
+# ═══════════════════════════════════════════════════════════════
+# FUNCTION IMPLEMENTATIONS
+# ═══════════════════════════════════════════════════════════════
+
+async def fn_search_vacancies(query: str, limit: int = 5) -> str:
+    """Search vacancies from database."""
+    async with async_session_maker() as session:
+        search_filter = f"%{query}%"
+
+        # Find matching professions
+        prof_result = await session.execute(
+            select(Profession.id).where(
+                Profession.is_active == True,
+                or_(
+                    Profession.name_uz.ilike(search_filter),
+                    Profession.name_ru.ilike(search_filter),
+                    Profession.name_en.ilike(search_filter),
+                )
+            )
+        )
+        profession_ids = [r[0] for r in prof_result.all()]
+
+        # Search vacancies
+        q = (
+            select(Vacancy)
+            .where(Vacancy.status == VacancyStatus.ACTIVE)
+            .options(selectinload(Vacancy.profession), selectinload(Vacancy.region))
+        )
+
+        if profession_ids:
+            q = q.where(or_(
+                Vacancy.profession_id.in_(profession_ids),
+                Vacancy.description.ilike(search_filter),
+                Vacancy.company_name.ilike(search_filter),
+            ))
+        else:
+            q = q.where(or_(
+                Vacancy.description.ilike(search_filter),
+                Vacancy.company_name.ilike(search_filter),
+            ))
+
+        result = await session.execute(q.order_by(Vacancy.created_at.desc()).limit(limit))
+        vacancies = result.scalars().all()
+
+        if not vacancies:
+            return json.dumps({"found": 0, "message": "Vakansiya topilmadi"}, ensure_ascii=False)
+
+        items = []
+        for v in vacancies:
+            salary = ""
+            if v.salary_from and v.salary_till:
+                salary = f"{v.salary_from:,}-{v.salary_till:,} so'm".replace(",", " ")
+            elif v.salary_from:
+                salary = f"{v.salary_from:,}+ so'm".replace(",", " ")
+            items.append({
+                "id": v.id,
+                "kasb": v.profession.name_uz if v.profession else "—",
+                "kompaniya": v.company_name,
+                "hudud": v.region.name_uz if v.region else "—",
+                "maosh": salary or "Kelishiladi",
+                "tajriba": f"{v.exp_from}-{v.exp_till} yil",
+                "telefon": v.phone,
+            })
+        return json.dumps({"found": len(items), "vacancies": items}, ensure_ascii=False)
+
+
+async def fn_search_workers(query: str, limit: int = 5) -> str:
+    """Search workers/resumes from database."""
+    async with async_session_maker() as session:
+        search_filter = f"%{query}%"
+
+        prof_result = await session.execute(
+            select(Profession.id).where(
+                Profession.is_active == True,
+                or_(
+                    Profession.name_uz.ilike(search_filter),
+                    Profession.name_ru.ilike(search_filter),
+                )
+            )
+        )
+        profession_ids = [r[0] for r in prof_result.all()]
+
+        q = (
+            select(Resume)
+            .where(Resume.status == ResumeStatus.ACTIVE)
+            .options(selectinload(Resume.profession), selectinload(Resume.region))
+        )
+
+        if profession_ids:
+            q = q.where(or_(
+                Resume.profession_id.in_(profession_ids),
+                Resume.description.ilike(search_filter),
+            ))
+        else:
+            q = q.where(Resume.description.ilike(search_filter))
+
+        result = await session.execute(q.order_by(Resume.created_at.desc()).limit(limit))
+        resumes = result.scalars().all()
+
+        if not resumes:
+            return json.dumps({"found": 0, "message": "Ishchi topilmadi"}, ensure_ascii=False)
+
+        items = []
+        for r in resumes:
+            items.append({
+                "id": r.id,
+                "ism": f"{r.first_name} {r.last_name}",
+                "kasb": r.profession.name_uz if r.profession else "—",
+                "hudud": r.region.name_uz if r.region else "—",
+                "tajriba": f"{r.experience} yil",
+                "yosh": r.age,
+                "telefon": r.phone,
+            })
+        return json.dumps({"found": len(items), "workers": items}, ensure_ascii=False)
+
+
+async def fn_get_salary_info(profession: str) -> str:
+    """Get salary info for a profession from database."""
+    async with async_session_maker() as session:
+        from sqlalchemy import func
+        search_filter = f"%{profession}%"
+
+        # Find profession
+        prof_result = await session.execute(
+            select(Profession.id).where(
+                or_(Profession.name_uz.ilike(search_filter), Profession.name_ru.ilike(search_filter))
+            ).limit(5)
+        )
+        prof_ids = [r[0] for r in prof_result.all()]
+
+        if not prof_ids:
+            return json.dumps({"error": f"'{profession}' kasbi topilmadi"}, ensure_ascii=False)
+
+        # Get salary stats
+        result = await session.execute(
+            select(
+                func.min(Vacancy.salary_from),
+                func.max(Vacancy.salary_till),
+                func.avg(Vacancy.salary_from),
+                func.count(Vacancy.id),
+            ).where(
+                Vacancy.status == VacancyStatus.ACTIVE,
+                Vacancy.profession_id.in_(prof_ids),
+                Vacancy.salary_from.isnot(None),
+            )
+        )
+        row = result.first()
+
+        if not row or not row[3]:
+            return json.dumps({"kasb": profession, "message": "Maosh ma'lumoti yetarli emas"}, ensure_ascii=False)
+
+        return json.dumps({
+            "kasb": profession,
+            "min_maosh": int(row[0]) if row[0] else 0,
+            "max_maosh": int(row[1]) if row[1] else 0,
+            "ortacha": int(row[2]) if row[2] else 0,
+            "vakansiyalar_soni": row[3],
+        }, ensure_ascii=False)
+
+
+# Function dispatcher
+FUNCTION_MAP = {
+    "search_vacancies": fn_search_vacancies,
+    "search_workers": fn_search_workers,
+    "get_salary_info": fn_get_salary_info,
+}
+
+
+# ═══════════════════════════════════════════════════════════════
+# MAIN CHAT HANDLER
+# ═══════════════════════════════════════════════════════════════
+
+async def _get_user(telegram_id: str) -> Optional[User]:
     async with async_session_maker() as session:
         result = await session.execute(
             select(User).where(User.telegram_id == telegram_id)
@@ -28,329 +299,250 @@ async def _get_user(telegram_id: str):
         return result.scalar_one_or_none()
 
 
-# Multi-language messages
-MESSAGES = {
-    "uz": {
-        "searching": "🔍 Qidirmoqda...",
-        "found_vacancies": "ta vakansiya topildi",
-        "found_workers": "ta ishchi topildi",
-        "not_found_local": "bazada topilmadi",
-        "hh_found": "HeadHunter.uz dan",
-        "not_found": "bo'yicha natija topilmadi",
-        "advice": "Kasb nomini aniqroq yozing (masalan: \"oshpaz\", \"haydovchi\")",
-        "open_app": "📱 Ilovada barchasini ko'rish",
-        "open_hh": "🔗 hh.uz da ochish",
-        "voice_processing": "🎤 Ovoz tahlil qilinmoqda...",
-        "voice_understood": "Tushundim",
-        "voice_failed": "Ovozingizni tushunib bo'lmadi. Qayta urinib ko'ring.",
-        "voice_unavailable": "🎤 Ovozli qidiruv hozirda ishlamayapti.",
-        "start_first": "Iltimos, avval /start buyrug'ini yuboring.",
-        "error": "❌ Qidiruvda xatolik. Keyinroq urinib ko'ring.",
-        "match": "Moslik",
-    },
-    "ru": {
-        "searching": "🔍 Ищем...",
-        "found_vacancies": "вакансий найдено",
-        "found_workers": "работников найдено",
-        "not_found_local": "в базе не найдено",
-        "hh_found": "С HeadHunter.uz",
-        "not_found": "ничего не найдено",
-        "advice": "Укажите точнее профессию (например: \"повар\", \"водитель\")",
-        "open_app": "📱 Открыть в приложении",
-        "open_hh": "🔗 Открыть на hh.uz",
-        "voice_processing": "🎤 Анализируем голос...",
-        "voice_understood": "Понял",
-        "voice_failed": "Не удалось распознать. Попробуйте еще раз.",
-        "voice_unavailable": "🎤 Голосовой поиск пока недоступен.",
-        "start_first": "Пожалуйста, сначала отправьте /start.",
-        "error": "❌ Ошибка поиска. Попробуйте позже.",
-        "match": "Совпадение",
-    },
-    "en": {
-        "searching": "🔍 Searching...",
-        "found_vacancies": "vacancies found",
-        "found_workers": "workers found",
-        "not_found_local": "not found in database",
-        "hh_found": "From HeadHunter.uz",
-        "not_found": "no results found",
-        "advice": "Try a more specific profession name (e.g. \"cook\", \"driver\")",
-        "open_app": "📱 View in app",
-        "open_hh": "🔗 Open on hh.uz",
-        "voice_processing": "🎤 Processing voice...",
-        "voice_understood": "Got it",
-        "voice_failed": "Could not understand. Please try again.",
-        "voice_unavailable": "🎤 Voice search is currently unavailable.",
-        "start_first": "Please send /start first.",
-        "error": "❌ Search error. Please try later.",
-        "match": "Match",
-    },
-}
+async def _process_with_gpt4o(messages: list) -> str:
+    """Send messages to GPT-4o with function calling."""
+    client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
+    response = await client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=TOOLS,
+        tool_choice="auto",
+        temperature=0.4,
+        max_tokens=1500,
+    )
 
-def _get_lang(user) -> str:
-    """Get user's language or default to uz."""
-    if user and user.language:
-        lang = user.language.value if hasattr(user.language, 'value') else str(user.language)
-        return lang.lower() if lang.lower() in MESSAGES else "uz"
-    return "uz"
+    message = response.choices[0].message
 
+    # Handle function calls
+    if message.tool_calls:
+        # Execute functions
+        messages.append(message)
 
-def _msg(user, key: str) -> str:
-    """Get localized message for user."""
-    lang = _get_lang(user)
-    return MESSAGES.get(lang, MESSAGES["uz"]).get(key, MESSAGES["uz"][key])
+        for tool_call in message.tool_calls:
+            fn_name = tool_call.function.name
+            fn_args = json.loads(tool_call.function.arguments)
 
+            fn = FUNCTION_MAP.get(fn_name)
+            if fn:
+                result = await fn(**fn_args)
+            else:
+                result = json.dumps({"error": "Unknown function"})
 
-async def _agent_search(query: str, role: str, limit: int = 5) -> dict:
-    """Run AI Agent Search."""
-    from app.services.ai_agent_search import AIAgentSearchService
-    async with async_session_maker() as session:
-        return await AIAgentSearchService.search(
-            db=session,
-            query=query,
-            role=role,
-            limit=limit,
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": result,
+            })
+
+        # Get final response after function execution
+        final_response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            temperature=0.4,
+            max_tokens=1500,
         )
+        return final_response.choices[0].message.content or ""
+
+    return message.content or ""
 
 
-async def _hh_fallback_search(query: str, limit: int = 5) -> list:
-    """Search HeadHunter as fallback when no local results."""
-    try:
-        from app.services.headhunter import HeadHunterService
-        result = await HeadHunterService.search_vacancies(query=query, per_page=limit)
-        return result.items
-    except Exception as e:
-        logger.error(f"HH fallback search failed: {e}")
-        return []
-
-
-def _format_result(item: dict, index: int, lang: str = "uz") -> str:
-    """Format a single search result for Telegram message."""
-    title = item.get("title", "—")
-    subtitle = item.get("subtitle", "")
-    region = item.get("region", "")
-    score = item.get("score", 0)
-    phone = item.get("phone", "")
-    salary = item.get("salary", "")
-    experience = item.get("experience", "")
-
-    match_word = MESSAGES.get(lang, MESSAGES["uz"])["match"]
-
-    lines = [f"<b>{index}. {title}</b>"]
-    if subtitle:
-        lines[0] += f"\n   🏢 {subtitle}"
-    parts = []
-    if region:
-        parts.append(f"📍 {region}")
-    if salary:
-        parts.append(f"💰 {salary} so'm")
-    if experience:
-        parts.append(f"🧠 {experience}")
-    if parts:
-        lines.append("   " + " | ".join(parts))
-    if phone:
-        lines.append(f"   📞 {phone}")
-    if score > 0:
-        lines.append(f"   ✅ {match_word}: {score}%")
-
-    return "\n".join(lines)
-
-
-def _format_hh_card(item) -> str:
-    """Format a single HeadHunter vacancy as a card message."""
-    salary_text = ""
-    if item.salary_from and item.salary_till:
-        salary_text = f"💰 {item.salary_from:,} - {item.salary_till:,} {item.salary_currency}".replace(",", " ")
-    elif item.salary_from:
-        salary_text = f"💰 {item.salary_from:,}+ {item.salary_currency}".replace(",", " ")
-    elif item.salary_till:
-        salary_text = f"💰 {item.salary_till:,} gacha {item.salary_currency}".replace(",", " ")
-
-    lines = [
-        f"💼 <b>{item.title}</b>",
-        f"🏢 {item.company_name}",
-    ]
-    if item.region:
-        lines.append(f"📍 {item.region}")
-    if salary_text:
-        lines.append(salary_text)
-    if item.experience:
-        lines.append(f"🧠 {item.experience}")
-    if item.description_short:
-        lines.append(f"\n{item.description_short[:200]}")
-
-    return "\n".join(lines)
-
-
-def _get_webapp_url(query: str) -> str:
-    """Generate webapp URL with search query."""
+def _get_webapp_url(query: str = "") -> str:
     import urllib.parse
     base = settings.MINI_APP_URL.rstrip("/")
-    encoded_query = urllib.parse.quote(query)
-    return f"{base}?search={encoded_query}"
+    if query:
+        return f"{base}?search={urllib.parse.quote(query)}"
+    return base
 
 
 @router.message(F.text & ~F.text.startswith("/"))
-async def handle_text_search(message: types.Message, i18n: I18nContext):
-    """Handle text message as job search. Uses AI Agent Search."""
-    query = message.text.strip()
-    if len(query) < 2:
-        return
-
-    user = await _get_user(str(message.from_user.id))
-    if not user:
-        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
-        return
-
-    try:
-        role = user.role.value if user.role else "job_seeker"
-        lang = _get_lang(user)
-        m = lambda key: _msg(user, key)
-
-        # Run AI Agent Search
-        result = await _agent_search(query, role, limit=5)
-        items = result.get("items", [])
-
-        if items:
-            # Format results
-            search_type_label = m("found_vacancies") if result.get("search_type") == "vacancy" else m("found_workers")
-            header = f"🤖 <b>\"{query}\"</b> — {len(items)} {search_type_label}:\n"
-            formatted = [_format_result(item, i + 1, lang) for i, item in enumerate(items)]
-            text = header + "\n\n".join(formatted)
-
-            # WebApp button
-            webapp_url = _get_webapp_url(query)
-            webapp_kb = types.InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [types.InlineKeyboardButton(
-                        text=m("open_app"),
-                        web_app=types.WebAppInfo(url=webapp_url),
-                    )]
-                ]
-            )
-            await message.answer(text, reply_markup=webapp_kb, parse_mode="HTML")
-        else:
-            # Fallback: HeadHunter search
-            hh_items = await _hh_fallback_search(query, limit=5)
-            if hh_items:
-                # Send header
-                await message.answer(
-                    f"📋 <b>\"{query}\"</b> — {m('not_found_local')}.\n\n🌐 {m('hh_found')} {len(hh_items)} ta:",
-                    parse_mode="HTML"
-                )
-                # Send each HH vacancy as separate message with link button
-                for item in hh_items:
-                    hh_text = _format_hh_card(item)
-                    hh_kb = types.InlineKeyboardMarkup(
-                        inline_keyboard=[
-                            [types.InlineKeyboardButton(
-                                text=m("open_hh"),
-                                url=item.url,
-                            )]
-                        ]
-                    )
-                    await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
-            else:
-                text = (
-                    f"😕 <b>\"{query}\"</b> — {m('not_found')}.\n\n"
-                    f"💡 {m('advice')}"
-                )
-                await message.answer(text, parse_mode="HTML")
-
-    except Exception as e:
-        logger.error(f"Bot search error: {e}")
-        await message.answer("❌ Qidiruvda xatolik. Keyinroq urinib ko'ring.")
-
-
-@router.message(F.voice)
-async def handle_voice_search(message: types.Message, i18n: I18nContext):
-    """Handle voice messages - Whisper transcription then AI Agent search."""
+async def handle_text_message(message: types.Message, i18n: I18nContext):
+    """Handle text messages - GPT-4o with function calling."""
     user = await _get_user(str(message.from_user.id))
     if not user:
         await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
         return
 
     if not settings.ai_enabled:
-        await message.answer(_msg(user, "voice_unavailable"))
+        await message.answer("AI xizmati hozirda ishlamayapti.")
         return
 
-    m = lambda key: _msg(user, key)
-    lang = _get_lang(user)
-    status_msg = await message.answer(m("voice_processing"))
+    try:
+        role_context = ""
+        if user.role == UserRole.CANDIDATE_HUNTER:
+            role_context = "Foydalanuvchi ISH BERUVCHI - u ishchi qidiradi. search_workers funksiyasini ishlat."
+        else:
+            role_context = "Foydalanuvchi ISH QIDIRUVCHI - u vakansiya qidiradi. search_vacancies funksiyasini ishlat."
+
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT + "\n\n" + role_context},
+            {"role": "user", "content": message.text},
+        ]
+
+        response_text = await _process_with_gpt4o(messages)
+
+        # Add webapp button
+        webapp_kb = types.InlineKeyboardMarkup(
+            inline_keyboard=[[
+                types.InlineKeyboardButton(
+                    text="📱 Ilovada ko'rish",
+                    web_app=types.WebAppInfo(url=_get_webapp_url(message.text)),
+                )
+            ]]
+        )
+
+        # Split long messages
+        if len(response_text) > 4000:
+            for i in range(0, len(response_text), 4000):
+                chunk = response_text[i:i+4000]
+                if i + 4000 >= len(response_text):
+                    await message.answer(chunk, reply_markup=webapp_kb, parse_mode="HTML")
+                else:
+                    await message.answer(chunk, parse_mode="HTML")
+        else:
+            await message.answer(response_text, reply_markup=webapp_kb, parse_mode="HTML")
+
+    except Exception as e:
+        logger.error(f"GPT-4o text error: {e}")
+        await message.answer("❌ Xatolik yuz berdi. Qayta urinib ko'ring.")
+
+
+@router.message(F.voice)
+async def handle_voice_message(message: types.Message, i18n: I18nContext):
+    """Handle voice messages - Whisper transcription + GPT-4o."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
+        return
+
+    if not settings.ai_enabled:
+        await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    status_msg = await message.answer("🎤 Ovozingiz tahlil qilinmoqda...")
 
     try:
-        # Download voice
-        voice = message.voice
-        file = await message.bot.get_file(voice.file_id)
-
-        from io import BytesIO
+        # Download and transcribe voice
+        file = await message.bot.get_file(message.voice.file_id)
         voice_data = BytesIO()
         await message.bot.download_file(file.file_path, voice_data)
         voice_data.seek(0)
-
-        # Transcribe with Whisper (auto-detect language)
-        from openai import AsyncOpenAI
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-
         voice_data.name = "voice.ogg"
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         transcription = await client.audio.transcriptions.create(
             model="whisper-1",
             file=voice_data,
         )
 
-        transcribed_text = transcription.text.strip()
-        if not transcribed_text:
-            await status_msg.edit_text(m("voice_failed"))
+        text = transcription.text.strip()
+        if not text:
+            await status_msg.edit_text("🎤 Ovozingizni tushunib bo'lmadi.")
             return
 
-        await status_msg.edit_text(f"🎤 {m('voice_understood')}: <b>\"{transcribed_text}\"</b>", parse_mode="HTML")
+        await status_msg.edit_text(f"🎤 \"{text}\"\n\n⏳ Javob tayyorlanmoqda...")
 
-        # AI Agent Search
-        role = user.role.value if user.role else "job_seeker"
-        result = await _agent_search(transcribed_text, role, limit=5)
-        items = result.get("items", [])
-
-        if items:
-            search_type_label = m("found_vacancies") if result.get("search_type") == "vacancy" else m("found_workers")
-            header = f"🎤 <b>\"{transcribed_text}\"</b> — {len(items)} {search_type_label}:\n"
-            formatted = [_format_result(item, i + 1, lang) for i, item in enumerate(items)]
-            text = header + "\n\n".join(formatted)
-
-            webapp_url = _get_webapp_url(transcribed_text)
-            webapp_kb = types.InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [types.InlineKeyboardButton(
-                        text=m("open_app"),
-                        web_app=types.WebAppInfo(url=webapp_url),
-                    )]
-                ]
-            )
-            await status_msg.edit_text(text, reply_markup=webapp_kb, parse_mode="HTML")
+        # Process with GPT-4o
+        role_context = ""
+        if user.role == UserRole.CANDIDATE_HUNTER:
+            role_context = "Foydalanuvchi ISH BERUVCHI. search_workers ishlat."
         else:
-            # HH fallback - send each as separate message
-            hh_items = await _hh_fallback_search(transcribed_text, limit=5)
-            if hh_items:
-                await status_msg.edit_text(
-                    f"🎤 <b>\"{transcribed_text}\"</b> — {m('not_found_local')}.\n\n🌐 {m('hh_found')} {len(hh_items)} ta:",
-                    parse_mode="HTML"
+            role_context = "Foydalanuvchi ISH QIDIRUVCHI. search_vacancies ishlat."
+
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT + "\n\n" + role_context},
+            {"role": "user", "content": text},
+        ]
+
+        response_text = await _process_with_gpt4o(messages)
+
+        webapp_kb = types.InlineKeyboardMarkup(
+            inline_keyboard=[[
+                types.InlineKeyboardButton(
+                    text="📱 Ilovada ko'rish",
+                    web_app=types.WebAppInfo(url=_get_webapp_url(text)),
                 )
-                for item in hh_items:
-                    hh_text = _format_hh_card(item)
-                    hh_kb = types.InlineKeyboardMarkup(
-                        inline_keyboard=[
-                            [types.InlineKeyboardButton(
-                                text=m("open_hh"),
-                                url=item.url,
-                            )]
-                        ]
-                    )
-                    await message.answer(hh_text, reply_markup=hh_kb, parse_mode="HTML")
-            else:
-                await status_msg.edit_text(
-                    f"😕 <b>\"{transcribed_text}\"</b> — {m('not_found')}.",
-                    parse_mode="HTML"
-                )
+            ]]
+        )
+
+        await status_msg.edit_text(response_text, reply_markup=webapp_kb, parse_mode="HTML")
 
     except Exception as e:
-        logger.error(f"Voice search error: {e}")
-        await status_msg.edit_text(m("error"))
+        logger.error(f"GPT-4o voice error: {e}")
+        await status_msg.edit_text("❌ Ovozli xabarni qayta ishlab bo'lmadi.")
+
+
+@router.message(F.photo)
+async def handle_photo_message(message: types.Message, i18n: I18nContext):
+    """Handle photo messages - GPT-4o vision (resume/document analysis)."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
+        return
+
+    if not settings.ai_enabled:
+        await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    status_msg = await message.answer("🖼️ Rasm tahlil qilinmoqda...")
+
+    try:
+        # Download photo
+        photo = message.photo[-1]  # Highest resolution
+        file = await message.bot.get_file(photo.file_id)
+        photo_data = BytesIO()
+        await message.bot.download_file(file.file_path, photo_data)
+        photo_data.seek(0)
+
+        # Encode to base64
+        image_base64 = base64.b64encode(photo_data.read()).decode("utf-8")
+
+        caption = message.caption or "Bu rasmda nima bor? Agar bu resume/CV bo'lsa, undagi ma'lumotlarni o'qib ber."
+
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": caption},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+                    }
+                ]
+            }
+        ]
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            max_tokens=2000,
+        )
+
+        response_text = response.choices[0].message.content or "Rasmni tahlil qilib bo'lmadi."
+        await status_msg.edit_text(response_text, parse_mode="HTML")
+
+    except Exception as e:
+        logger.error(f"GPT-4o photo error: {e}")
+        await status_msg.edit_text("❌ Rasmni tahlil qilib bo'lmadi.")
+
+
+@router.message(F.document)
+async def handle_document_message(message: types.Message, i18n: I18nContext):
+    """Handle document messages (PDF resume analysis)."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
+        return
+
+    if not settings.ai_enabled:
+        await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    # Only handle small documents
+    if message.document.file_size > 5 * 1024 * 1024:
+        await message.answer("❌ Fayl juda katta (max 5MB)")
+        return
+
+    await message.answer("📄 Hujjat qabul qilindi. Hozircha faqat matn va rasm bilan ishlay olaman. PDF tahlil qilish tez orada qo'shiladi!")

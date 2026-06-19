@@ -503,8 +503,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{t("home.categories")}</h3>
           <button onClick={() => setShowAllCategories(true)} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{t("home.all")} <i className="fa-solid fa-chevron-right text-[8px]" /></button>
         </div>
-        <div className="grid grid-cols-4 gap-2.5">
-          {professions.filter(p => !p.parent_id).slice(0, 11).map((prof) => {
+        <div className="grid grid-cols-3 gap-2.5">
+          {professions.filter(p => !p.parent_id).slice(0, 14).map((prof) => {
             const iconInfo = getProfessionIcon(prof);
             return (
               <button

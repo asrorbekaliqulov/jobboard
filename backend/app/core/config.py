@@ -41,8 +41,9 @@ class Settings(BaseSettings):
 
     # AI / OpenAI Configuration
     OPENAI_API_KEY: str = ""  # OpenAI API key for ChatGPT features
-    OPENAI_MODEL: str = "gpt-4o-mini"  # Model to use (cost-effective)
+    OPENAI_MODEL: str = "gpt-4o-mini"  # Model for lightweight tasks
     OPENAI_MAX_TOKENS: int = 2000  # Max tokens per response
+    OPENAI_CHAT_MODEL: str = "gpt-4o"  # Model for bot chat (multimodal)
 
     # HeadHunter API Configuration
     HH_API_BASE_URL: str = "https://api.hh.ru"  # HH API (works for Uzbekistan with area=97)
