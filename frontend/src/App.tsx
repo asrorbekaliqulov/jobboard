@@ -38,18 +38,51 @@ import { dailyJobSeekerService } from "./services/dailyJobSeekerService.ts";
 import i18n from "./i18n.ts";
 import { useTheme } from "./hooks/useTheme.ts";
 
+// Capture deep-link param at module load (before any re-render loses it)
+function captureDeepLink(): { type: "vacancy" | "resume"; id: number } | null {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    let vacancyId = params.get("vacancy");
+    let resumeId = params.get("resume");
+
+    // Telegram start_param (from t.me/bot/app?startapp=vacancy_123)
+    const tg = (window as any).Telegram?.WebApp;
+    const startParam = tg?.initDataUnsafe?.start_param;
+    if (startParam) {
+      if (startParam.startsWith("vacancy_")) vacancyId = startParam.replace("vacancy_", "");
+      if (startParam.startsWith("resume_")) resumeId = startParam.replace("resume_", "");
+    }
+    // Also check hash (some Telegram clients put params in hash)
+    if (!vacancyId && !resumeId && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      vacancyId = vacancyId || hashParams.get("vacancy");
+      resumeId = resumeId || hashParams.get("resume");
+    }
+
+    if (vacancyId && !isNaN(Number(vacancyId))) return { type: "vacancy", id: Number(vacancyId) };
+    if (resumeId && !isNaN(Number(resumeId))) return { type: "resume", id: Number(resumeId) };
+  } catch (e) {
+    console.error("Deep link capture failed", e);
+  }
+  return null;
+}
+
+const INITIAL_DEEP_LINK = captureDeepLink();
+
 const App: React.FC = () => {
   const navigate = useNavigate();
   const { theme, isDark } = useTheme(); // Theme hook qo'shamiz
   
   const [view, setView] = useState<"onboarding" | "client" | "admin">(
-    "onboarding",
+    INITIAL_DEEP_LINK ? "client" : "onboarding",
   );
-  const [userRole, setUserRole] = useState<UserRole>(UserRole.JOB_SEEKER);
+  const [userRole, setUserRole] = useState<UserRole>(
+    INITIAL_DEEP_LINK?.type === "resume" ? UserRole.CANDIDATE_HUNTER : UserRole.JOB_SEEKER,
+  );
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [deepLink, setDeepLink] = useState<{ type: "vacancy" | "resume"; id: number } | null>(null);
+  const [deepLink, setDeepLink] = useState<{ type: "vacancy" | "resume"; id: number } | null>(INITIAL_DEEP_LINK);
 
   // App Data State
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
@@ -104,31 +137,13 @@ const App: React.FC = () => {
             i18n.changeLanguage(userLang);
           }
 
-          // Deep-link handling: ?vacancy=ID or ?resume=ID
-          // Read from URL or Telegram startapp param
-          const params = new URLSearchParams(window.location.search);
-          let vacancyId = params.get("vacancy");
-          let resumeId = params.get("resume");
-
-          // Telegram passes start_param via initDataUnsafe
-          const tgStartParam = (window as any).Telegram?.WebApp?.initDataUnsafe?.start_param;
-          if (tgStartParam) {
-            if (tgStartParam.startsWith("vacancy_")) vacancyId = tgStartParam.replace("vacancy_", "");
-            if (tgStartParam.startsWith("resume_")) resumeId = tgStartParam.replace("resume_", "");
-          }
-
-          if (vacancyId) {
-            // Open vacancy directly - role = job seeker
-            setUserRole(UserRole.JOB_SEEKER);
-            setDeepLink({ type: "vacancy", id: Number(vacancyId) });
-            setView("client");
-            setIsAuthenticating(false);
-            return;
-          }
-          if (resumeId) {
-            // Open resume directly - role = employer
-            setUserRole(UserRole.CANDIDATE_HUNTER);
-            setDeepLink({ type: "resume", id: Number(resumeId) });
+          // Deep-link handling: vacancy/resume opened from bot button
+          if (INITIAL_DEEP_LINK) {
+            setUserRole(
+              INITIAL_DEEP_LINK.type === "resume"
+                ? UserRole.CANDIDATE_HUNTER
+                : UserRole.JOB_SEEKER,
+            );
             setView("client");
             setIsAuthenticating(false);
             return;

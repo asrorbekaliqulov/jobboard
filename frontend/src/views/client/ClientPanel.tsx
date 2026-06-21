@@ -1189,50 +1189,44 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       onToggleRole={() => setIsRoleModalOpen(true)}
       savedCount={activeSection === "daily-workers" ? savedDailyJobSeekerIds.length : savedIds.length}
     >
-      {activeSubTab === "all" && renderHomePage()}
-      {activeSubTab === "mine" && renderVacanciesList()}
-      {activeSubTab === "saved" && renderSavedList()}
-      {activeSubTab === "more" && renderProfilePage()}
-
-      {/* Deep Link Detail Modal (opened from bot URL) */}
-      {(deepLinkItem || deepLinkLoading) && createPortal(
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] flex flex-col">
-          <div className="w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[92vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b" style={{ borderColor: 'var(--border-primary)' }}>
-              <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                {deepLinkItem?.kind === "resume" ? "Nomzod" : "Vakansiya"}
-              </h3>
-              <button onClick={() => { setDeepLinkItem(null); }}
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-secondary)' }}>
-                <i className="fa-solid fa-xmark text-sm" />
-              </button>
+      {/* Deep-link detail as main content (navbar stays, back returns home) */}
+      {(deepLinkItem || deepLinkLoading) ? (
+        <div className="px-4 pt-4 pb-4 fade-up">
+          <button
+            onClick={() => { setDeepLinkItem(null); setActiveSubTab("all"); }}
+            className="flex items-center gap-2 mb-4 text-sm font-semibold active:scale-95 transition-all"
+            style={{ color: 'var(--accent)' }}
+          >
+            <i className="fa-solid fa-arrow-left" /> Bosh menyuga qaytish
+          </button>
+          {deepLinkLoading ? (
+            <div className="py-16 text-center">
+              <div className="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</p>
             </div>
-            <div className="overflow-y-auto p-4">
-              {deepLinkLoading ? (
-                <div className="py-16 text-center">
-                  <div className="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</p>
-                </div>
-              ) : deepLinkItem?.kind === "vacancy" ? (
-                <ClientVacancyExplorerCard
-                  vacancy={deepLinkItem.data}
-                  isSaved={savedIds.includes(deepLinkItem.data.id)}
-                  onToggleSave={initialRole === UserRole.JOB_SEEKER ? onToggleVacancySave : undefined}
-                  index={0}
-                />
-              ) : deepLinkItem?.kind === "resume" ? (
-                <ClientResumeExplorerCard
-                  resume={deepLinkItem.data}
-                  isSaved={savedIds.includes(deepLinkItem.data.id)}
-                  onToggleSave={initialRole === UserRole.CANDIDATE_HUNTER ? onToggleResumeSave : undefined}
-                  index={0}
-                />
-              ) : null}
-            </div>
-          </div>
-        </div>,
-        document.body
+          ) : deepLinkItem?.kind === "vacancy" ? (
+            <ClientVacancyExplorerCard
+              vacancy={deepLinkItem.data}
+              isSaved={savedIds.includes(deepLinkItem.data.id)}
+              onToggleSave={initialRole === UserRole.JOB_SEEKER ? onToggleVacancySave : undefined}
+              index={0}
+            />
+          ) : deepLinkItem?.kind === "resume" ? (
+            <ClientResumeExplorerCard
+              resume={deepLinkItem.data}
+              isSaved={savedIds.includes(deepLinkItem.data.id)}
+              onToggleSave={initialRole === UserRole.CANDIDATE_HUNTER ? onToggleResumeSave : undefined}
+              index={0}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <>
+          {activeSubTab === "all" && renderHomePage()}
+          {activeSubTab === "mine" && renderVacanciesList()}
+          {activeSubTab === "saved" && renderSavedList()}
+          {activeSubTab === "more" && renderProfilePage()}
+        </>
       )}
 
       {/* All Categories Modal - 2 columns, parent with child list */}

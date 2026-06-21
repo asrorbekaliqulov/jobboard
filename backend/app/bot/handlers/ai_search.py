@@ -58,10 +58,17 @@ QOIDALAR:
 - Qisqa, aniq va do'stona javob ber
 - Oldingi suhbatni eslab tur — user "kecha", "oldin", "yana" desa, avvalgi gaplarni hisobga ol
 - User ish qidirsa — search_vacancies, ishchi qidirsa — search_workers chaqir
-- MUHIM: Vakansiya/ishchi natijalarini matnda raqamlab yozma va havola/telefon yozma!
-  Natijalar PASTDA TUGMALAR (buttonlar) ko'rinishida avtomatik chiqadi.
-  Sen faqat qisqa tanishtir: "Sizga mos N ta vakansiya topdim. Quyidagi tugmalar orqali ko'rib chiqishingiz mumkin 👇"
-- Vakansiya tafsilotlarini (maosh, hudud) qisqa aytishing mumkin, lekin asosiysi tugmalarda
+- MUHIM: Har bir vakansiya/ishchini RO'YXAT qilib qisqacha tavsifi bilan yoz:
+  Masalan:
+  "1. 💼 <b>Dasturchi</b> — TechWave
+   📍 Toshkent | 💰 8-15 mln so'm
+   📝 React va Node.js bilan ishlash, 2 yil tajriba kerak
+
+   2. 💼 <b>Backend Developer</b> — IT Solutions
+   ..."
+- Tavsif (tavsif maydoni) ni qisqa 1-2 jumla qilib yoz
+- Oxirida ayt: "Batafsil ko'rish uchun pastdagi tugmalar orqali kiring 👇"
+- Telefon raqam yoki havola YOZMA — pastdagi tugmalar buni hal qiladi
 - ISHKOP haqida: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
 """
 
@@ -206,6 +213,7 @@ async def fn_search_vacancies(query: str, limit: int = 5) -> str:
                 "hudud": v.region.name_uz if v.region else "—",
                 "maosh": salary or "Kelishiladi",
                 "tajriba": f"{v.exp_from}-{v.exp_till} yil",
+                "tavsif": (v.description or "")[:200],
             })
         return json.dumps({"found": len(items), "vacancies": items}, ensure_ascii=False)
 
@@ -255,6 +263,7 @@ async def fn_search_workers(query: str, limit: int = 5) -> str:
                 "hudud": r.region.name_uz if r.region else "—",
                 "tajriba": f"{r.experience} yil",
                 "yosh": r.age,
+                "tavsif": (r.description or "")[:200],
             })
         return json.dumps({"found": len(items), "workers": items}, ensure_ascii=False)
 
