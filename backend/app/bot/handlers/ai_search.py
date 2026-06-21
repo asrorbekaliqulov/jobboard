@@ -58,7 +58,10 @@ QOIDALAR:
 - Qisqa, aniq va do'stona javob ber
 - Oldingi suhbatni eslab tur — user "kecha", "oldin", "yana" desa, avvalgi gaplarni hisobga ol
 - User ish qidirsa — search_vacancies, ishchi qidirsa — search_workers chaqir
-- Vakansiya/ishchi natijalarini ko'rsatganda telefon raqamni emas, ularning HAVOLASINI (url) ber
+- MUHIM: Vakansiya/ishchi natijalarini matnda raqamlab yozma va havola/telefon yozma!
+  Natijalar PASTDA TUGMALAR (buttonlar) ko'rinishida avtomatik chiqadi.
+  Sen faqat qisqa tanishtir: "Sizga mos N ta vakansiya topdim. Quyidagi tugmalar orqali ko'rib chiqishingiz mumkin 👇"
+- Vakansiya tafsilotlarini (maosh, hudud) qisqa aytishing mumkin, lekin asosiysi tugmalarda
 - ISHKOP haqida: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
 """
 
@@ -203,7 +206,6 @@ async def fn_search_vacancies(query: str, limit: int = 5) -> str:
                 "hudud": v.region.name_uz if v.region else "—",
                 "maosh": salary or "Kelishiladi",
                 "tajriba": f"{v.exp_from}-{v.exp_till} yil",
-                "havola": _vacancy_url(v.id),
             })
         return json.dumps({"found": len(items), "vacancies": items}, ensure_ascii=False)
 
@@ -253,7 +255,6 @@ async def fn_search_workers(query: str, limit: int = 5) -> str:
                 "hudud": r.region.name_uz if r.region else "—",
                 "tajriba": f"{r.experience} yil",
                 "yosh": r.age,
-                "havola": _resume_url(r.id),
             })
         return json.dumps({"found": len(items), "workers": items}, ensure_ascii=False)
 
@@ -322,9 +323,14 @@ async def _get_user(telegram_id: str) -> Optional[User]:
         return result.scalar_one_or_none()
 
 
-async def _process_with_gpt4o(messages: list) -> str:
-    """Send messages to GPT-4o with function calling."""
+async def _process_with_gpt4o(messages: list) -> tuple:
+    """
+    Send messages to GPT-4o with function calling.
+    Returns (response_text, found_items) where found_items is a list of
+    {type, id, title} for building inline webapp buttons.
+    """
     client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    found_items = []
 
     response = await client.chat.completions.create(
         model=settings.OPENAI_CHAT_MODEL,
@@ -339,7 +345,6 @@ async def _process_with_gpt4o(messages: list) -> str:
 
     # Handle function calls
     if message.tool_calls:
-        # Execute functions
         messages.append(message)
 
         for tool_call in message.tool_calls:
@@ -349,6 +354,25 @@ async def _process_with_gpt4o(messages: list) -> str:
             fn = FUNCTION_MAP.get(fn_name)
             if fn:
                 result = await fn(**fn_args)
+                # Capture found items for button building
+                try:
+                    parsed = json.loads(result)
+                    if "vacancies" in parsed:
+                        for v in parsed["vacancies"]:
+                            found_items.append({
+                                "type": "vacancy",
+                                "id": v["id"],
+                                "title": f"{v['kasb']} — {v['kompaniya']}",
+                            })
+                    elif "workers" in parsed:
+                        for w in parsed["workers"]:
+                            found_items.append({
+                                "type": "resume",
+                                "id": w["id"],
+                                "title": f"{w['ism']} — {w['kasb']}",
+                            })
+                except Exception:
+                    pass
             else:
                 result = json.dumps({"error": "Unknown function"})
 
@@ -358,16 +382,42 @@ async def _process_with_gpt4o(messages: list) -> str:
                 "content": result,
             })
 
-        # Get final response after function execution
         final_response = await client.chat.completions.create(
             model=settings.OPENAI_CHAT_MODEL,
             messages=messages,
             temperature=0.4,
             max_tokens=1500,
         )
-        return final_response.choices[0].message.content or ""
+        return (final_response.choices[0].message.content or "", found_items)
 
-    return message.content or ""
+    return (message.content or "", found_items)
+
+
+def _build_result_buttons(found_items: list) -> Optional[types.InlineKeyboardMarkup]:
+    """Build inline webapp buttons for found vacancies/resumes."""
+    if not found_items:
+        return None
+
+    rows = []
+    for item in found_items[:8]:  # Max 8 buttons
+        if item["type"] == "vacancy":
+            url = _vacancy_url(item["id"])
+            emoji = "💼"
+        else:
+            url = _resume_url(item["id"])
+            emoji = "👤"
+        # Truncate title for button
+        title = item["title"]
+        if len(title) > 40:
+            title = title[:37] + "..."
+        rows.append([
+            types.InlineKeyboardButton(
+                text=f"{emoji} {title}",
+                web_app=types.WebAppInfo(url=url),
+            )
+        ])
+
+    return types.InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def _get_webapp_url(query: str = "") -> str:
@@ -406,7 +456,7 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
             message.text,
         )
 
-        response_text = await _process_with_gpt4o(messages)
+        response_text, found_items = await _process_with_gpt4o(messages)
 
         # Check if user is referencing a previous message ("kecha", "oldin", "anaqa")
         reply_to_id = None
@@ -419,14 +469,17 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
         # Save user message to memory
         await memory.save_message(tg_id, "user", message.text, message_id=message.message_id)
 
-        webapp_kb = types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text="📱 Ilovada ko'rish",
-                    web_app=types.WebAppInfo(url=_get_webapp_url(message.text)),
-                )
-            ]]
-        )
+        # Build result buttons (vacancy/resume webapp links) or fallback to general button
+        result_kb = _build_result_buttons(found_items)
+        if not result_kb:
+            result_kb = types.InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    types.InlineKeyboardButton(
+                        text="📱 Ilovada ko'rish",
+                        web_app=types.WebAppInfo(url=_get_webapp_url(message.text)),
+                    )
+                ]]
+            )
 
         # Send response (with reply if referencing previous)
         sent = None
@@ -436,19 +489,19 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
                 is_last = idx == len(chunks) - 1
                 sent = await message.answer(
                     chunk,
-                    reply_markup=webapp_kb if is_last else None,
+                    reply_markup=result_kb if is_last else None,
                     parse_mode="HTML",
                     reply_to_message_id=reply_to_id if idx == 0 else None,
                 )
         else:
             sent = await message.answer(
                 response_text,
-                reply_markup=webapp_kb,
+                reply_markup=result_kb,
                 parse_mode="HTML",
                 reply_to_message_id=reply_to_id,
             )
 
-        # Save assistant response to memory (with its message_id for future replies)
+        # Save assistant response to memory
         await memory.save_message(
             tg_id, "assistant", response_text,
             message_id=sent.message_id if sent else None,
@@ -510,21 +563,23 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
             text,
         )
 
-        response_text = await _process_with_gpt4o(messages)
+        response_text, found_items = await _process_with_gpt4o(messages)
 
         # Save to memory
         await memory.save_message(tg_id, "user", text, message_id=message.message_id)
 
-        webapp_kb = types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text="📱 Ilovada ko'rish",
-                    web_app=types.WebAppInfo(url=_get_webapp_url(text)),
-                )
-            ]]
-        )
+        result_kb = _build_result_buttons(found_items)
+        if not result_kb:
+            result_kb = types.InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    types.InlineKeyboardButton(
+                        text="📱 Ilovada ko'rish",
+                        web_app=types.WebAppInfo(url=_get_webapp_url(text)),
+                    )
+                ]]
+            )
 
-        sent = await status_msg.edit_text(response_text, reply_markup=webapp_kb, parse_mode="HTML")
+        sent = await status_msg.edit_text(response_text, reply_markup=result_kb, parse_mode="HTML")
         await memory.save_message(
             tg_id, "assistant", response_text,
             message_id=sent.message_id if hasattr(sent, "message_id") else None,

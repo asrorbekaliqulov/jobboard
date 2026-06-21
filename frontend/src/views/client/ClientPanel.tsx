@@ -39,6 +39,8 @@ import { VoiceSearchButton } from "../../components/VoiceSearch.tsx";
 
 interface ClientPanelProps {
   initialRole: UserRole;
+  deepLink?: { type: "vacancy" | "resume"; id: number } | null;
+  onDeepLinkConsumed?: () => void;
   vacancies: Vacancy[];
   resumes: Resume[];
   dailyJobSeekers: DailyJobSeeker[];
@@ -65,6 +67,8 @@ interface ClientPanelProps {
 
 const ClientPanel: React.FC<ClientPanelProps> = ({
   initialRole,
+  deepLink,
+  onDeepLinkConsumed,
   vacancies,
   resumes,
   dailyJobSeekers,
@@ -154,6 +158,32 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     id: string | number;
     type: "v" | "r" | "d";
   } | null>(null);
+
+  // Deep link item (opened from bot URL)
+  const [deepLinkItem, setDeepLinkItem] = useState<any>(null);
+  const [deepLinkLoading, setDeepLinkLoading] = useState(false);
+
+  useEffect(() => {
+    if (!deepLink) return;
+    setDeepLinkLoading(true);
+    const fetchItem = async () => {
+      try {
+        if (deepLink.type === "vacancy") {
+          const v = await vacancyService.getVacancyById(deepLink.id);
+          setDeepLinkItem({ kind: "vacancy", data: v });
+        } else {
+          const r = await resumeService.getResume(deepLink.id);
+          setDeepLinkItem({ kind: "resume", data: r });
+        }
+      } catch (e) {
+        console.error("Deep link fetch failed", e);
+      } finally {
+        setDeepLinkLoading(false);
+        onDeepLinkConsumed?.();
+      }
+    };
+    fetchItem();
+  }, [deepLink]);
 
   // HeadHunter vacancies (loaded once)
   const hhVacancies = useHHVacancies(searchText);
@@ -1163,6 +1193,47 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       {activeSubTab === "mine" && renderVacanciesList()}
       {activeSubTab === "saved" && renderSavedList()}
       {activeSubTab === "more" && renderProfilePage()}
+
+      {/* Deep Link Detail Modal (opened from bot URL) */}
+      {(deepLinkItem || deepLinkLoading) && createPortal(
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] flex flex-col">
+          <div className="w-full max-w-md mx-auto mt-auto rounded-t-3xl flex flex-col max-h-[92vh] slide-up-modal" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+              <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                {deepLinkItem?.kind === "resume" ? "Nomzod" : "Vakansiya"}
+              </h3>
+              <button onClick={() => { setDeepLinkItem(null); }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-secondary)' }}>
+                <i className="fa-solid fa-xmark text-sm" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4">
+              {deepLinkLoading ? (
+                <div className="py-16 text-center">
+                  <div className="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</p>
+                </div>
+              ) : deepLinkItem?.kind === "vacancy" ? (
+                <ClientVacancyExplorerCard
+                  vacancy={deepLinkItem.data}
+                  isSaved={savedIds.includes(deepLinkItem.data.id)}
+                  onToggleSave={initialRole === UserRole.JOB_SEEKER ? onToggleVacancySave : undefined}
+                  index={0}
+                />
+              ) : deepLinkItem?.kind === "resume" ? (
+                <ClientResumeExplorerCard
+                  resume={deepLinkItem.data}
+                  isSaved={savedIds.includes(deepLinkItem.data.id)}
+                  onToggleSave={initialRole === UserRole.CANDIDATE_HUNTER ? onToggleResumeSave : undefined}
+                  index={0}
+                />
+              ) : null}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* All Categories Modal - 2 columns, parent with child list */}
       {showAllCategories && createPortal(
