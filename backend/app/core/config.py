@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"  # Model for lightweight tasks
     OPENAI_MAX_TOKENS: int = 2000  # Max tokens per response
     OPENAI_CHAT_MODEL: str = "gpt-4o"  # Model for bot chat (multimodal)
+    OPENAI_TRANSCRIBE_MODEL: str = "gpt-4o-mini-transcribe"  # Voice transcription model
 
     # HeadHunter API Configuration
     HH_API_BASE_URL: str = "https://api.hh.ru"  # HH API (works for Uzbekistan with area=97)

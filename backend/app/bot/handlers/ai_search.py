@@ -617,10 +617,20 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
         voice_data.name = "voice.ogg"
 
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-        transcription = await client.audio.transcriptions.create(
-            model="whisper-1",
-            file=voice_data,
-        )
+        transcribe_kwargs = {
+            "model": settings.OPENAI_TRANSCRIBE_MODEL,
+            "file": voice_data,
+            "prompt": "Bu O'zbek tilidagi ish qidirish so'rovi. Kasb va vakansiya haqida.",
+        }
+        try:
+            transcription = await client.audio.transcriptions.create(
+                language="uz", **transcribe_kwargs
+            )
+        except Exception as lang_err:
+            # If 'uz' language not supported, retry without language (auto-detect)
+            logger.warning(f"Transcribe with uz failed, retrying auto: {lang_err}")
+            voice_data.seek(0)
+            transcription = await client.audio.transcriptions.create(**transcribe_kwargs)
 
         text = transcription.text.strip()
         if not text:
