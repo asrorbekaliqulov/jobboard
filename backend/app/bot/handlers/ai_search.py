@@ -20,6 +20,7 @@ from app.models.user import User, UserRole
 from app.models.vacancy import Vacancy, VacancyStatus
 from app.models.resume import Resume, ResumeStatus
 from app.models.profession import Profession
+from app.bot import memory
 
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
@@ -31,25 +32,35 @@ router = Router()
 # SYSTEM PROMPT - ISHKOP Bot shaxsiyati
 # ═══════════════════════════════════════════════════════════════
 
-SYSTEM_PROMPT = """Sen ISHKOP - O'zbekistonning eng yirik mehnat bozori botisan.
-Sen foydalanuvchilarga ish topish, ishchi qidirish va kasb maslahat berishda yordam berasan.
+SYSTEM_PROMPT = """Sen ISHKOP — O'zbekistonning eng yirik mehnat bozori AI yordamchisisan.
+Seni ISHKOP jamoasi yaratgan. Sen ISHKOP platformasining bir qismisan.
 
-SENING VAZIFALARING:
+ENG MUHIM QOIDA — SHAXSIYAT:
+- Agar "seni kim yaratgan?", "qaysi AI san?", "qaysi model?", "ChatGPT misan?", "OpenAI?" deb so'rasalar:
+  FAQAT shunday javob ber: "Men ISHKOP platformasining AI yordamchisiman. Meni ISHKOP jamoasi yaratgan."
+- HECH QACHON OpenAI, ChatGPT, GPT, Google, boshqa kompaniya yoki model nomini aytma!
+- Sen faqat ISHKOP san, boshqa hech narsa emas.
+
+SENING VAZIFALARING (faqat shu mavzular):
 1. Ish qidiruvchilarga mos vakansiyalar topish (search_vacancies funksiyasi)
 2. Ish beruvchilarga mos ishchilar topish (search_workers funksiyasi)
-3. Kasb maslahat berish (qaysi soha mos, maosh haqida)
+3. Kasb va maosh bo'yicha maslahat berish
 4. ISHKOP platformasi haqida ma'lumot berish
-5. Resume/CV yaratishda yordam
+5. Resume/CV yaratishda yordam berish
+
+CONTEXTDAN CHETLASHMA:
+- Sen FAQAT ish, kasb, vakansiya, resume, mehnat bozori mavzularida gaplashasan.
+- Agar user boshqa mavzu so'rasa (siyosat, din, ob-havo, matematika va h.k.):
+  Muloyim qaytar: "Men faqat ish va kasb masalalarida yordam bera olaman. Sizga qanday ish kerak?"
 
 QOIDALAR:
-- Har doim O'ZBEK tilida javob ber (agar user boshqa tilda yozmasa)
-- Qisqa va aniq javob ber
-- Agar user ish qidirsa — search_vacancies funksiyasini chaqir
-- Agar user ishchi qidirsa — search_workers funksiyasini chaqir
-- Agar user kasb maslahat so'rasa — tavsiyalar ber
-- ISHKOP haqida so'ralsa: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
-- Doim do'stona va professional bo'l
-- Agar aniq javob bera olmasang, "Iltimos, aniqroq yozing" de"""
+- Har doim O'ZBEK tilida javob ber (agar user rus/ingliz tilida yozmasa)
+- Qisqa, aniq va do'stona javob ber
+- Oldingi suhbatni eslab tur — user "kecha", "oldin", "yana" desa, avvalgi gaplarni hisobga ol
+- User ish qidirsa — search_vacancies, ishchi qidirsa — search_workers chaqir
+- Vakansiya/ishchi natijalarini ko'rsatganda telefon raqamni emas, ularning HAVOLASINI (url) ber
+- ISHKOP haqida: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
+"""
 
 # ═══════════════════════════════════════════════════════════════
 # FUNCTION DEFINITIONS (OpenAI Function Calling)
@@ -123,6 +134,18 @@ TOOLS = [
 # FUNCTION IMPLEMENTATIONS
 # ═══════════════════════════════════════════════════════════════
 
+def _vacancy_url(vacancy_id: int) -> str:
+    """Deep link to a specific vacancy (job seeker role auto-selected)."""
+    base = settings.MINI_APP_URL.rstrip("/")
+    return f"{base}?vacancy={vacancy_id}"
+
+
+def _resume_url(resume_id: int) -> str:
+    """Deep link to a specific resume (employer role auto-selected)."""
+    base = settings.MINI_APP_URL.rstrip("/")
+    return f"{base}?resume={resume_id}"
+
+
 async def fn_search_vacancies(query: str, limit: int = 5) -> str:
     """Search vacancies from database."""
     async with async_session_maker() as session:
@@ -180,7 +203,7 @@ async def fn_search_vacancies(query: str, limit: int = 5) -> str:
                 "hudud": v.region.name_uz if v.region else "—",
                 "maosh": salary or "Kelishiladi",
                 "tajriba": f"{v.exp_from}-{v.exp_till} yil",
-                "telefon": v.phone,
+                "havola": _vacancy_url(v.id),
             })
         return json.dumps({"found": len(items), "vacancies": items}, ensure_ascii=False)
 
@@ -230,7 +253,7 @@ async def fn_search_workers(query: str, limit: int = 5) -> str:
                 "hudud": r.region.name_uz if r.region else "—",
                 "tajriba": f"{r.experience} yil",
                 "yosh": r.age,
-                "telefon": r.phone,
+                "havola": _resume_url(r.id),
             })
         return json.dumps({"found": len(items), "workers": items}, ensure_ascii=False)
 
@@ -304,7 +327,7 @@ async def _process_with_gpt4o(messages: list) -> str:
     client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model=settings.OPENAI_CHAT_MODEL,
         messages=messages,
         tools=TOOLS,
         tool_choice="auto",
@@ -337,7 +360,7 @@ async def _process_with_gpt4o(messages: list) -> str:
 
         # Get final response after function execution
         final_response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=settings.OPENAI_CHAT_MODEL,
             messages=messages,
             temperature=0.4,
             max_tokens=1500,
@@ -357,7 +380,7 @@ def _get_webapp_url(query: str = "") -> str:
 
 @router.message(F.text & ~F.text.startswith("/"))
 async def handle_text_message(message: types.Message, i18n: I18nContext):
-    """Handle text messages - GPT-4o with function calling."""
+    """Handle text messages - GPT-4o with memory + function calling."""
     user = await _get_user(str(message.from_user.id))
     if not user:
         await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
@@ -367,6 +390,8 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
         await message.answer("AI xizmati hozirda ishlamayapti.")
         return
 
+    tg_id = str(message.from_user.id)
+
     try:
         role_context = ""
         if user.role == UserRole.CANDIDATE_HUNTER:
@@ -374,14 +399,26 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
         else:
             role_context = "Foydalanuvchi ISH QIDIRUVCHI - u vakansiya qidiradi. search_vacancies funksiyasini ishlat."
 
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT + "\n\n" + role_context},
-            {"role": "user", "content": message.text},
-        ]
+        # Build messages with conversation history
+        messages = await memory.build_openai_messages(
+            tg_id,
+            SYSTEM_PROMPT + "\n\n" + role_context,
+            message.text,
+        )
 
         response_text = await _process_with_gpt4o(messages)
 
-        # Add webapp button
+        # Check if user is referencing a previous message ("kecha", "oldin", "anaqa")
+        reply_to_id = None
+        ref_words = ["kecha", "oldin", "avval", "anaqa", "o'sha", "haligi", "yana o'sha"]
+        if any(w in message.text.lower() for w in ref_words):
+            prev = await memory.find_message_about(tg_id, message.text)
+            if prev:
+                reply_to_id = prev.get("message_id")
+
+        # Save user message to memory
+        await memory.save_message(tg_id, "user", message.text, message_id=message.message_id)
+
         webapp_kb = types.InlineKeyboardMarkup(
             inline_keyboard=[[
                 types.InlineKeyboardButton(
@@ -391,16 +428,32 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
             ]]
         )
 
-        # Split long messages
+        # Send response (with reply if referencing previous)
+        sent = None
         if len(response_text) > 4000:
-            for i in range(0, len(response_text), 4000):
-                chunk = response_text[i:i+4000]
-                if i + 4000 >= len(response_text):
-                    await message.answer(chunk, reply_markup=webapp_kb, parse_mode="HTML")
-                else:
-                    await message.answer(chunk, parse_mode="HTML")
+            chunks = [response_text[i:i+4000] for i in range(0, len(response_text), 4000)]
+            for idx, chunk in enumerate(chunks):
+                is_last = idx == len(chunks) - 1
+                sent = await message.answer(
+                    chunk,
+                    reply_markup=webapp_kb if is_last else None,
+                    parse_mode="HTML",
+                    reply_to_message_id=reply_to_id if idx == 0 else None,
+                )
         else:
-            await message.answer(response_text, reply_markup=webapp_kb, parse_mode="HTML")
+            sent = await message.answer(
+                response_text,
+                reply_markup=webapp_kb,
+                parse_mode="HTML",
+                reply_to_message_id=reply_to_id,
+            )
+
+        # Save assistant response to memory (with its message_id for future replies)
+        await memory.save_message(
+            tg_id, "assistant", response_text,
+            message_id=sent.message_id if sent else None,
+            summary=message.text[:60],
+        )
 
     except Exception as e:
         logger.error(f"GPT-4o text error: {e}")
@@ -442,19 +495,25 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
 
         await status_msg.edit_text(f"🎤 \"{text}\"\n\n⏳ Javob tayyorlanmoqda...")
 
-        # Process with GPT-4o
+        tg_id = str(message.from_user.id)
+
+        # Process with GPT-4o (with memory)
         role_context = ""
         if user.role == UserRole.CANDIDATE_HUNTER:
             role_context = "Foydalanuvchi ISH BERUVCHI. search_workers ishlat."
         else:
             role_context = "Foydalanuvchi ISH QIDIRUVCHI. search_vacancies ishlat."
 
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT + "\n\n" + role_context},
-            {"role": "user", "content": text},
-        ]
+        messages = await memory.build_openai_messages(
+            tg_id,
+            SYSTEM_PROMPT + "\n\n" + role_context,
+            text,
+        )
 
         response_text = await _process_with_gpt4o(messages)
+
+        # Save to memory
+        await memory.save_message(tg_id, "user", text, message_id=message.message_id)
 
         webapp_kb = types.InlineKeyboardMarkup(
             inline_keyboard=[[
@@ -465,7 +524,12 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
             ]]
         )
 
-        await status_msg.edit_text(response_text, reply_markup=webapp_kb, parse_mode="HTML")
+        sent = await status_msg.edit_text(response_text, reply_markup=webapp_kb, parse_mode="HTML")
+        await memory.save_message(
+            tg_id, "assistant", response_text,
+            message_id=sent.message_id if hasattr(sent, "message_id") else None,
+            summary=text[:60],
+        )
 
     except Exception as e:
         logger.error(f"GPT-4o voice error: {e}")
@@ -515,7 +579,7 @@ async def handle_photo_message(message: types.Message, i18n: I18nContext):
 
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=settings.OPENAI_CHAT_MODEL,
             messages=messages,
             max_tokens=2000,
         )
@@ -546,3 +610,18 @@ async def handle_document_message(message: types.Message, i18n: I18nContext):
         return
 
     await message.answer("📄 Hujjat qabul qilindi. Hozircha faqat matn va rasm bilan ishlay olaman. PDF tahlil qilish tez orada qo'shiladi!")
+
+
+
+# ═══════════════════════════════════════════════════════════════
+# /clear command - reset conversation memory
+# ═══════════════════════════════════════════════════════════════
+
+from aiogram.filters import Command
+
+
+@router.message(Command("clear"))
+async def handle_clear(message: types.Message, i18n: I18nContext):
+    """Clear conversation history."""
+    await memory.clear_history(str(message.from_user.id))
+    await message.answer("🗑 Suhbat tarixi tozalandi. Yangi suhbat boshlashingiz mumkin.")
