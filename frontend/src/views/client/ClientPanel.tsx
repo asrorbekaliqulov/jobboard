@@ -378,6 +378,21 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       });
     }
 
+    // Apply filter chip (new / onsite / remote / short_term)
+    if (activeFilterChip && activeFilterChip !== "all") {
+      if (activeFilterChip === "new") {
+        // Items created in last 24h
+        const dayAgo = Date.now() - 86400000;
+        list = list.filter((item: any) => item.created_at && new Date(item.created_at).getTime() > dayAgo);
+      } else if (activeFilterChip === "onsite") {
+        list = list.filter((item: any) => item.work_format === "onsite");
+      } else if (activeFilterChip === "remote") {
+        list = list.filter((item: any) => item.work_format === "remote");
+      } else if (activeFilterChip === "short_term") {
+        list = list.filter((item: any) => item.work_type === "part-time");
+      }
+    }
+
     return list;
   }, [
     activeSection,
@@ -389,6 +404,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
     savedDailyJobSeekerIds,
     currentUser,
     searchText,
+    activeFilterChip,
     getLocalizedName,
   ]);
 
@@ -583,7 +599,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           {initialRole === UserRole.CANDIDATE_HUNTER ? (
             // Ish beruvchi uchun — ishchilar (rezumelar) ko'rinadi
             <>
-              {resumes.filter(r => r.status === ItemStatus.ACTIVE).slice(0, 3).map((resume, i) => (
+              {resumes.filter(r => r.status === ItemStatus.ACTIVE).slice(0, 50).map((resume, i) => (
                 <ClientResumeExplorerCard
                   key={resume.id}
                   resume={resume}
@@ -605,7 +621,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
           ) : (
             // Ishchi/Kunlik ishchi uchun — vakansiyalar ko'rinadi
             <>
-              {vacancies.filter(v => v.status === ItemStatus.ACTIVE).slice(0, 3).map((vacancy, i) => (
+              {vacancies.filter(v => v.status === ItemStatus.ACTIVE).slice(0, 50).map((vacancy, i) => (
                 <ClientVacancyExplorerCard
                   key={vacancy.id}
                   vacancy={vacancy}
