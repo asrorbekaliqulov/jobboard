@@ -30,7 +30,6 @@ async def get_hh_vacancies(
         None,
         description="Tajriba: noExperience, between1And3, between3And6, moreThan6"
     ),
-    current_user: User = Depends(get_current_user),
 ):
     """
     HeadHunter.uz dan vakansiyalar ro'yxati.
@@ -60,7 +59,6 @@ async def get_hh_vacancies(
 @router.get("/vacancies/{vacancy_id}")
 async def get_hh_vacancy_detail(
     vacancy_id: str,
-    current_user: User = Depends(get_current_user),
 ):
     """
     HeadHunter.uz dan bitta vakansiya tafsilotlari.
@@ -82,7 +80,6 @@ async def get_hh_vacancy_detail(
 async def search_similar_on_hh(
     query: str = Query(..., min_length=2, description="Qidiruv matni"),
     limit: int = Query(10, ge=1, le=30),
-    current_user: User = Depends(get_current_user),
 ):
     """
     Bazadagi vakansiyaga o'xshash HH vakansiyalarini qidirish.
