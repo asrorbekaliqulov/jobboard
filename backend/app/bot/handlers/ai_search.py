@@ -399,6 +399,9 @@ async def _process_with_gpt4o(messages: list) -> tuple:
         )
         return (final_response.choices[0].message.content or "", found_items)
 
+    # No tool calls — return the direct response
+    return (message.content or "", found_items)
+
 
 async def _stream_gpt4o(messages: list, on_update, edit_interval: float = 1.0) -> tuple:
     """
@@ -617,20 +620,13 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
         voice_data.name = "voice.ogg"
 
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-        transcribe_kwargs = {
-            "model": settings.OPENAI_TRANSCRIBE_MODEL,
-            "file": voice_data,
-            "prompt": "Bu O'zbek tilidagi ish qidirish so'rovi. Kasb va vakansiya haqida.",
-        }
-        try:
-            transcription = await client.audio.transcriptions.create(
-                language="uz", **transcribe_kwargs
-            )
-        except Exception as lang_err:
-            # If 'uz' language not supported, retry without language (auto-detect)
-            logger.warning(f"Transcribe with uz failed, retrying auto: {lang_err}")
-            voice_data.seek(0)
-            transcription = await client.audio.transcriptions.create(**transcribe_kwargs)
+        # gpt-4o-mini-transcribe doesn't accept 'uz' language code,
+        # so we hint the language via the prompt instead (auto-detect)
+        transcription = await client.audio.transcriptions.create(
+            model=settings.OPENAI_TRANSCRIBE_MODEL,
+            file=voice_data,
+            prompt="Bu O'zbek tilidagi ish qidirish so'rovi. Iltimos o'zbek tilida transkripsiya qil. Kasb va vakansiya haqida.",
+        )
 
         text = transcription.text.strip()
         if not text:
