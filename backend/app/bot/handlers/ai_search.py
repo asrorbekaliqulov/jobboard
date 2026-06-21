@@ -146,12 +146,17 @@ TOOLS = [
 
 def _vacancy_url(vacancy_id: int) -> str:
     """Deep link to a specific vacancy (job seeker role auto-selected)."""
+    # Prefer reliable t.me startapp deep link (works even if webview cached)
+    if settings.BOT_USERNAME and settings.MINI_APP_NAME:
+        return f"https://t.me/{settings.BOT_USERNAME}/{settings.MINI_APP_NAME}?startapp=vacancy_{vacancy_id}"
     base = settings.MINI_APP_URL.rstrip("/")
     return f"{base}?vacancy={vacancy_id}"
 
 
 def _resume_url(resume_id: int) -> str:
     """Deep link to a specific resume (employer role auto-selected)."""
+    if settings.BOT_USERNAME and settings.MINI_APP_NAME:
+        return f"https://t.me/{settings.BOT_USERNAME}/{settings.MINI_APP_NAME}?startapp=resume_{resume_id}"
     base = settings.MINI_APP_URL.rstrip("/")
     return f"{base}?resume={resume_id}"
 
@@ -478,9 +483,11 @@ async def _stream_gpt4o(messages: list, on_update, edit_interval: float = 1.0) -
 
 
 def _build_result_buttons(found_items: list) -> Optional[types.InlineKeyboardMarkup]:
-    """Build inline webapp buttons for found vacancies/resumes."""
+    """Build inline buttons for found vacancies/resumes."""
     if not found_items:
         return None
+
+    use_startapp = bool(settings.BOT_USERNAME and settings.MINI_APP_NAME)
 
     rows = []
     for item in found_items[:8]:  # Max 8 buttons
@@ -490,16 +497,19 @@ def _build_result_buttons(found_items: list) -> Optional[types.InlineKeyboardMar
         else:
             url = _resume_url(item["id"])
             emoji = "👤"
-        # Truncate title for button
         title = item["title"]
         if len(title) > 40:
             title = title[:37] + "..."
-        rows.append([
-            types.InlineKeyboardButton(
+
+        # t.me startapp links → url button; direct domain → web_app button
+        if use_startapp:
+            btn = types.InlineKeyboardButton(text=f"{emoji} {title}", url=url)
+        else:
+            btn = types.InlineKeyboardButton(
                 text=f"{emoji} {title}",
                 web_app=types.WebAppInfo(url=url),
             )
-        ])
+        rows.append([btn])
 
     return types.InlineKeyboardMarkup(inline_keyboard=rows)
 

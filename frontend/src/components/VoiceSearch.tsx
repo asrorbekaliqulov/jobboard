@@ -1,25 +1,25 @@
 /**
  * Voice Search Button
  * Strategy:
- * 1. Try Web Speech API (works in Chrome, some Android browsers)
- * 2. Fallback: MediaRecorder → send audio to backend for Whisper transcription
- * 3. If neither works, show alert
+ * 1. Web Speech API with interim results (real-time text as you speak) - Chrome
+ * 2. Fallback: MediaRecorder → backend gpt-4o-mini-transcribe - Telegram WebApp
  */
 import React, { useState, useRef, useCallback } from "react";
 import { mainApi } from "../services/api.ts";
 
 interface VoiceSearchButtonProps {
   onResult: (text: string) => void;
+  onInterim?: (text: string) => void; // Real-time partial text
 }
 
-export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }) => {
+export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult, onInterim }) => {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  // Try Web Speech API first
+  // Try Web Speech API first (gives real-time interim results)
   const tryWebSpeechAPI = useCallback((): boolean => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return false;
@@ -27,20 +27,29 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
     try {
       const recognition = new SpeechRecognition();
       recognition.lang = "uz-UZ";
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Real-time partial results
       recognition.maxAlternatives = 1;
       recognition.continuous = false;
 
       recognition.onstart = () => setIsListening(true);
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript.trim()) onResult(transcript.trim());
-        setIsListening(false);
+        let interim = "";
+        let final = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) final += transcript;
+          else interim += transcript;
+        }
+        // Show real-time interim text in search field
+        if (interim && onInterim) onInterim(interim);
+        if (final.trim()) {
+          onResult(final.trim());
+          setIsListening(false);
+        }
       };
       recognition.onerror = () => {
         setIsListening(false);
-        // If Web Speech fails, try MediaRecorder
-        startMediaRecorder();
+        startMediaRecorder(); // Fallback
       };
       recognition.onend = () => setIsListening(false);
 
@@ -50,9 +59,9 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
     } catch {
       return false;
     }
-  }, [onResult]);
+  }, [onResult, onInterim]);
 
-  // Fallback: MediaRecorder → backend Whisper
+  // Fallback: MediaRecorder → backend gpt-4o-mini-transcribe
   const startMediaRecorder = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -67,6 +76,7 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
         stream.getTracks().forEach(t => t.stop());
         setIsListening(false);
         setIsProcessing(true);
+        if (onInterim) onInterim("🎤 Eshitganim matnga aylantirilmoqda...");
 
         try {
           const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
@@ -96,6 +106,7 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsListening(true);
+      if (onInterim) onInterim("🎤 Tinglayapman... gapiring");
 
       // Auto-stop after 10 seconds
       setTimeout(() => {
@@ -108,23 +119,17 @@ export const VoiceSearchButton: React.FC<VoiceSearchButtonProps> = ({ onResult }
       setIsListening(false);
       alert("Mikrofonga ruxsat berilmadi. Brauzer sozlamalarini tekshiring.");
     }
-  }, [onResult]);
+  }, [onResult, onInterim]);
 
   const startListening = useCallback(() => {
-    // Try Web Speech API first
     if (!tryWebSpeechAPI()) {
-      // Fallback to MediaRecorder
       startMediaRecorder();
     }
   }, [tryWebSpeechAPI, startMediaRecorder]);
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
+    if (recognitionRef.current) recognitionRef.current.stop();
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
     setIsListening(false);
   }, []);
 

@@ -764,7 +764,10 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {/* Voice Search Button */}
-          <VoiceSearchButton onResult={(text) => { setSearchText(text); setPage(1); }} />
+          <VoiceSearchButton
+            onResult={(text) => { setSearchText(text); setPage(1); }}
+            onInterim={(text) => { setSearchText(text); }}
+          />
           <button
             onClick={() => setIsFilterModalOpen(true)}
             className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500"

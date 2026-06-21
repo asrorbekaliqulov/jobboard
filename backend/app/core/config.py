@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     WEBHOOK_URL: str = ""  # Optional: if empty or not https, bot runs in polling mode
     MINI_APP_URL: str = ""  # e.g., https://your-miniapp-domain.com
+    # For reliable deep links: t.me/{BOT_USERNAME}/{MINI_APP_NAME}?startapp=...
+    BOT_USERNAME: str = ""  # Bot username without @ (e.g., ishkop_bot)
+    MINI_APP_NAME: str = ""  # Mini App short name from BotFather (e.g., app)
     DATABASE_URL: str  # e.g., postgresql+asyncpg://user:pass@db:5432/job_db
     REDIS_URL: str = ""  # e.g., redis://redis:6379/0 (optional for polling mode)
 

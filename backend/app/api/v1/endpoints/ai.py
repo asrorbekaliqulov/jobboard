@@ -517,10 +517,11 @@ async def ai_voice_transcribe(
         audio_file = BytesIO(content)
         audio_file.name = file.filename or "voice.webm"
 
-        # Transcribe
+        # Transcribe with gpt-4o-mini-transcribe (better Uzbek support)
         transcription = await client.audio.transcriptions.create(
-            model="whisper-1",
+            model=settings.OPENAI_TRANSCRIBE_MODEL,
             file=audio_file,
+            prompt="Bu O'zbek tilidagi ish qidirish so'rovi. Iltimos o'zbek tilida transkripsiya qil.",
         )
 
         return {"text": transcription.text.strip()}
