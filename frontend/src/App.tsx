@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [deepLink, setDeepLink] = useState<{ type: "vacancy" | "resume"; id: number } | null>(null);
 
   // App Data State
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
@@ -101,6 +102,36 @@ const App: React.FC = () => {
           const userLang = result.user.language?.toLowerCase();
           if (userLang && ["en", "ru", "uz"].includes(userLang)) {
             i18n.changeLanguage(userLang);
+          }
+
+          // Deep-link handling: ?vacancy=ID or ?resume=ID
+          // Read from URL or Telegram startapp param
+          const params = new URLSearchParams(window.location.search);
+          let vacancyId = params.get("vacancy");
+          let resumeId = params.get("resume");
+
+          // Telegram passes start_param via initDataUnsafe
+          const tgStartParam = (window as any).Telegram?.WebApp?.initDataUnsafe?.start_param;
+          if (tgStartParam) {
+            if (tgStartParam.startsWith("vacancy_")) vacancyId = tgStartParam.replace("vacancy_", "");
+            if (tgStartParam.startsWith("resume_")) resumeId = tgStartParam.replace("resume_", "");
+          }
+
+          if (vacancyId) {
+            // Open vacancy directly - role = job seeker
+            setUserRole(UserRole.JOB_SEEKER);
+            setDeepLink({ type: "vacancy", id: Number(vacancyId) });
+            setView("client");
+            setIsAuthenticating(false);
+            return;
+          }
+          if (resumeId) {
+            // Open resume directly - role = employer
+            setUserRole(UserRole.CANDIDATE_HUNTER);
+            setDeepLink({ type: "resume", id: Number(resumeId) });
+            setView("client");
+            setIsAuthenticating(false);
+            return;
           }
 
           // Always show onboarding to let user select their role
@@ -502,6 +533,8 @@ const App: React.FC = () => {
             <>
               <ClientPanel
                 initialRole={userRole}
+                deepLink={deepLink}
+                onDeepLinkConsumed={() => setDeepLink(null)}
                 vacancies={vacancies}
                 resumes={resumes}
                 dailyJobSeekers={dailyJobSeekers}
