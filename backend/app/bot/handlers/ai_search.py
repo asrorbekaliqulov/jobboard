@@ -399,6 +399,78 @@ async def _process_with_gpt4o(messages: list) -> tuple:
         )
         return (final_response.choices[0].message.content or "", found_items)
 
+
+async def _stream_gpt4o(messages: list, on_update, edit_interval: float = 1.0) -> tuple:
+    """
+    Streaming version: streams GPT response and calls on_update(partial_text)
+    periodically (real-time typing effect via message editing).
+    Returns (full_text, found_items).
+    Handles function calling: if functions needed, executes them first (no stream),
+    then streams the final answer.
+    """
+    import time as _time
+    client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    found_items = []
+
+    # Step 1: detect function calls (non-streaming)
+    response = await client.chat.completions.create(
+        model=settings.OPENAI_CHAT_MODEL,
+        messages=messages,
+        tools=TOOLS,
+        tool_choice="auto",
+        temperature=0.4,
+        max_tokens=1500,
+    )
+    message = response.choices[0].message
+
+    if message.tool_calls:
+        messages.append(message)
+        for tool_call in message.tool_calls:
+            fn_name = tool_call.function.name
+            fn_args = json.loads(tool_call.function.arguments)
+            fn = FUNCTION_MAP.get(fn_name)
+            if fn:
+                result = await fn(**fn_args)
+                try:
+                    parsed = json.loads(result)
+                    if "vacancies" in parsed:
+                        for v in parsed["vacancies"]:
+                            found_items.append({"type": "vacancy", "id": v["id"], "title": f"{v['kasb']} — {v['kompaniya']}"})
+                    elif "workers" in parsed:
+                        for w in parsed["workers"]:
+                            found_items.append({"type": "resume", "id": w["id"], "title": f"{w['ism']} — {w['kasb']}"})
+                except Exception:
+                    pass
+            else:
+                result = json.dumps({"error": "Unknown function"})
+            messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": result})
+
+    # Step 2: stream the final answer
+    stream = await client.chat.completions.create(
+        model=settings.OPENAI_CHAT_MODEL,
+        messages=messages,
+        temperature=0.4,
+        max_tokens=1500,
+        stream=True,
+    )
+
+    full_text = ""
+    last_edit = 0.0
+    async for chunk in stream:
+        delta = chunk.choices[0].delta.content if chunk.choices else None
+        if delta:
+            full_text += delta
+            now = _time.time()
+            # Edit message every edit_interval seconds (Telegram rate limit safe)
+            if now - last_edit >= edit_interval and len(full_text) > 5:
+                last_edit = now
+                try:
+                    await on_update(full_text + " ▌")
+                except Exception:
+                    pass
+
+    return (full_text, found_items)
+
     return (message.content or "", found_items)
 
 
@@ -465,9 +537,18 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
             message.text,
         )
 
-        response_text, found_items = await _process_with_gpt4o(messages)
+        # Send initial "typing" message that we'll edit in real-time
+        stream_msg = await message.answer("✍️ ...")
 
-        # Check if user is referencing a previous message ("kecha", "oldin", "anaqa")
+        async def _update(partial: str):
+            try:
+                await stream_msg.edit_text(partial[:4000])
+            except Exception:
+                pass
+
+        response_text, found_items = await _stream_gpt4o(messages, _update)
+
+        # Check if user is referencing a previous message
         reply_to_id = None
         ref_words = ["kecha", "oldin", "avval", "anaqa", "o'sha", "haligi", "yana o'sha"]
         if any(w in message.text.lower() for w in ref_words):
@@ -478,7 +559,7 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
         # Save user message to memory
         await memory.save_message(tg_id, "user", message.text, message_id=message.message_id)
 
-        # Build result buttons (vacancy/resume webapp links) or fallback to general button
+        # Build result buttons
         result_kb = _build_result_buttons(found_items)
         if not result_kb:
             result_kb = types.InlineKeyboardMarkup(
@@ -490,30 +571,21 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
                 ]]
             )
 
-        # Send response (with reply if referencing previous)
-        sent = None
-        if len(response_text) > 4000:
-            chunks = [response_text[i:i+4000] for i in range(0, len(response_text), 4000)]
-            for idx, chunk in enumerate(chunks):
-                is_last = idx == len(chunks) - 1
-                sent = await message.answer(
-                    chunk,
-                    reply_markup=result_kb if is_last else None,
-                    parse_mode="HTML",
-                    reply_to_message_id=reply_to_id if idx == 0 else None,
-                )
-        else:
-            sent = await message.answer(
-                response_text,
+        # Final edit with complete text + buttons
+        try:
+            sent = await stream_msg.edit_text(
+                response_text[:4000],
                 reply_markup=result_kb,
                 parse_mode="HTML",
-                reply_to_message_id=reply_to_id,
             )
+        except Exception:
+            # If edit fails (e.g. HTML parse), send plain
+            sent = await stream_msg.edit_text(response_text[:4000], reply_markup=result_kb)
 
         # Save assistant response to memory
         await memory.save_message(
             tg_id, "assistant", response_text,
-            message_id=sent.message_id if sent else None,
+            message_id=stream_msg.message_id,
             summary=message.text[:60],
         )
 
