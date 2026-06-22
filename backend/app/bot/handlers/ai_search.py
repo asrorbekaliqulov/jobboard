@@ -851,3 +851,95 @@ async def handle_clear(message: types.Message, i18n: I18nContext):
     """Clear conversation history."""
     await memory.clear_history(str(message.from_user.id))
     await message.answer("🗑 Suhbat tarixi tozalandi. Yangi suhbat boshlashingiz mumkin.")
+
+
+@router.message(Command("cv"))
+async def handle_cv(message: types.Message, i18n: I18nContext):
+    """Generate a PDF resume from the user's saved profile + AI enhancement."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
+        return
+
+    if not settings.ai_enabled:
+        await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    status = await message.answer("📄 Rezyumengiz tayyorlanmoqda...")
+
+    try:
+        from app.models.bot_user_profile import BotUserProfile
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(BotUserProfile).where(BotUserProfile.user_id == user.id)
+            )
+            profile = result.scalar_one_or_none()
+
+        if not profile or not (profile.profession or profile.about or profile.first_name):
+            await status.edit_text(
+                "📄 Rezyume yaratish uchun avval o'zingiz haqingizda gapirib bering.\n\n"
+                "Masalan: \"Men Alisher, 28 yoshda elektrikman, 5 yil tajribam bor, "
+                "Toshkentda yashayman, telefonim +998901234567\"\n\n"
+                "Keyin /cv buyrug'ini bosing."
+            )
+            return
+
+        # Build professional resume text via AI
+        profile_text = (
+            f"Ism: {profile.first_name or ''} {profile.last_name or ''}\n"
+            f"Yosh: {profile.age or ''}\n"
+            f"Kasb: {profile.profession or ''}\n"
+            f"Tajriba: {profile.experience_years or ''} yil\n"
+            f"Ko'nikmalar: {profile.skills or ''}\n"
+            f"Hudud: {profile.region or ''}\n"
+            f"Telefon: {profile.phone or ''}\n"
+            f"O'zi haqida: {profile.about or ''}"
+        )
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        ai_resp = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": "Sen professional rezyume tuzuvchisan. O'zbek tilida yoz. Javobni JSON formatda ber."},
+                {"role": "user", "content": (
+                    f"Quyidagi ma'lumotlardan professional rezyume matni yoz:\n{profile_text}\n\n"
+                    "Format: {\"summary\": \"o'zi haqida 2-3 jumla\", \"experience_details\": \"tajriba batafsil\", \"skills\": [\"k1\",\"k2\"]}"
+                )},
+            ],
+            temperature=0.4,
+            response_format={"type": "json_object"},
+        )
+        import json as _json
+        ai_data = _json.loads(ai_resp.choices[0].message.content or "{}")
+
+        # Generate PDF
+        from app.services.pdf_resume import generate_resume_pdf
+        full_name = f"{profile.first_name or ''} {profile.last_name or ''}".strip() or "Nomzod"
+        pdf_data = {
+            "full_name": full_name,
+            "profession": profile.profession or "",
+            "age": profile.age,
+            "experience": profile.experience_years,
+            "phone": profile.phone or "",
+            "telegram": (user.username and f"@{user.username}") or "",
+            "region": profile.region or "",
+            "summary": ai_data.get("summary", profile.about or ""),
+            "experience_details": ai_data.get("experience_details", ""),
+            "skills": ai_data.get("skills", (profile.skills or "").split(",") if profile.skills else []),
+        }
+
+        pdf_io = generate_resume_pdf(pdf_data)
+        if not pdf_io:
+            await status.edit_text("❌ PDF yaratishda xatolik yuz berdi.")
+            return
+
+        await status.delete()
+        doc = types.BufferedInputFile(pdf_io.read(), filename=f"{full_name}_rezyume.pdf")
+        await message.answer_document(
+            doc,
+            caption="📄 Mana sizning professional rezyumengiz!\n\nISHKOP orqali ish toping 🚀",
+        )
+
+    except Exception as e:
+        logger.error(f"CV generation error: {e}")
+        await status.edit_text("❌ Rezyume yaratishda xatolik. Qayta urinib ko'ring.")
