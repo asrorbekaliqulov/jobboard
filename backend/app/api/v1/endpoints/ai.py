@@ -566,6 +566,8 @@ async def get_my_bot_profile(
             "region": profile.region,
             "about": profile.about,
             "company_name": profile.company_name,
+            "cv_url": profile.cv_url,
+            "has_photo": bool(profile.photo_file_id),
         }
     except Exception as e:
         logger.error(f"get_my_bot_profile error: {e}")

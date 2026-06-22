@@ -217,6 +217,8 @@ export const AIWriterSection: React.FC<AIWriterProps> = ({ type, onGenerated, us
           if (p.phone) fill.phone = p.phone;
           if (p.experience_years != null) fill.experience = p.experience_years;
           if (p.about) fill.description = p.about;
+          // Auto-attach generated CV to portfolio/file field
+          if (p.cv_url) fill.portfolio = p.cv_url;
           if (Object.keys(fill).length > 0) onGenerated(fill);
         }
       })
