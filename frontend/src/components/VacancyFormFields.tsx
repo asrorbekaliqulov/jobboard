@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { WorkFormat, WorkType, WorkSchedule } from "../types.ts";
 import FormSection from "./FormSection.tsx";
 import FieldError from "./FieldError.tsx";
+import { AISalaryButton } from "./AIIntegrated.tsx";
 
 interface VacancyFormFieldsProps {
   formData: any;
@@ -273,6 +274,16 @@ const VacancyFormFields: React.FC<VacancyFormFieldsProps> = ({
           </div>
         </div>
       )}
+
+      {/* AI Salary Suggestion */}
+      <AISalaryButton
+        professionId={formData.profession_id || undefined}
+        regionId={formData.region_id || undefined}
+        onSuggest={(from, till) => {
+          setFormData({ ...formData, salary_from: from, salary_till: till });
+          setSalaryError("");
+        }}
+      />
 
       {/* Salary Guidelines */}
       {!formData.salary_from && !formData.salary_till && (
