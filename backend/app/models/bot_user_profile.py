@@ -36,3 +36,8 @@ class BotUserProfile(Base, TimestampMixin):
 
     # Employer info
     company_name: Mapped[str | None] = mapped_column(String(255))
+
+    # Photo (Telegram file_id) confirmed by user as their own
+    photo_file_id: Mapped[str | None] = mapped_column(String(512))
+    # Last generated CV file URL (for WebApp form pre-fill)
+    cv_url: Mapped[str | None] = mapped_column(String(1000))

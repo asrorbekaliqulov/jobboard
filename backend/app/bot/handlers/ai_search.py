@@ -81,6 +81,8 @@ QOIDALAR:
 - MUHIM: Agar user O'ZI haqida ma'lumot bersa (ism, kasb, tajriba, yosh, telefon, ko'nikma),
   save_user_info funksiyasi orqali JIMGINA saqlab qo'y. Saqlaganingni AYTMA, oddiy suhbatni davom ettir.
   Hech qachon "ma'lumotingizni so'rashim mumkinmi" deb so'rama — faqat user o'zi aytsa saqla.
+- Agar user "menga rezyume/CV yarat", "rezyume tayyorla" desa — create_resume funksiyasini chaqir.
+  Avval kasb va asosiy ma'lumotlar bo'lishi kerak. Bo'lmasa, avval qisqa so'ra yoki save_user_info bilan saqla.
 """
 
 # ═══════════════════════════════════════════════════════════════
@@ -174,6 +176,19 @@ TOOLS = [
                     "company_name": {"type": "string"},
                 },
             }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_resume",
+            "description": (
+                "Foydalanuvchi rezyume/CV yaratib berishni so'rasa (masalan: 'menga rezyume yarat', "
+                "'cv kerak', 'rezyume tayyorla'), bu funksiyani chaqir. PDF rezyume yaratiladi. "
+                "Avval user haqida yetarli ma'lumot (kamida kasb) bo'lishi kerak — bo'lmasa "
+                "avval save_user_info bilan saqla yoki userdan so'ra."
+            ),
+            "parameters": {"type": "object", "properties": {}},
         }
     }
 ]
@@ -358,6 +373,16 @@ async def fn_get_salary_info(profession: str) -> str:
 # Context variable to hold current user id during function calling
 import contextvars
 _current_user_id: contextvars.ContextVar = contextvars.ContextVar("current_user_id", default=None)
+# Flag set when AI decides to create a resume during chat
+_cv_requested: contextvars.ContextVar = contextvars.ContextVar("cv_requested", default=False)
+# Pending photo file_ids awaiting "is this you?" confirmation {telegram_id: file_id}
+_pending_photos: dict = {}
+
+
+async def fn_create_resume() -> str:
+    """Mark that a resume should be generated (handled by the message handler)."""
+    _cv_requested.set(True)
+    return json.dumps({"action": "generate_cv", "status": "tayyorlanmoqda"}, ensure_ascii=False)
 
 
 async def fn_save_user_info(**kwargs) -> str:
@@ -402,6 +427,7 @@ FUNCTION_MAP = {
     "search_workers": fn_search_workers,
     "get_salary_info": fn_get_salary_info,
     "save_user_info": fn_save_user_info,
+    "create_resume": fn_create_resume,
 }
 
 
@@ -618,6 +644,7 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
 
     try:
         _current_user_id.set(user.id)
+        _cv_requested.set(False)
         role_context = ""
         if user.role == UserRole.CANDIDATE_HUNTER:
             role_context = "Foydalanuvchi ISH BERUVCHI - u ishchi qidiradi. search_workers funksiyasini ishlat."
@@ -682,6 +709,10 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
             message_id=stream_msg.message_id,
             summary=message.text[:60],
         )
+
+        # If AI requested a resume, generate and send the PDF
+        if _cv_requested.get():
+            await _generate_and_send_cv(message, user)
 
     except Exception as e:
         logger.error(f"GPT-4o text error: {e}")
@@ -795,35 +826,88 @@ async def handle_photo_message(message: types.Message, i18n: I18nContext):
         # Encode to base64
         image_base64 = base64.b64encode(photo_data.read()).decode("utf-8")
 
-        caption = message.caption or "Bu rasmda nima bor? Agar bu resume/CV bo'lsa, undagi ma'lumotlarni o'qib ber."
-
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
+        # Ask GPT-4o vision to analyze and detect if it's a person
+        analysis_messages = [
+            {"role": "system", "content": (
+                "Sen rasm tahlilchisisan. Rasmni ko'rib JSON qaytar: "
+                '{"type": "person/document/other", "is_person": true/false, '
+                '"description": "rasm haqida qisqa o\'zbekcha", '
+                '"resume_text": "agar bu CV/resume bo\'lsa undagi matn, aks holda null"}'
+            )},
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": caption},
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-                    }
-                ]
-            }
+                    {"type": "text", "text": message.caption or "Bu rasmni tahlil qil."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}},
+                ],
+            },
         ]
 
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         response = await client.chat.completions.create(
             model=settings.OPENAI_CHAT_MODEL,
-            messages=messages,
-            max_tokens=2000,
+            messages=analysis_messages,
+            max_tokens=1500,
+            response_format={"type": "json_object"},
         )
 
-        response_text = response.choices[0].message.content or "Rasmni tahlil qilib bo'lmadi."
-        await status_msg.edit_text(response_text, parse_mode="HTML")
+        import json as _json
+        result = _json.loads(response.choices[0].message.content or "{}")
+        is_person = result.get("is_person", False)
+        description = result.get("description", "Rasmni tahlil qildim.")
+        resume_text = result.get("resume_text")
+
+        if is_person:
+            # Ask if this is the user (to save for future resumes)
+            _pending_photos[str(message.from_user.id)] = photo.file_id
+            kb = types.InlineKeyboardMarkup(inline_keyboard=[[
+                types.InlineKeyboardButton(text="✅ Ha, bu men", callback_data="photo_yes"),
+                types.InlineKeyboardButton(text="❌ Yo'q", callback_data="photo_no"),
+            ]])
+            await status_msg.edit_text(
+                f"🖼 {description}\n\n👤 Bu rasmda inson bor. <b>Bu sizmi?</b>\n"
+                "Agar ha bo'lsa, rezyumengizga qo'shib qo'yaman.",
+                reply_markup=kb, parse_mode="HTML",
+            )
+        elif resume_text:
+            # It's a CV/document - extract info and save
+            await status_msg.edit_text(f"📄 Bu hujjatdan ma'lumotlarni o'qidim:\n\n{resume_text[:1500]}", parse_mode="HTML")
+        else:
+            await status_msg.edit_text(f"🖼 {description}", parse_mode="HTML")
 
     except Exception as e:
         logger.error(f"GPT-4o photo error: {e}")
         await status_msg.edit_text("❌ Rasmni tahlil qilib bo'lmadi.")
+
+
+@router.callback_query(F.data == "photo_yes")
+async def photo_confirm_yes(callback: types.CallbackQuery):
+    """User confirmed the photo is theirs - save to profile."""
+    tg_id = str(callback.from_user.id)
+    file_id = _pending_photos.pop(tg_id, None)
+    user = await _get_user(tg_id)
+    if file_id and user:
+        from app.models.bot_user_profile import BotUserProfile
+        async with async_session_maker() as session:
+            res = await session.execute(
+                select(BotUserProfile).where(BotUserProfile.user_id == user.id)
+            )
+            profile = res.scalar_one_or_none()
+            if profile:
+                profile.photo_file_id = file_id
+            else:
+                session.add(BotUserProfile(user_id=user.id, photo_file_id=file_id))
+            await session.commit()
+    await callback.message.edit_text("✅ Rasm saqlandi! Rezyumengizga qo'shaman.")
+    await callback.answer()
+
+
+@router.callback_query(F.data == "photo_no")
+async def photo_confirm_no(callback: types.CallbackQuery):
+    """User said photo isn't theirs - discard."""
+    _pending_photos.pop(str(callback.from_user.id), None)
+    await callback.message.edit_text("Tushunarli, rasmni saqlamadim.")
+    await callback.answer()
 
 
 @router.message(F.document)
@@ -1029,11 +1113,36 @@ async def _generate_and_send_cv(message: types.Message, user) -> None:
             await status.edit_text("❌ PDF yaratishda xatolik.")
             return
 
+        # Save CV to storage for WebApp form pre-fill
+        try:
+            from app.services.storage import upload_file
+            import time as _t
+            pdf_io.seek(0)
+            cv_url = upload_file(
+                pdf_io,
+                prefix="cv",
+                filename=f"cv_{user.id}_{int(_t.time())}.pdf",
+                content_type="application/pdf",
+            )
+            async with async_session_maker() as session2:
+                res2 = await session2.execute(
+                    select(BotUserProfile).where(BotUserProfile.user_id == user.id)
+                )
+                p2 = res2.scalar_one_or_none()
+                if p2:
+                    p2.cv_url = cv_url
+                    await session2.commit()
+        except Exception as e:
+            logger.error(f"CV upload failed: {e}")
+
         await status.delete()
+        pdf_io.seek(0)
         doc = types.BufferedInputFile(pdf_io.read(), filename=f"{full_name}_rezyume.pdf")
         await message.answer_document(
             doc,
-            caption="📄 Mana sizning professional rezyumengiz!\n\nISHKOP orqali ish toping 🚀",
+            caption="📄 Mana sizning professional rezyumengiz!\n\n"
+                    "✅ Bu rezyume saqlandi — ilovada rezyume yaratganda avtomatik yuklanadi.\n\n"
+                    "ISHKOP orqali ish toping 🚀",
         )
     except Exception as e:
         logger.error(f"CV generation error: {e}")
