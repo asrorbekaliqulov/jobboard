@@ -912,22 +912,107 @@ async def photo_confirm_no(callback: types.CallbackQuery):
 
 @router.message(F.document)
 async def handle_document_message(message: types.Message, i18n: I18nContext):
-    """Handle document messages (PDF resume analysis)."""
+    """
+    Handle PDF documents: extract text, read caption, let AI edit/recreate CV.
+    User can send a CV + caption like 'shuni mana shu qismini o'zgartir' or
+    'mana shu dizaynda menga cv qil'.
+    """
     user = await _get_user(str(message.from_user.id))
     if not user:
         await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
         return
-
     if not settings.ai_enabled:
         await message.answer("AI xizmati hozirda ishlamayapti.")
         return
 
-    # Only handle small documents
-    if message.document.file_size > 5 * 1024 * 1024:
+    doc = message.document
+    if doc.file_size and doc.file_size > 5 * 1024 * 1024:
         await message.answer("❌ Fayl juda katta (max 5MB)")
         return
 
-    await message.answer("📄 Hujjat qabul qilindi. Hozircha faqat matn va rasm bilan ishlay olaman. PDF tahlil qilish tez orada qo'shiladi!")
+    is_pdf = (doc.mime_type == "application/pdf") or (doc.file_name or "").lower().endswith(".pdf")
+    if not is_pdf:
+        await message.answer("📄 Hozircha faqat PDF fayllarni o'qiy olaman.")
+        return
+
+    caption = (message.caption or "").strip()
+    status = await message.answer("📄 Hujjat o'qilmoqda...")
+
+    try:
+        # Download and extract text
+        file = await message.bot.get_file(doc.file_id)
+        buf = BytesIO()
+        await message.bot.download_file(file.file_path, buf)
+        buf.seek(0)
+
+        from app.services.pdf_resume import extract_pdf_text, generate_resume_pdf
+        pdf_text = extract_pdf_text(buf.read())
+
+        if not pdf_text:
+            await status.edit_text("❌ PDF dan matn o'qib bo'lmadi. Balki rasm ko'rinishidagi PDF.")
+            return
+
+        # Daily limit check (editing also counts)
+        tg_id = str(message.from_user.id)
+        if not await memory.can_generate_cv(tg_id):
+            await status.edit_text(
+                f"⛔ Kunlik rezyume limiti tugadi ({memory.DAILY_CV_LIMIT} ta/kun). Ertaga urinib ko'ring."
+            )
+            return
+
+        await status.edit_text("🤖 AI hujjatni qayta ishlamoqda...")
+
+        # AI: process the CV + user's instruction
+        instruction = caption or "Bu rezyumeni ISHKOP dizaynida professional qilib qayta yarat."
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        ai_resp = await client.chat.completions.create(
+            model=settings.OPENAI_CHAT_MODEL,
+            messages=[
+                {"role": "system", "content": (
+                    "Sen rezyume muharririsan. Mavjud rezyume matni va foydalanuvchi ko'rsatmasi beriladi. "
+                    "Ko'rsatmaga qarab rezyumeni TAHRIRLA — faqat aytilgan qismni o'zgartir, qolganini saqla. "
+                    "BIRINCHI SHAXSDA yoz (men, mening). JSON qaytar."
+                )},
+                {"role": "user", "content": (
+                    f"Mavjud rezyume:\n{pdf_text[:3000]}\n\n"
+                    f"Foydalanuvchi ko'rsatmasi: \"{instruction}\"\n\n"
+                    "Format: {\"full_name\":\"\",\"profession\":\"\",\"age\":null,\"experience\":null,"
+                    "\"phone\":\"\",\"region\":\"\",\"summary\":\"men haqimda\","
+                    "\"experience_details\":\"\",\"skills\":[\"k1\"]}"
+                )},
+            ],
+            temperature=0.4,
+            response_format={"type": "json_object"},
+        )
+        import json as _json
+        data = _json.loads(ai_resp.choices[0].message.content or "{}")
+
+        pdf_io = generate_resume_pdf({
+            "full_name": data.get("full_name") or "Nomzod",
+            "profession": data.get("profession", ""),
+            "age": data.get("age"),
+            "experience": data.get("experience"),
+            "phone": data.get("phone", ""),
+            "telegram": (user.username and f"@{user.username}") or "",
+            "region": data.get("region", ""),
+            "summary": data.get("summary", ""),
+            "experience_details": data.get("experience_details", ""),
+            "skills": data.get("skills", []),
+        })
+        if not pdf_io:
+            await status.edit_text("❌ PDF yaratishda xatolik.")
+            return
+
+        await status.delete()
+        out_doc = types.BufferedInputFile(pdf_io.read(), filename="rezyume_yangilangan.pdf")
+        await message.answer_document(out_doc, caption="✅ Tayyor! Mana yangilangan rezyumengiz.")
+        new_count = await memory.increment_cv_count(tg_id)
+        remaining = max(0, memory.DAILY_CV_LIMIT - new_count)
+        await message.answer(f"ℹ️ Bugun yana {remaining} ta rezyume yaratishingiz mumkin.")
+
+    except Exception as e:
+        logger.error(f"Document handler error: {e}")
+        await status.edit_text("❌ Hujjatni qayta ishlashda xatolik.")
 
 
 
@@ -1048,6 +1133,15 @@ async def handle_cv_collecting(message: types.Message, state: "FSMContext", i18n
 
 async def _generate_and_send_cv(message: types.Message, user) -> None:
     """Generate and send the PDF CV from saved profile."""
+    tg_id = str(message.from_user.id)
+    # Daily limit check (3/day)
+    if not await memory.can_generate_cv(tg_id):
+        await message.answer(
+            f"⛔ Kunlik rezyume yaratish limiti tugadi ({memory.DAILY_CV_LIMIT} ta/kun).\n"
+            "Ertaga qayta urinib ko'ring."
+        )
+        return
+
     status = await message.answer("📄 Rezyumengiz tayyorlanmoqda...")
     try:
         from app.models.bot_user_profile import BotUserProfile
@@ -1144,6 +1238,10 @@ async def _generate_and_send_cv(message: types.Message, user) -> None:
                     "✅ Bu rezyume saqlandi — ilovada rezyume yaratganda avtomatik yuklanadi.\n\n"
                     "ISHKOP orqali ish toping 🚀",
         )
+        # Count this generation toward the daily limit
+        new_count = await memory.increment_cv_count(str(message.from_user.id))
+        remaining = max(0, memory.DAILY_CV_LIMIT - new_count)
+        await message.answer(f"ℹ️ Bugun yana {remaining} ta rezyume yaratishingiz mumkin.")
     except Exception as e:
         logger.error(f"CV generation error: {e}")
         await status.edit_text("❌ Rezyume yaratishda xatolik. Qayta urinib ko'ring.")

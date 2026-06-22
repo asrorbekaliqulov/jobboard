@@ -145,3 +145,57 @@ async def find_message_about(telegram_id: str, keyword: str) -> Optional[dict]:
             if keyword_lower in content or keyword_lower in summary:
                 return entry
     return None
+
+
+
+# ═══════════════════════════════════════════════════════════════
+# Daily CV generation limit (3 per day)
+# ═══════════════════════════════════════════════════════════════
+
+DAILY_CV_LIMIT = 3
+
+_cv_count_store: Dict[str, dict] = {}  # fallback {tg_id: {date: count}}
+
+
+def _cv_key(telegram_id: str) -> str:
+    import datetime
+    today = datetime.date.today().isoformat()
+    return f"cv_count:{telegram_id}:{today}"
+
+
+async def get_cv_count(telegram_id: str) -> int:
+    """Get how many CVs the user generated today."""
+    redis = _get_redis()
+    if redis:
+        try:
+            val = await redis.get(_cv_key(telegram_id))
+            return int(val) if val else 0
+        except Exception:
+            pass
+    import datetime
+    today = datetime.date.today().isoformat()
+    return _cv_count_store.get(telegram_id, {}).get(today, 0)
+
+
+async def increment_cv_count(telegram_id: str) -> int:
+    """Increment today's CV count. Returns new count."""
+    redis = _get_redis()
+    if redis:
+        try:
+            key = _cv_key(telegram_id)
+            new_val = await redis.incr(key)
+            if new_val == 1:
+                await redis.expire(key, 60 * 60 * 25)  # ~1 day
+            return new_val
+        except Exception:
+            pass
+    import datetime
+    today = datetime.date.today().isoformat()
+    user_counts = _cv_count_store.setdefault(telegram_id, {})
+    user_counts[today] = user_counts.get(today, 0) + 1
+    return user_counts[today]
+
+
+async def can_generate_cv(telegram_id: str) -> bool:
+    """Check if user is under the daily CV limit."""
+    return (await get_cv_count(telegram_id)) < DAILY_CV_LIMIT
