@@ -165,6 +165,8 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
   useEffect(() => {
     if (!deepLink) return;
+    // Wait until authenticated (token ready) before fetching
+    if (!currentUser && !authService.isAuthenticated()) return;
     setDeepLinkLoading(true);
     const fetchItem = async () => {
       try {
@@ -177,13 +179,14 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         }
       } catch (e) {
         console.error("Deep link fetch failed", e);
+        setDeepLinkItem({ kind: "error" });
       } finally {
         setDeepLinkLoading(false);
         onDeepLinkConsumed?.();
       }
     };
     fetchItem();
-  }, [deepLink]);
+  }, [deepLink, currentUser]);
 
   // HeadHunter vacancies (loaded once)
   const hhVacancies = useHHVacancies(searchText);
@@ -1237,6 +1240,12 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               onToggleSave={initialRole === UserRole.CANDIDATE_HUNTER ? onToggleResumeSave : undefined}
               index={0}
             />
+          ) : deepLinkItem?.kind === "error" ? (
+            <div className="py-16 text-center">
+              <i className="fa-solid fa-circle-exclamation text-3xl text-red-400 mb-3" />
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Topilmadi</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Bu e'lon o'chirilgan yoki mavjud emas</p>
+            </div>
           ) : null}
         </div>
       ) : (
