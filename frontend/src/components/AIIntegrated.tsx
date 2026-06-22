@@ -15,9 +15,10 @@ import { UserRole } from "../types.ts";
 interface AISearchResultsProps {
   searchText: string;
   userRole: UserRole;
+  onSelect?: (type: "vacancy" | "resume", id: number) => void;
 }
 
-export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, userRole }) => {
+export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, userRole, onSelect }) => {
   const { t } = useTranslation();
   const [results, setResults] = useState<AgentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,7 +78,9 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
         <div className="flex-1 h-px bg-indigo-100" />
       </div>
       {displayResults.map((item, i: number) => (
-        <div key={i} className="p-3 rounded-xl border border-indigo-100" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <button key={i} type="button"
+          onClick={() => onSelect && onSelect(item.type as any, item.id)}
+          className="w-full text-left p-3 rounded-xl border border-indigo-100 active:scale-[0.98] transition-all" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
@@ -91,7 +94,7 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({ searchText, us
               {item.score}%
             </span>
           </div>
-        </div>
+        </button>
       ))}
       {results.length > 2 && !showAll && (
         <button onClick={() => setShowAll(true)}
