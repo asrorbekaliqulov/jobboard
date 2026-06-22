@@ -233,13 +233,19 @@ export const AIWriterSection: React.FC<AIWriterProps> = ({ type, onGenerated, us
     try {
       if (type === "vacancy") {
         const r = await aiService.writeJobPost({ simple_text: text });
-        onGenerated({
-          description: r.description,
-          salary_from: r.suggested_salary_from,
-          salary_till: r.suggested_salary_till,
-          profession_id: r.suggested_profession_id,
-          work_hours: r.suggested_work_hours,
-        });
+        // Fill ALL vacancy fields from AI response
+        const fields: any = { description: r.description };
+        if (r.suggested_salary_from != null) fields.salary_from = r.suggested_salary_from;
+        if (r.suggested_salary_till != null) fields.salary_till = r.suggested_salary_till;
+        if (r.suggested_profession_id) fields.profession_id = r.suggested_profession_id;
+        if (r.suggested_work_hours) fields.work_hours = r.suggested_work_hours;
+        if (r.suggested_schedule) fields.schedule = r.suggested_schedule;
+        if (r.suggested_work_format) fields.work_format = r.suggested_work_format;
+        if (r.suggested_work_type) fields.work_type = r.suggested_work_type;
+        if (r.suggested_exp_from != null) fields.exp_from = r.suggested_exp_from;
+        if (r.suggested_exp_till != null) fields.exp_till = r.suggested_exp_till;
+        if (r.title) fields.company_name = fields.company_name; // keep existing company
+        onGenerated(fields);
       } else {
         const r = await aiService.buildResume({ simple_text: text });
         // Fill ALL form fields from AI response
@@ -310,6 +316,94 @@ export const AIWriterSection: React.FC<AIWriterProps> = ({ type, onGenerated, us
         )}
       </button>
       {error && <p className="text-[10px] text-red-500 mt-2">{error}</p>}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   6. AI SALARY SUGGESTION BUTTON (next to salary input in vacancy form)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+interface AISalaryButtonProps {
+  professionId?: number;
+  regionId?: number;
+  professionName?: string;
+  onSuggest?: (from: number, till: number) => void;
+}
+
+export const AISalaryButton: React.FC<AISalaryButtonProps> = ({ professionId, regionId, professionName, onSuggest }) => {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleClick = async () => {
+    if (!professionId && !professionName) {
+      setError("Avval kasbni tanlang");
+      setTimeout(() => setError(null), 2500);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const r = await aiService.getSalaryAnalytics({
+        profession_id: professionId,
+        profession_name: professionName,
+        region_id: regionId,
+        role: "employer",
+      });
+      setResult(r);
+    } catch (e: any) {
+      setError(e.message || "Xatolik");
+      setTimeout(() => setError(null), 2500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50"
+        style={{ backgroundColor: 'rgba(99,102,241,0.1)', color: '#6366f1' }}
+      >
+        {loading ? (
+          <span className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <i className="fa-solid fa-robot" />
+        )}
+        AI: o'rtacha narxni ko'rsat
+      </button>
+      {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
+      {result && result.salary_data && result.salary_data.sample_count > 0 && (
+        <div className="mt-2 p-3 rounded-xl border border-indigo-100 bg-indigo-50/50">
+          <p className="text-[11px] font-bold text-indigo-700 mb-1">
+            <i className="fa-solid fa-chart-line mr-1" />
+            {result.profession_name} — bozor narxlari
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-center my-2">
+            <div><p className="text-[9px] text-slate-400">Min</p><p className="text-xs font-bold text-slate-700">{result.salary_data.min_salary.toLocaleString()}</p></div>
+            <div><p className="text-[9px] text-slate-400">O'rtacha</p><p className="text-xs font-bold text-indigo-600">{result.salary_data.avg_salary.toLocaleString()}</p></div>
+            <div><p className="text-[9px] text-slate-400">Max</p><p className="text-xs font-bold text-slate-700">{result.salary_data.max_salary.toLocaleString()}</p></div>
+          </div>
+          <p className="text-[10px] text-slate-600">{result.ai_recommendation}</p>
+          <p className="text-[9px] text-slate-400 mt-1">{result.data_freshness}</p>
+          {onSuggest && (
+            <button
+              type="button"
+              onClick={() => onSuggest(result.salary_data.min_salary, result.salary_data.max_salary)}
+              className="mt-2 w-full py-1.5 rounded-lg text-[10px] font-bold text-white bg-indigo-600 active:scale-95 transition-all"
+            >
+              Shu narxlarni qo'yish
+            </button>
+          )}
+        </div>
+      )}
+      {result && (!result.salary_data || result.salary_data.sample_count === 0) && (
+        <p className="text-[10px] text-slate-400 mt-1">{result.ai_recommendation || result.data_freshness}</p>
+      )}
     </div>
   );
 };

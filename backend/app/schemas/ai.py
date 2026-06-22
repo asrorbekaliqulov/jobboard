@@ -59,6 +59,10 @@ class AIJobPostWriterResponse(BaseModel):
     suggested_work_hours: Optional[int] = None
     suggested_schedule: Optional[str] = None
     suggested_profession_id: Optional[int] = None
+    suggested_work_format: Optional[str] = None  # onsite/remote
+    suggested_work_type: Optional[str] = None    # fulltime/part-time
+    suggested_exp_from: Optional[int] = None
+    suggested_exp_till: Optional[int] = None
 
 
 # ==================== 3. AI Resume Builder ====================

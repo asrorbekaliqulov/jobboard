@@ -346,9 +346,20 @@ export const ClientVacancyExplorerCard: React.FC<{
             )}
           </div>
 
-          {/* Apply button */}
-          <button className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100">
-            Rezyume yuborish
+          {/* Apply button - opens employer contact */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (vacancy.telegram) {
+                const tg = vacancy.telegram.replace("@", "");
+                window.open(`https://t.me/${tg}`, "_blank");
+              } else if (vacancy.phone) {
+                window.open(`tel:${vacancy.phone}`, "_self");
+              }
+            }}
+            className="w-full py-3.5 bg-indigo-600 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-lg shadow-indigo-100"
+          >
+            Ish beruvchiga murojaat qilish
             <i className="fa-solid fa-paper-plane text-xs" />
           </button>
         </div>

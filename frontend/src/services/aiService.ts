@@ -66,6 +66,10 @@ export interface JobPostWriterResponse {
   suggested_work_hours: number | null;
   suggested_schedule: string | null;
   suggested_profession_id: number | null;
+  suggested_work_format: string | null;
+  suggested_work_type: string | null;
+  suggested_exp_from: number | null;
+  suggested_exp_till: number | null;
 }
 
 export interface ResumeBuilderResponse {

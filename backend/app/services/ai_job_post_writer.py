@@ -66,6 +66,10 @@ class AIJobPostWriterService:
             '  "suggested_requirements": ["talab1", "talab2"],\n'
             '  "suggested_work_hours": 8 yoki 9 yoki 10 yoki 12,\n'
             '  "suggested_schedule": "5/2" yoki "6/1" yoki "7/0",\n'
+            '  "suggested_work_format": "onsite" yoki "remote",\n'
+            '  "suggested_work_type": "fulltime" yoki "part-time",\n'
+            '  "suggested_exp_from": 0 dan 10 gacha raqam,\n'
+            '  "suggested_exp_till": 0 dan 15 gacha raqam,\n'
             '  "suggested_profession_id": null yoki ID raqam\n'
             "}\n\n"
             "E'lon matni professional, aniq va qisqa bo'lsin. "
@@ -88,4 +92,8 @@ class AIJobPostWriterService:
             suggested_work_hours=result.get("suggested_work_hours"),
             suggested_schedule=result.get("suggested_schedule"),
             suggested_profession_id=result.get("suggested_profession_id"),
+            suggested_work_format=result.get("suggested_work_format"),
+            suggested_work_type=result.get("suggested_work_type"),
+            suggested_exp_from=result.get("suggested_exp_from"),
+            suggested_exp_till=result.get("suggested_exp_till"),
         )
