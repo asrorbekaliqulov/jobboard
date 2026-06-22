@@ -371,13 +371,18 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
       }
     }
 
-    // Apply search filter
+    // Apply search filter (also matches description for broader results)
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       list = list.filter((item: any) => {
         const name = item.company_name || `${item.first_name} ${item.last_name}` || "";
         const profName = getLocalizedName(item.profession) || "";
-        return name.toLowerCase().includes(q) || profName.toLowerCase().includes(q);
+        const desc = item.description || "";
+        return (
+          name.toLowerCase().includes(q) ||
+          profName.toLowerCase().includes(q) ||
+          desc.toLowerCase().includes(q)
+        );
       });
     }
 
@@ -805,7 +810,28 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
 
       {/* AI Search Results (Google-style) */}
       {searchText.trim().length >= 3 && (
-        <AISearchResults searchText={searchText} userRole={initialRole} />
+        <AISearchResults
+          searchText={searchText}
+          userRole={initialRole}
+          onSelect={(type, id) => {
+            setDeepLinkLoading(true);
+            (async () => {
+              try {
+                if (type === "vacancy") {
+                  const v = await vacancyService.getVacancyById(id);
+                  setDeepLinkItem({ kind: "vacancy", data: v });
+                } else {
+                  const r = await resumeService.getResume(id);
+                  setDeepLinkItem({ kind: "resume", data: r });
+                }
+              } catch (e) {
+                setDeepLinkItem({ kind: "error" });
+              } finally {
+                setDeepLinkLoading(false);
+              }
+            })();
+          }}
+        />
       )}
 
       {/* Vacancy/Resume list */}
