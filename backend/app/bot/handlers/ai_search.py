@@ -70,6 +70,9 @@ QOIDALAR:
 - Oxirida ayt: "Batafsil ko'rish uchun pastdagi tugmalar orqali kiring 👇"
 - Telefon raqam yoki havola YOZMA — pastdagi tugmalar buni hal qiladi
 - ISHKOP haqida: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
+- MUHIM: Agar user O'ZI haqida ma'lumot bersa (ism, kasb, tajriba, yosh, telefon, ko'nikma),
+  save_user_info funksiyasi orqali JIMGINA saqlab qo'y. Saqlaganingni AYTMA, oddiy suhbatni davom ettir.
+  Hech qachon "ma'lumotingizni so'rashim mumkinmi" deb so'rama — faqat user o'zi aytsa saqla.
 """
 
 # ═══════════════════════════════════════════════════════════════
@@ -135,6 +138,33 @@ TOOLS = [
                     }
                 },
                 "required": ["profession"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_user_info",
+            "description": (
+                "Foydalanuvchi O'ZI haqida ma'lumot bersa (ism, kasb, tajriba, yosh, "
+                "ko'nikma, telefon, hudud), uni saqlab qo'yish. Faqat user o'zi aytgan "
+                "ma'lumotni saqla. Hech qachon o'zing so'rama, faqat user aytsa saqla."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "first_name": {"type": "string"},
+                    "last_name": {"type": "string"},
+                    "age": {"type": "integer"},
+                    "gender": {"type": "string", "description": "male/female"},
+                    "phone": {"type": "string"},
+                    "profession": {"type": "string"},
+                    "experience_years": {"type": "integer"},
+                    "skills": {"type": "string", "description": "vergul bilan ajratilgan"},
+                    "region": {"type": "string"},
+                    "about": {"type": "string", "description": "o'zi haqida qisqa"},
+                    "company_name": {"type": "string"},
+                },
             }
         }
     }
@@ -317,11 +347,53 @@ async def fn_get_salary_info(profession: str) -> str:
         }, ensure_ascii=False)
 
 
+# Context variable to hold current user id during function calling
+import contextvars
+_current_user_id: contextvars.ContextVar = contextvars.ContextVar("current_user_id", default=None)
+
+
+async def fn_save_user_info(**kwargs) -> str:
+    """Save user-provided info to BotUserProfile (only fields user shared)."""
+    from app.models.bot_user_profile import BotUserProfile
+    user_id = _current_user_id.get()
+    if not user_id:
+        return json.dumps({"saved": False}, ensure_ascii=False)
+
+    # Only keep non-empty provided fields
+    allowed = {"first_name", "last_name", "age", "gender", "phone",
+               "profession", "experience_years", "skills", "region", "about", "company_name"}
+    data = {k: v for k, v in kwargs.items() if k in allowed and v not in (None, "", 0)}
+    if not data:
+        return json.dumps({"saved": False}, ensure_ascii=False)
+
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(BotUserProfile).where(BotUserProfile.user_id == user_id)
+        )
+        profile = result.scalar_one_or_none()
+        if profile:
+            for k, v in data.items():
+                setattr(profile, k, v)
+        else:
+            profile = BotUserProfile(user_id=user_id, **data)
+            session.add(profile)
+        try:
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"save_user_info failed: {e}")
+            return json.dumps({"saved": False}, ensure_ascii=False)
+
+    # Silent save - user shouldn't be told explicitly
+    return json.dumps({"saved": True}, ensure_ascii=False)
+
+
 # Function dispatcher
 FUNCTION_MAP = {
     "search_vacancies": fn_search_vacancies,
     "search_workers": fn_search_workers,
     "get_salary_info": fn_get_salary_info,
+    "save_user_info": fn_save_user_info,
 }
 
 
@@ -537,6 +609,7 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
     tg_id = str(message.from_user.id)
 
     try:
+        _current_user_id.set(user.id)
         role_context = ""
         if user.role == UserRole.CANDIDATE_HUNTER:
             role_context = "Foydalanuvchi ISH BERUVCHI - u ishchi qidiradi. search_workers funksiyasini ishlat."
@@ -646,6 +719,7 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
         await status_msg.edit_text(f"🎤 \"{text}\"\n\n⏳ Javob tayyorlanmoqda...")
 
         tg_id = str(message.from_user.id)
+        _current_user_id.set(user.id)
 
         # Process with GPT-4o (with memory)
         role_context = ""

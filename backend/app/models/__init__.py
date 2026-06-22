@@ -8,6 +8,7 @@ from app.models.daily_job_seeker import DailyJobSeeker, Work, daily_job_seeker_w
 from app.models.favourite import FavouriteVacancy, FavouriteResume, FavouriteDailyJobSeeker
 from app.models.channel_message import ChannelMessage, ChannelMessageEntity
 from app.models.like import Like
+from app.models.bot_user_profile import BotUserProfile
 from app.models.ai_models import (
     EmployerTrustRating,
     EmployerReview,

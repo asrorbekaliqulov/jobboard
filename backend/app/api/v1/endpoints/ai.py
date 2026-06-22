@@ -529,3 +529,44 @@ async def ai_voice_transcribe(
     except Exception as e:
         logger.error(f"Voice transcription error: {e}")
         raise HTTPException(status_code=500, detail="Ovozni matnga aylantirib bo'lmadi")
+
+
+
+# ==================== Bot User Profile (for form pre-fill) ====================
+
+@router.get("/my-profile")
+async def get_my_bot_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get saved bot profile info to pre-fill resume/vacancy forms.
+    Returns info the user shared with the bot during chat.
+    """
+    try:
+        from app.models.bot_user_profile import BotUserProfile
+        from sqlalchemy import select as _select
+        result = await db.execute(
+            _select(BotUserProfile).where(BotUserProfile.user_id == current_user.id)
+        )
+        profile = result.scalar_one_or_none()
+        if not profile:
+            return {"has_profile": False}
+        return {
+            "has_profile": True,
+            "first_name": profile.first_name,
+            "last_name": profile.last_name,
+            "age": profile.age,
+            "gender": profile.gender,
+            "phone": profile.phone,
+            "telegram": profile.telegram,
+            "profession": profile.profession,
+            "experience_years": profile.experience_years,
+            "skills": profile.skills,
+            "region": profile.region,
+            "about": profile.about,
+            "company_name": profile.company_name,
+        }
+    except Exception as e:
+        logger.error(f"get_my_bot_profile error: {e}")
+        return {"has_profile": False}
