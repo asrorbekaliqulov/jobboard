@@ -28,11 +28,9 @@ def generate_resume_pdf(data: dict) -> Optional[BytesIO]:
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Helper to safely encode text (fpdf core fonts are latin-1)
         def s(text):
             if text is None:
                 return ""
-            # Replace Uzbek-specific chars that latin-1 can't encode
             replacements = {
                 "'": "'", "'": "'", "ʻ": "'", "ʼ": "'",
                 "—": "-", "–": "-", "“": '"', "”": '"',
@@ -42,78 +40,94 @@ def generate_resume_pdf(data: dict) -> Optional[BytesIO]:
                 text = text.replace(k, v)
             return text.encode("latin-1", "replace").decode("latin-1")
 
-        # Header - name
-        pdf.set_font("Helvetica", "B", 22)
-        pdf.cell(0, 12, s(data.get("full_name", "Rezyume")), ln=True)
+        ACCENT = (99, 102, 241)  # indigo
+        DARK = (30, 30, 40)
+        GRAY = (110, 110, 120)
 
-        # Profession
-        pdf.set_font("Helvetica", "", 14)
-        pdf.set_text_color(80, 80, 80)
+        # ── Colored header band ──
+        pdf.set_fill_color(*ACCENT)
+        pdf.rect(0, 0, 210, 42, "F")
+
+        pdf.set_xy(12, 10)
+        pdf.set_font("Helvetica", "B", 24)
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(0, 11, s(data.get("full_name", "Rezyume")), ln=True)
+
+        pdf.set_x(12)
+        pdf.set_font("Helvetica", "", 13)
+        pdf.set_text_color(230, 230, 255)
         pdf.cell(0, 8, s(data.get("profession", "")), ln=True)
-        pdf.set_text_color(0, 0, 0)
-        pdf.ln(4)
 
-        # Divider
-        pdf.set_draw_color(99, 102, 241)
-        pdf.set_line_width(0.6)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(6)
-
-        # Contact / basic info
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.cell(0, 8, "Shaxsiy ma'lumotlar", ln=True)
-        pdf.set_font("Helvetica", "", 11)
-        info_lines = []
-        if data.get("age"):
-            info_lines.append(f"Yosh: {data['age']}")
-        if data.get("experience"):
-            info_lines.append(f"Tajriba: {data['experience']} yil")
-        if data.get("region"):
-            info_lines.append(f"Hudud: {s(data['region'])}")
+        # Contact line in header
+        contact_parts = []
         if data.get("phone"):
-            info_lines.append(f"Telefon: {s(data['phone'])}")
+            contact_parts.append(f"Tel: {s(data['phone'])}")
         if data.get("telegram"):
-            info_lines.append(f"Telegram: {s(data['telegram'])}")
-        for line in info_lines:
-            pdf.cell(0, 7, s(line), ln=True)
-        pdf.ln(4)
+            contact_parts.append(f"TG: {s(data['telegram'])}")
+        if data.get("region"):
+            contact_parts.append(s(data["region"]))
+        if contact_parts:
+            pdf.set_x(12)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.cell(0, 6, s("  |  ".join(contact_parts)), ln=True)
 
-        # Summary / About
+        pdf.ln(12)
+        pdf.set_text_color(*DARK)
+
+        def section_title(title):
+            pdf.ln(2)
+            pdf.set_font("Helvetica", "B", 13)
+            pdf.set_text_color(*ACCENT)
+            pdf.cell(0, 8, s(title), ln=True)
+            pdf.set_draw_color(*ACCENT)
+            pdf.set_line_width(0.4)
+            y = pdf.get_y()
+            pdf.line(12, y, 198, y)
+            pdf.ln(3)
+            pdf.set_text_color(*DARK)
+
+        # ── Basic info ──
+        section_title("Shaxsiy ma'lumotlar")
+        pdf.set_font("Helvetica", "", 11)
+        basics = []
+        if data.get("age"):
+            basics.append(f"Yosh: {data['age']}")
+        if data.get("experience"):
+            basics.append(f"Tajriba: {data['experience']} yil")
+        if basics:
+            pdf.cell(0, 7, s("   ".join(basics)), ln=True)
+
+        # ── About (first person) ──
         if data.get("summary"):
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, "O'zi haqida", ln=True)
+            section_title("O'zim haqimda")
             pdf.set_font("Helvetica", "", 11)
             pdf.multi_cell(0, 6, s(data["summary"]))
-            pdf.ln(3)
 
-        # Experience details
+        # ── Experience ──
         if data.get("experience_details"):
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, "Ish tajribasi", ln=True)
+            section_title("Ish tajribasi")
             pdf.set_font("Helvetica", "", 11)
             pdf.multi_cell(0, 6, s(data["experience_details"]))
-            pdf.ln(3)
 
-        # Skills
+        # ── Skills as bullet chips ──
         skills = data.get("skills") or []
         if skills:
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, "Ko'nikmalar", ln=True)
+            section_title("Ko'nikmalar")
             pdf.set_font("Helvetica", "", 11)
             if isinstance(skills, list):
-                skills_text = ", ".join(str(x) for x in skills)
+                for sk in skills:
+                    if sk and str(sk).strip():
+                        pdf.cell(5, 6, s("•"), ln=False)
+                        pdf.cell(0, 6, s(str(sk).strip()), ln=True)
             else:
-                skills_text = str(skills)
-            pdf.multi_cell(0, 6, s(skills_text))
-            pdf.ln(3)
+                pdf.multi_cell(0, 6, s(str(skills)))
 
-        # Footer
-        pdf.set_y(-20)
+        # ── Footer ──
+        pdf.set_y(-18)
         pdf.set_font("Helvetica", "I", 9)
-        pdf.set_text_color(150, 150, 150)
-        pdf.cell(0, 6, "ISHKOP - O'zbekiston mehnat bozori", ln=True, align="C")
+        pdf.set_text_color(*GRAY)
+        pdf.cell(0, 6, s("ISHKOP - O'zbekiston mehnat bozori  |  ishkop.uz"), ln=True, align="C")
 
-        # Output to BytesIO
         out = BytesIO()
         pdf_bytes = pdf.output()
         out.write(bytes(pdf_bytes))

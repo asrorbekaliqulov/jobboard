@@ -12,6 +12,9 @@ from typing import Optional
 
 from aiogram import Router, F, types
 from aiogram_i18n import I18nContext
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.filters import StateFilter, Command
 from openai import AsyncOpenAI
 
 from app.core.config import settings
@@ -27,6 +30,11 @@ from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+
+class CVStates(StatesGroup):
+    """FSM states for CV creation flow."""
+    collecting = State()
 
 # ═══════════════════════════════════════════════════════════════
 # SYSTEM PROMPT - ISHKOP Bot shaxsiyati
@@ -594,7 +602,7 @@ def _get_webapp_url(query: str = "") -> str:
     return base
 
 
-@router.message(F.text & ~F.text.startswith("/"))
+@router.message(StateFilter(None), F.text & ~F.text.startswith("/"))
 async def handle_text_message(message: types.Message, i18n: I18nContext):
     """Handle text messages - GPT-4o with memory + function calling."""
     user = await _get_user(str(message.from_user.id))
@@ -843,8 +851,6 @@ async def handle_document_message(message: types.Message, i18n: I18nContext):
 # /clear command - reset conversation memory
 # ═══════════════════════════════════════════════════════════════
 
-from aiogram.filters import Command
-
 
 @router.message(Command("clear"))
 async def handle_clear(message: types.Message, i18n: I18nContext):
@@ -854,19 +860,111 @@ async def handle_clear(message: types.Message, i18n: I18nContext):
 
 
 @router.message(Command("cv"))
-async def handle_cv(message: types.Message, i18n: I18nContext):
-    """Generate a PDF resume from the user's saved profile + AI enhancement."""
+async def handle_cv(message: types.Message, state: "FSMContext", i18n: I18nContext):
+    """Start CV creation: show current info, ask for additions."""
     user = await _get_user(str(message.from_user.id))
     if not user:
         await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
         return
-
     if not settings.ai_enabled:
         await message.answer("AI xizmati hozirda ishlamayapti.")
         return
 
-    status = await message.answer("📄 Rezyumengiz tayyorlanmoqda...")
+    from app.models.bot_user_profile import BotUserProfile
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(BotUserProfile).where(BotUserProfile.user_id == user.id)
+        )
+        profile = result.scalar_one_or_none()
 
+    # Show current info
+    lines = ["📄 <b>Rezyume yaratish boshlandi</b>\n", "Menda siz haqingizda quyidagi ma'lumotlar bor:\n"]
+    if profile:
+        if profile.first_name or profile.last_name:
+            lines.append(f"👤 Ism: {profile.first_name or ''} {profile.last_name or ''}".strip())
+        if profile.age:
+            lines.append(f"🎂 Yosh: {profile.age}")
+        if profile.profession:
+            lines.append(f"💼 Kasb: {profile.profession}")
+        if profile.experience_years is not None:
+            lines.append(f"🧠 Tajriba: {profile.experience_years} yil")
+        if profile.skills:
+            lines.append(f"🛠 Ko'nikmalar: {profile.skills}")
+        if profile.region:
+            lines.append(f"📍 Hudud: {profile.region}")
+        if profile.phone:
+            lines.append(f"📞 Telefon: {profile.phone}")
+        if profile.about:
+            lines.append(f"📝 {profile.about}")
+    if len(lines) <= 2:
+        lines.append("<i>(hozircha ma'lumot yo'q)</i>")
+
+    lines.append("\n➕ Yana qo'shimcha ma'lumot kiritasizmi?")
+    lines.append("Agar shu ma'lumotlar bilan yaratsam — <b>\"Yarat\"</b> deb yozing.")
+
+    await state.set_state(CVStates.collecting)
+    await message.answer("\n".join(lines), parse_mode="HTML")
+
+
+@router.message(StateFilter(CVStates.collecting))
+async def handle_cv_collecting(message: types.Message, state: "FSMContext", i18n: I18nContext):
+    """Handle user response during CV creation."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await state.clear()
+        return
+
+    text = (message.text or "").strip().lower()
+
+    # User wants to generate now
+    generate_words = ["yarat", "boshla", "tayyorla", "shu bilan", "yetarli", "bo'ldi", "ha yarat", "davom"]
+    if any(w in text for w in generate_words) and len(text) < 30:
+        await state.clear()
+        await _generate_and_send_cv(message, user)
+        return
+
+    # Off-topic detection: if it looks like a question/different topic, exit CV mode
+    offtopic_markers = ["?", "qancha", "qayerda", "nima uchun", "kim", "ob-havo", "vaqt"]
+    is_question = any(m in text for m in offtopic_markers)
+
+    # Otherwise treat as additional info → save it via AI extraction
+    if message.text and not is_question:
+        # Save the new info using AI
+        try:
+            _current_user_id.set(user.id)
+            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            extract = await client.chat.completions.create(
+                model=settings.OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": "Foydalanuvchi gapidan rezyume ma'lumotlarini ajrat. JSON qaytar."},
+                    {"role": "user", "content": (
+                        f"Gap: \"{message.text}\"\n"
+                        "Format: {\"first_name\":null,\"last_name\":null,\"age\":null,\"gender\":null,"
+                        "\"phone\":null,\"profession\":null,\"experience_years\":null,\"skills\":null,"
+                        "\"region\":null,\"about\":null}. Faqat aytilganlarni to'ldir, qolganini null qoldir."
+                    )},
+                ],
+                temperature=0.1,
+                response_format={"type": "json_object"},
+            )
+            import json as _json
+            extracted = _json.loads(extract.choices[0].message.content or "{}")
+            await fn_save_user_info(**extracted)
+            await message.answer("✅ Qo'shildi! Yana qo'shasizmi yoki <b>\"Yarat\"</b> deb yozing?", parse_mode="HTML")
+        except Exception as e:
+            logger.error(f"CV collect error: {e}")
+            await message.answer("Yana ma'lumot qo'shing yoki \"Yarat\" deb yozing.")
+    else:
+        # Off-topic → exit CV mode and answer normally
+        await state.clear()
+        await message.answer("Rezyume yaratish to'xtatildi. Savolingizga javob beraman 👇")
+        # Re-process as normal message
+        await handle_text_message(message, i18n)
+
+
+async def _generate_and_send_cv(message: types.Message, user) -> None:
+    """Generate and send the PDF CV from saved profile."""
+    status = await message.answer("📄 Rezyumengiz tayyorlanmoqda...")
     try:
         from app.models.bot_user_profile import BotUserProfile
         async with async_session_maker() as session:
@@ -877,14 +975,10 @@ async def handle_cv(message: types.Message, i18n: I18nContext):
 
         if not profile or not (profile.profession or profile.about or profile.first_name):
             await status.edit_text(
-                "📄 Rezyume yaratish uchun avval o'zingiz haqingizda gapirib bering.\n\n"
-                "Masalan: \"Men Alisher, 28 yoshda elektrikman, 5 yil tajribam bor, "
-                "Toshkentda yashayman, telefonim +998901234567\"\n\n"
-                "Keyin /cv buyrug'ini bosing."
+                "📄 Rezyume uchun ma'lumot yetarli emas. O'zingiz haqingizda gapirib bering."
             )
             return
 
-        # Build professional resume text via AI
         profile_text = (
             f"Ism: {profile.first_name or ''} {profile.last_name or ''}\n"
             f"Yosh: {profile.age or ''}\n"
@@ -900,10 +994,13 @@ async def handle_cv(message: types.Message, i18n: I18nContext):
         ai_resp = await client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=[
-                {"role": "system", "content": "Sen professional rezyume tuzuvchisan. O'zbek tilida yoz. Javobni JSON formatda ber."},
+                {"role": "system", "content": (
+                    "Sen professional rezyume tuzuvchisan. O'zbek tilida, BIRINCHI SHAXSDA yoz "
+                    "(men, mening). 'Men 5 yil ishladim'. Uchinchi shaxsda yozma! JSON qaytar."
+                )},
                 {"role": "user", "content": (
-                    f"Quyidagi ma'lumotlardan professional rezyume matni yoz:\n{profile_text}\n\n"
-                    "Format: {\"summary\": \"o'zi haqida 2-3 jumla\", \"experience_details\": \"tajriba batafsil\", \"skills\": [\"k1\",\"k2\"]}"
+                    f"Ma'lumotlar:\n{profile_text}\n\n"
+                    "Format: {\"summary\":\"men haqimda\",\"experience_details\":\"mening tajribam\",\"skills\":[\"k1\"]}"
                 )},
             ],
             temperature=0.4,
@@ -912,7 +1009,6 @@ async def handle_cv(message: types.Message, i18n: I18nContext):
         import json as _json
         ai_data = _json.loads(ai_resp.choices[0].message.content or "{}")
 
-        # Generate PDF
         from app.services.pdf_resume import generate_resume_pdf
         full_name = f"{profile.first_name or ''} {profile.last_name or ''}".strip() or "Nomzod"
         pdf_data = {
@@ -930,7 +1026,7 @@ async def handle_cv(message: types.Message, i18n: I18nContext):
 
         pdf_io = generate_resume_pdf(pdf_data)
         if not pdf_io:
-            await status.edit_text("❌ PDF yaratishda xatolik yuz berdi.")
+            await status.edit_text("❌ PDF yaratishda xatolik.")
             return
 
         await status.delete()
@@ -939,7 +1035,6 @@ async def handle_cv(message: types.Message, i18n: I18nContext):
             doc,
             caption="📄 Mana sizning professional rezyumengiz!\n\nISHKOP orqali ish toping 🚀",
         )
-
     except Exception as e:
         logger.error(f"CV generation error: {e}")
         await status.edit_text("❌ Rezyume yaratishda xatolik. Qayta urinib ko'ring.")
