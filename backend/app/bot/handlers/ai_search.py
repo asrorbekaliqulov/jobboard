@@ -70,6 +70,9 @@ QOIDALAR:
 - Oxirida ayt: "Batafsil ko'rish uchun pastdagi tugmalar orqali kiring 👇"
 - Telefon raqam yoki havola YOZMA — pastdagi tugmalar buni hal qiladi
 - ISHKOP haqida: "ISHKOP — O'zbekistondagi eng yirik ish qidirish platformasi. 8000+ foydalanuvchi, 5000+ vakansiya."
+- MUHIM: Agar user O'ZI haqida ma'lumot bersa (ism, kasb, tajriba, yosh, telefon, ko'nikma),
+  save_user_info funksiyasi orqali JIMGINA saqlab qo'y. Saqlaganingni AYTMA, oddiy suhbatni davom ettir.
+  Hech qachon "ma'lumotingizni so'rashim mumkinmi" deb so'rama — faqat user o'zi aytsa saqla.
 """
 
 # ═══════════════════════════════════════════════════════════════
@@ -135,6 +138,33 @@ TOOLS = [
                     }
                 },
                 "required": ["profession"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_user_info",
+            "description": (
+                "Foydalanuvchi O'ZI haqida ma'lumot bersa (ism, kasb, tajriba, yosh, "
+                "ko'nikma, telefon, hudud), uni saqlab qo'yish. Faqat user o'zi aytgan "
+                "ma'lumotni saqla. Hech qachon o'zing so'rama, faqat user aytsa saqla."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "first_name": {"type": "string"},
+                    "last_name": {"type": "string"},
+                    "age": {"type": "integer"},
+                    "gender": {"type": "string", "description": "male/female"},
+                    "phone": {"type": "string"},
+                    "profession": {"type": "string"},
+                    "experience_years": {"type": "integer"},
+                    "skills": {"type": "string", "description": "vergul bilan ajratilgan"},
+                    "region": {"type": "string"},
+                    "about": {"type": "string", "description": "o'zi haqida qisqa"},
+                    "company_name": {"type": "string"},
+                },
             }
         }
     }
@@ -317,11 +347,53 @@ async def fn_get_salary_info(profession: str) -> str:
         }, ensure_ascii=False)
 
 
+# Context variable to hold current user id during function calling
+import contextvars
+_current_user_id: contextvars.ContextVar = contextvars.ContextVar("current_user_id", default=None)
+
+
+async def fn_save_user_info(**kwargs) -> str:
+    """Save user-provided info to BotUserProfile (only fields user shared)."""
+    from app.models.bot_user_profile import BotUserProfile
+    user_id = _current_user_id.get()
+    if not user_id:
+        return json.dumps({"saved": False}, ensure_ascii=False)
+
+    # Only keep non-empty provided fields
+    allowed = {"first_name", "last_name", "age", "gender", "phone",
+               "profession", "experience_years", "skills", "region", "about", "company_name"}
+    data = {k: v for k, v in kwargs.items() if k in allowed and v not in (None, "", 0)}
+    if not data:
+        return json.dumps({"saved": False}, ensure_ascii=False)
+
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(BotUserProfile).where(BotUserProfile.user_id == user_id)
+        )
+        profile = result.scalar_one_or_none()
+        if profile:
+            for k, v in data.items():
+                setattr(profile, k, v)
+        else:
+            profile = BotUserProfile(user_id=user_id, **data)
+            session.add(profile)
+        try:
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"save_user_info failed: {e}")
+            return json.dumps({"saved": False}, ensure_ascii=False)
+
+    # Silent save - user shouldn't be told explicitly
+    return json.dumps({"saved": True}, ensure_ascii=False)
+
+
 # Function dispatcher
 FUNCTION_MAP = {
     "search_vacancies": fn_search_vacancies,
     "search_workers": fn_search_workers,
     "get_salary_info": fn_get_salary_info,
+    "save_user_info": fn_save_user_info,
 }
 
 
@@ -537,6 +609,7 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
     tg_id = str(message.from_user.id)
 
     try:
+        _current_user_id.set(user.id)
         role_context = ""
         if user.role == UserRole.CANDIDATE_HUNTER:
             role_context = "Foydalanuvchi ISH BERUVCHI - u ishchi qidiradi. search_workers funksiyasini ishlat."
@@ -646,6 +719,7 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
         await status_msg.edit_text(f"🎤 \"{text}\"\n\n⏳ Javob tayyorlanmoqda...")
 
         tg_id = str(message.from_user.id)
+        _current_user_id.set(user.id)
 
         # Process with GPT-4o (with memory)
         role_context = ""
@@ -777,3 +851,95 @@ async def handle_clear(message: types.Message, i18n: I18nContext):
     """Clear conversation history."""
     await memory.clear_history(str(message.from_user.id))
     await message.answer("🗑 Suhbat tarixi tozalandi. Yangi suhbat boshlashingiz mumkin.")
+
+
+@router.message(Command("cv"))
+async def handle_cv(message: types.Message, i18n: I18nContext):
+    """Generate a PDF resume from the user's saved profile + AI enhancement."""
+    user = await _get_user(str(message.from_user.id))
+    if not user:
+        await message.answer("Iltimos, avval /start buyrug'ini yuboring.")
+        return
+
+    if not settings.ai_enabled:
+        await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    status = await message.answer("📄 Rezyumengiz tayyorlanmoqda...")
+
+    try:
+        from app.models.bot_user_profile import BotUserProfile
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(BotUserProfile).where(BotUserProfile.user_id == user.id)
+            )
+            profile = result.scalar_one_or_none()
+
+        if not profile or not (profile.profession or profile.about or profile.first_name):
+            await status.edit_text(
+                "📄 Rezyume yaratish uchun avval o'zingiz haqingizda gapirib bering.\n\n"
+                "Masalan: \"Men Alisher, 28 yoshda elektrikman, 5 yil tajribam bor, "
+                "Toshkentda yashayman, telefonim +998901234567\"\n\n"
+                "Keyin /cv buyrug'ini bosing."
+            )
+            return
+
+        # Build professional resume text via AI
+        profile_text = (
+            f"Ism: {profile.first_name or ''} {profile.last_name or ''}\n"
+            f"Yosh: {profile.age or ''}\n"
+            f"Kasb: {profile.profession or ''}\n"
+            f"Tajriba: {profile.experience_years or ''} yil\n"
+            f"Ko'nikmalar: {profile.skills or ''}\n"
+            f"Hudud: {profile.region or ''}\n"
+            f"Telefon: {profile.phone or ''}\n"
+            f"O'zi haqida: {profile.about or ''}"
+        )
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        ai_resp = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": "Sen professional rezyume tuzuvchisan. O'zbek tilida yoz. Javobni JSON formatda ber."},
+                {"role": "user", "content": (
+                    f"Quyidagi ma'lumotlardan professional rezyume matni yoz:\n{profile_text}\n\n"
+                    "Format: {\"summary\": \"o'zi haqida 2-3 jumla\", \"experience_details\": \"tajriba batafsil\", \"skills\": [\"k1\",\"k2\"]}"
+                )},
+            ],
+            temperature=0.4,
+            response_format={"type": "json_object"},
+        )
+        import json as _json
+        ai_data = _json.loads(ai_resp.choices[0].message.content or "{}")
+
+        # Generate PDF
+        from app.services.pdf_resume import generate_resume_pdf
+        full_name = f"{profile.first_name or ''} {profile.last_name or ''}".strip() or "Nomzod"
+        pdf_data = {
+            "full_name": full_name,
+            "profession": profile.profession or "",
+            "age": profile.age,
+            "experience": profile.experience_years,
+            "phone": profile.phone or "",
+            "telegram": (user.username and f"@{user.username}") or "",
+            "region": profile.region or "",
+            "summary": ai_data.get("summary", profile.about or ""),
+            "experience_details": ai_data.get("experience_details", ""),
+            "skills": ai_data.get("skills", (profile.skills or "").split(",") if profile.skills else []),
+        }
+
+        pdf_io = generate_resume_pdf(pdf_data)
+        if not pdf_io:
+            await status.edit_text("❌ PDF yaratishda xatolik yuz berdi.")
+            return
+
+        await status.delete()
+        doc = types.BufferedInputFile(pdf_io.read(), filename=f"{full_name}_rezyume.pdf")
+        await message.answer_document(
+            doc,
+            caption="📄 Mana sizning professional rezyumengiz!\n\nISHKOP orqali ish toping 🚀",
+        )
+
+    except Exception as e:
+        logger.error(f"CV generation error: {e}")
+        await status.edit_text("❌ Rezyume yaratishda xatolik. Qayta urinib ko'ring.")

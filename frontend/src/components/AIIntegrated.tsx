@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { aiService, aiAgentSearch, AgentSearchResult } from "../services/aiService.ts";
+import { mainApi } from "../services/api.ts";
 import { headhunterService, HHVacancy } from "../services/headhunterService.ts";
 import { UserRole } from "../types.ts";
 
@@ -196,6 +197,32 @@ export const AIWriterSection: React.FC<AIWriterProps> = ({ type, onGenerated, us
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Pre-fill form from saved bot profile (info user shared with bot)
+  useEffect(() => {
+    if (type !== "resume" || profileLoaded) return;
+    const token = localStorage.getItem("auth_token");
+    fetch(`${mainApi}/api/v1/ai/my-profile`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.json())
+      .then((p) => {
+        if (p?.has_profile) {
+          const fill: any = {};
+          if (p.first_name) fill.first_name = p.first_name;
+          if (p.last_name) fill.last_name = p.last_name;
+          if (p.age) fill.age = p.age;
+          if (p.gender) fill.gender = p.gender;
+          if (p.phone) fill.phone = p.phone;
+          if (p.experience_years != null) fill.experience = p.experience_years;
+          if (p.about) fill.description = p.about;
+          if (Object.keys(fill).length > 0) onGenerated(fill);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setProfileLoaded(true));
+  }, [type, profileLoaded]);
 
   const handleGenerate = async () => {
     if (!text.trim()) return;
