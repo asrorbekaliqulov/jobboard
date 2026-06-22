@@ -138,3 +138,19 @@ def generate_resume_pdf(data: dict) -> Optional[BytesIO]:
     except Exception as e:
         logger.error(f"PDF generation failed: {e}")
         return None
+
+
+
+def extract_pdf_text(file_bytes: bytes) -> str:
+    """Extract text content from a PDF file."""
+    try:
+        from pypdf import PdfReader
+        from io import BytesIO as _BytesIO
+        reader = PdfReader(_BytesIO(file_bytes))
+        text_parts = []
+        for page in reader.pages[:5]:  # max 5 pages
+            text_parts.append(page.extract_text() or "")
+        return "\n".join(text_parts).strip()
+    except Exception as e:
+        logger.error(f"PDF text extraction failed: {e}")
+        return ""
