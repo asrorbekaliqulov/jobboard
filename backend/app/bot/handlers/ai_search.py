@@ -741,16 +741,9 @@ async def handle_voice_message(message: types.Message, i18n: I18nContext):
         voice_data.seek(0)
         voice_data.name = "voice.ogg"
 
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-        # gpt-4o-mini-transcribe doesn't accept 'uz' language code,
-        # so we hint the language via the prompt instead (auto-detect)
-        transcription = await client.audio.transcriptions.create(
-            model=settings.OPENAI_TRANSCRIBE_MODEL,
-            file=voice_data,
-            prompt="Bu O'zbek tilidagi ish qidirish so'rovi. Iltimos o'zbek tilida transkripsiya qil. Kasb va vakansiya haqida.",
-        )
-
-        text = transcription.text.strip()
+        # O'zbek tiliga moslangan, kuchaytirilgan transkripsiya (ai_core)
+        from app.services.ai_core import transcribe_audio
+        text = await transcribe_audio(voice_data)
         if not text:
             await status_msg.edit_text("🎤 Ovozingizni tushunib bo'lmadi.")
             return

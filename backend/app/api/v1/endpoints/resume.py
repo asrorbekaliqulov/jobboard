@@ -91,7 +91,12 @@ async def create_resume(
     """
     Create a new resume.
     """
-    return await ResumeService.create(db, resume_in, user_id=current_user.id)
+    resume = await ResumeService.create(db, resume_in, user_id=current_user.id)
+    # Rezyume ma'lumotlarini JIMGINA bot profiliga ham saqlaymiz (AI uchun).
+    # Bu asosiy oqimni hech qachon buzmaydi (ichida try/except bor).
+    from app.services.bot_profile_sync import sync_resume_to_bot_profile
+    await sync_resume_to_bot_profile(db, resume)
+    return resume
 
 @router.get("/{resume_id}", response_model=ResumeRead)
 async def get_resume(

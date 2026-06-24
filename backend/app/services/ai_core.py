@@ -279,3 +279,60 @@ def parse_ai_json(response: str) -> dict:
             return json.loads(response[start:end])
         
         raise ValueError(f"AI javobini JSON formatga o'girib bo'lmadi: {response[:200]}")
+
+
+
+# Ovozni matnga aylantirish uchun kuchaytirilgan prompt.
+# Model o'zbekcha kasb/ish atamalarini to'g'ri tanishi uchun lug'at beramiz.
+TRANSCRIBE_PROMPT_UZ = (
+    "Bu O'zbek tilidagi ish qidirish yoki ishchi qidirish bo'yicha ovozli so'rov. "
+    "Standart adabiy o'zbek tilida, to'g'ri imloda transkripsiya qil. "
+    "Quyidagi atamalar uchraydi: vakansiya, ish, ish o'rni, ish beruvchi, ishchi, "
+    "hodim, lavozim, maosh, oylik, tajriba, ko'nikma, rezyume, oshpaz, ofitsiant, "
+    "haydovchi, sotuvchi, kassir, quruvchi, dasturchi, hisobchi, shifokor, hamshira, "
+    "o'qituvchi, menejer, administrator, kuryer, omborchi, usta, dizayner, "
+    "Toshkent, Samarqand, Buxoro, Andijon, Farg'ona, Namangan, masofaviy, ofis."
+)
+
+
+async def transcribe_audio(audio_file) -> str:
+    """
+    Ovozli faylni matnga aylantiradi (o'zbek tiliga moslangan).
+
+    - settings.OPENAI_TRANSCRIBE_MODEL ishlatiladi
+    - temperature=0 (eng aniq, barqaror natija)
+    - o'zbekcha kasb lug'ati bilan kuchaytirilgan prompt
+    - avval language="uz" bilan urinadi, model qabul qilmasa promptning
+      o'zi bilan qayta urinadi (auto-detect).
+
+    audio_file: .name atributi bo'lgan fayl-ga o'xshash obyekt (BytesIO).
+    """
+    client = get_openai_client()
+    model = settings.OPENAI_TRANSCRIBE_MODEL
+    base_kwargs = {
+        "model": model,
+        "file": audio_file,
+        "prompt": TRANSCRIBE_PROMPT_UZ,
+        "temperature": 0,
+    }
+
+    # 1-urinish: language="uz" bilan (aniqlikni oshiradi)
+    try:
+        try:
+            audio_file.seek(0)
+        except Exception:
+            pass
+        transcription = await client.audio.transcriptions.create(
+            language="uz", **base_kwargs
+        )
+        return (transcription.text or "").strip()
+    except Exception as e:
+        logger.warning(f"Transcribe with language=uz failed, retrying without: {e}")
+
+    # 2-urinish: language siz (model 'uz' ni qo'llamasa)
+    try:
+        audio_file.seek(0)
+    except Exception:
+        pass
+    transcription = await client.audio.transcriptions.create(**base_kwargs)
+    return (transcription.text or "").strip()

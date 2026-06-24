@@ -507,24 +507,17 @@ async def ai_voice_transcribe(
     """
     _check_ai_enabled()
     try:
-        from openai import AsyncOpenAI
         from io import BytesIO
-
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        from app.services.ai_core import transcribe_audio
 
         # Read uploaded file
         content = await file.read()
         audio_file = BytesIO(content)
         audio_file.name = file.filename or "voice.webm"
 
-        # Transcribe with gpt-4o-mini-transcribe (better Uzbek support)
-        transcription = await client.audio.transcriptions.create(
-            model=settings.OPENAI_TRANSCRIBE_MODEL,
-            file=audio_file,
-            prompt="Bu O'zbek tilidagi ish qidirish so'rovi. Iltimos o'zbek tilida transkripsiya qil.",
-        )
-
-        return {"text": transcription.text.strip()}
+        # O'zbek tiliga moslangan kuchaytirilgan transkripsiya
+        text = await transcribe_audio(audio_file)
+        return {"text": text}
 
     except Exception as e:
         logger.error(f"Voice transcription error: {e}")
