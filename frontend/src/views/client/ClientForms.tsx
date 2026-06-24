@@ -11,7 +11,6 @@ import { regionService } from "../../services/regionService.ts";
 import { resumeService } from "../../services/resumeService.ts";
 import { vacancyService } from "../../services/vacancyService.ts";
 import { worksService } from "../../services/worksService.ts";
-import { AIWriterSection } from "../../components/AIIntegrated.tsx";
 
 interface ClientFormProps {
   type: "vacancy" | "resume";
@@ -462,17 +461,6 @@ export const ClientItemForm: React.FC<ClientFormProps> = ({
       </nav>
 
       <div className="p-4 max-w-2xl mx-auto w-full space-y-10">
-        {/* AI Writer Section - at top of form */}
-        {!initialData?.id && (
-          <AIWriterSection 
-            type={type} 
-            userRole={userRole}
-            onGenerated={(data) => {
-              setFormData((prev: any) => ({ ...prev, ...data }));
-            }} 
-          />
-        )}
-
         <div className="space-y-8">
           <BasicInfoSection
             type={type}
