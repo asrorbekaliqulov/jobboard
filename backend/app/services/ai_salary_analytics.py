@@ -28,6 +28,47 @@ class AISalaryAnalyticsService:
     """Provides salary analytics based ONLY on real database data."""
 
     @staticmethod
+    async def _get_related_profession_ids(
+        db: AsyncSession, profession: Profession
+    ) -> list[int]:
+        """
+        Yaqin kasblarning id larini topadi (maosh namunasini ko'paytirish uchun).
+        Tartib: bir xil parent ostidagi aka-uka kasblar + bolalari,
+        bo'lmasa bir xil kategoriyadagi kasblar.
+        Har doim asosiy kasbning o'zi ham ro'yxatda bo'ladi.
+        """
+        ids: set[int] = {profession.id}
+
+        # 1) Parent/child ierarxiyasi bo'yicha aka-uka kasblar
+        # parent_id mavjud bo'lsa -> bir xil parent ostidagilar; aks holda o'zining bolalari
+        anchor_parent = profession.parent_id or profession.id
+        try:
+            sib_result = await db.execute(
+                select(Profession.id).where(
+                    (Profession.parent_id == anchor_parent)
+                    | (Profession.id == anchor_parent)
+                    | (Profession.parent_id == profession.id)
+                )
+            )
+            ids.update(r[0] for r in sib_result.all())
+        except Exception as e:  # pragma: no cover
+            logger.warning(f"Sibling lookup by parent failed: {e}")
+
+        # 2) Hali ham kam bo'lsa, bir xil kategoriyadagi kasblar
+        if profession.category_id:
+            try:
+                cat_result = await db.execute(
+                    select(Profession.id).where(
+                        Profession.category_id == profession.category_id
+                    )
+                )
+                ids.update(r[0] for r in cat_result.all())
+            except Exception as e:  # pragma: no cover
+                logger.warning(f"Sibling lookup by category failed: {e}")
+
+        return list(ids)
+
+    @staticmethod
     async def get_analytics(
         db: AsyncSession, request: AISalaryAnalyticsRequest
     ) -> AISalaryAnalyticsResponse:
@@ -64,30 +105,56 @@ class AISalaryAnalyticsService:
             if region:
                 region_name = region.name_uz
 
-        # Step 3: Query REAL salary data from database
-        salary_query = select(
-            func.min(Vacancy.salary_from).label("min_salary"),
-            func.max(Vacancy.salary_till).label("max_salary"),
-            func.avg(Vacancy.salary_from).label("avg_salary_from"),
-            func.avg(Vacancy.salary_till).label("avg_salary_till"),
-            func.count(Vacancy.id).label("sample_count"),
-        ).where(
-            Vacancy.status == VacancyStatus.ACTIVE,
-            Vacancy.profession_id == profession.id,
-            Vacancy.salary_from.isnot(None),
-        )
+        # Step 3: Query REAL salary data from database.
+        # MUHIM: kamida 20 ta vakansiyaga qarashga harakat qilamiz.
+        # Agar aniq kasb bo'yicha 20 tadan kam bo'lsa, bir xil
+        # kategoriya/parent ostidagi yaqin kasblarni ham qo'shamiz.
+        MIN_SAMPLES = 20
 
-        if region:
-            salary_query = salary_query.where(Vacancy.region_id == region.id)
+        def _build_salary_query(profession_ids):
+            q = select(
+                func.min(Vacancy.salary_from).label("min_salary"),
+                func.max(Vacancy.salary_till).label("max_salary"),
+                func.avg(Vacancy.salary_from).label("avg_salary_from"),
+                func.avg(Vacancy.salary_till).label("avg_salary_till"),
+                func.count(Vacancy.id).label("sample_count"),
+            ).where(
+                Vacancy.status == VacancyStatus.ACTIVE,
+                Vacancy.salary_from.isnot(None),
+            )
+            if len(profession_ids) == 1:
+                q = q.where(Vacancy.profession_id == profession_ids[0])
+            else:
+                q = q.where(Vacancy.profession_id.in_(profession_ids))
+            if region:
+                q = q.where(Vacancy.region_id == region.id)
+            return q
 
-        result = await db.execute(salary_query)
+        # 3a: avval aniq kasb bo'yicha
+        result = await db.execute(_build_salary_query([profession.id]))
         row = result.first()
+        sample_count = int(row[4]) if row[4] else 0
+        broadened = False
+
+        # 3b: agar 20 tadan kam bo'lsa, yaqin kasblarni qo'shamiz
+        if sample_count < MIN_SAMPLES:
+            sibling_ids = await AISalaryAnalyticsService._get_related_profession_ids(
+                db, profession
+            )
+            if len(sibling_ids) > 1:
+                result = await db.execute(_build_salary_query(sibling_ids))
+                broadened_row = result.first()
+                broadened_count = int(broadened_row[4]) if broadened_row[4] else 0
+                # Faqat ko'proq namuna topilsa, kengaytirilgan natijani olamiz
+                if broadened_count > sample_count:
+                    row = broadened_row
+                    sample_count = broadened_count
+                    broadened = True
 
         min_salary = int(row[0]) if row[0] else 0
         max_salary = int(row[1]) if row[1] else 0
         avg_from = int(row[2]) if row[2] else 0
         avg_till = int(row[3]) if row[3] else 0
-        sample_count = int(row[4]) if row[4] else 0
 
         avg_salary = (avg_from + avg_till) // 2 if (avg_from and avg_till) else avg_from or avg_till
         median_salary = avg_salary
@@ -137,7 +204,9 @@ class AISalaryAnalyticsService:
             f"- Minimal maosh: {min_salary:,} so'm\n"
             f"- Maksimal maosh: {max_salary:,} so'm\n"
             f"- O'rtacha maosh: {avg_salary:,} so'm\n"
-            f"- Namuna soni: {sample_count} ta aktiv vakansiya\n"
+            f"- Namuna soni: {sample_count} ta aktiv vakansiya"
+            + (" (shu jumladan yaqin kasblar)" if broadened else "")
+            + "\n"
             f"- Foydalanuvchi tajribasi: {exp_display} yil\n"
             f"- Foydalanuvchi roli: {request.role}\n\n"
             "MUHIM: Faqat yuqoridagi raqamlar asosida maslahat ber!\n"
@@ -187,7 +256,10 @@ class AISalaryAnalyticsService:
         except Exception:
             await db.rollback()
 
-        data_freshness = f"Bazadagi {sample_count} ta aktiv vakansiya asosida hisoblandi"
+        data_freshness = (
+            f"Bazadagi {sample_count} ta aktiv vakansiya asosida hisoblandi"
+            + (" (yaqin kasblar ham hisobga olindi)" if broadened else "")
+        )
 
         return AISalaryAnalyticsResponse(
             profession_name=profession.name_uz,
