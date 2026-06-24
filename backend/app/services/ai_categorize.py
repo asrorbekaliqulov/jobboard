@@ -38,9 +38,10 @@ class AICategorizeService:
         if not all_profs:
             return {"groups": [], "error": "Kasblar topilmadi"}
 
-        # Prepare data for AI
+        # Prepare data for AI (id + names are enough to group; parent_id omitted
+        # to keep the payload small and leave more room for the response).
         profs_data = [
-            {"id": p.id, "name_uz": p.name_uz, "name_ru": p.name_ru, "parent_id": p.parent_id}
+            {"id": p.id, "name_uz": p.name_uz, "name_ru": p.name_ru}
             for p in all_profs
         ]
 
@@ -56,25 +57,41 @@ class AICategorizeService:
             "5. Hech qanday kasbni o'chirmang, faqat guruhlang\n\n"
             "MUHIM QOIDALAR:\n"
             "- BARCHA kasblarni guruhlang! Birontasini ham tashlab ketmang!\n"
+            "- HAR BIR kasb 'id' si javobda AYNAN BIR MARTA bo'lishi shart "
+            "(takrorlanmasin va tushib qolmasin).\n"
             "- Har bir kasb faqat BITTA guruhga tegishli bo'lishi kerak\n"
-            "- 'Boshqa' guruhida MAKSIMUM 2 ta kasb bo'lishi mumkin!\n"
-            "- Agar kasb nomi 'menejer' so'zini o'z ichiga olsa → 'Boshqaruv va Menejment' guruhiga\n"
-            "- Agar kasb nomi 'yordamchi' yoki 'assistenti' so'zini o'z ichiga olsa → 'Yordamchi xodimlar' guruhiga\n"
-            "- Agar kasb nomi 'operator' so'zini o'z ichiga olsa → 'Operatorlar' guruhiga\n"
-            "- Tibbiyot (shifokor, hamshira, stomatolog...) — alohida guruh\n"
-            "- Ta'lim (o'qituvchi, tutor, murabbiy...) — alohida guruh\n"
-            "- IT va Dasturlash (dasturchi, developer...) — alohida guruh\n"
-            "- Dizayn (dizayner, landshaft...) — alohida guruh\n"
-            "- Huquq (yurist, advokat, notarius...) — alohida guruh\n"
-            "- Moliya (buxgalter, iqtisodchi...) — alohida guruh\n"
-            "- Logistika va Transport (haydovchi, yuk tashish...) — alohida guruh\n"
-            "- Savdo (sotuvchi, kassir...) — alohida guruh\n"
-            "- Marketing (SMM, reklama...) — alohida guruh\n"
-            "- Oshxona (oshpaz, ofitsiant...) — alohida guruh\n"
-            "- Qurilish (quruvchi, montajchi...) — alohida guruh\n"
-            "- Tozalash va xo'jalik — alohida guruh\n"
-            "- Xavfsizlik (qorovul, security...) — alohida guruh\n"
-            "- Kamida 18-25 ta guruh yarating!\n"
+            "- 'Boshqa' guruhida MAKSIMUM 2 ta kasb bo'lishi mumkin!\n\n"
+            "TAVSIYA ETILGAN ASOSIY KATEGORIYALAR (parent).\n"
+            "Iloji boricha kasblarni AYNAN shu kategoriyalarga moslab joylashtir. "
+            "Faqat hech qaysi biriga to'g'ri kelmasa, yangi mantiqiy parent qo'sh:\n"
+            "1. IT va Dasturlash / IT и Программирование / IT & Programming "
+            "(dasturchi, developer, tizim administratori, dba)\n"
+            "2. Muhandislik / Инженерия / Engineering (injener, konstruktor, montajchi)\n"
+            "3. Analitika / Аналитика / Analytics (analitik, data analyst)\n"
+            "4. Dizayn / Дизайн / Design (dizayner, verstalshchik, UX/UI)\n"
+            "5. Marketing va Reklama / Маркетинг и Реклама / Marketing "
+            "(SMM, kopirayter, merchandiser, reklama)\n"
+            "6. Menejment va Savdo / Менеджмент и Продажи / Management & Sales "
+            "(menejer, sotuvchi, kassir, sotuv menejeri)\n"
+            "7. Boshqaruv / Руководство / Executive (direktor, rahbar, restoran direktori)\n"
+            "8. Buxgalteriya va Moliya / Бухгалтерия и Финансы / Accounting & Finance "
+            "(buxgalter, iqtisodchi, moliyachi)\n"
+            "9. Huquq / Юриспруденция / Legal (yurist, advokat, notarius)\n"
+            "10. Tibbiyot / Медицина / Medicine (shifokor, hamshira, stomatolog)\n"
+            "11. Ta'lim / Образование / Education (o'qituvchi, tutor, murabbiy)\n"
+            "12. Transport va Logistika / Транспорт и Логистика / Transport & Logistics "
+            "(haydovchi, kuryer, omborchi, logist)\n"
+            "13. Oshxona va Restoran / Общепит / Food Service (oshpaz, ofitsiant, bariste)\n"
+            "14. Qurilish / Строительство / Construction (quruvchi, suvoqchi, montajchi)\n"
+            "15. Administratorlar / Администраторы / Administration (administrator)\n"
+            "16. Operatorlar / Операторы / Operators (har xil operatorlar)\n"
+            "17. Xavfsizlik / Безопасность / Security (qorovul, soqchi, security)\n"
+            "18. Tozalash va Xizmat / Уборка и Сервис / Cleaning & Service (tozalovchi, farrosh)\n"
+            "19. Yordamchi xodimlar / Помощники / Assistants (yordamchi, assistent)\n\n"
+            "QO'SHIMCHA QOIDALAR:\n"
+            "- Agar kasb nomida 'menejer' bo'lsa → 'Menejment va Savdo'\n"
+            "- Agar kasb nomida 'operator' bo'lsa → 'Operatorlar'\n"
+            "- Agar kasb nomida 'yordamchi' yoki 'assistent' bo'lsa → 'Yordamchi xodimlar'\n"
             "- Parent nomi guruhni aniq ifodalashi kerak\n\n"
             "Javob formati:\n"
             "{\n"
@@ -95,7 +112,8 @@ class AICategorizeService:
                 feature="career_advisor",
                 user_message=prompt,
                 temperature=0.2,
-                max_tokens=4000,
+                max_tokens=16000,
+                response_format="json",
             )
             result_data = parse_ai_json(ai_response)
         except Exception as e:

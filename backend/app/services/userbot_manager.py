@@ -16,9 +16,10 @@ import asyncio
 import io
 import logging
 import random
+from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -43,6 +44,11 @@ MIN_DELAY_BETWEEN_CHANNELS = 4.0   # seconds
 MIN_DELAY_BETWEEN_MESSAGES = 1.2   # seconds
 # Never flood-wait the worker too long; if Telegram asks for more, skip.
 MAX_FLOOD_WAIT_SECONDS = 60
+
+# Maximum vacancies imported from a SINGLE channel within one calendar day
+# (UTC). Applies across both the real-time listener and the polling backstop,
+# since the count is derived from the vacancies table itself.
+DAILY_CHANNEL_LIMIT = 50
 
 
 async def _human_pause(base: float):
@@ -278,6 +284,91 @@ async def _ensure_channel_photo(client, entity, channel: UserbotChannel, db: Asy
         return None
 
 
+async def _download_post_image(client, message, channel_id: int) -> Optional[str]:
+    """Download an image attached to a channel post and return its stored URL.
+
+    Returns None if the post has no image (e.g. plain text, video, or document
+    that is not an image). Videos and non-image files are intentionally ignored.
+    """
+    try:
+        content_type = "image/jpeg"
+        ext = "jpg"
+        has_image = False
+
+        # Standard Telegram photo
+        if getattr(message, "photo", None):
+            has_image = True
+        else:
+            # Image sent as a document (e.g. image/png)
+            media = getattr(message, "media", None)
+            doc = getattr(media, "document", None) if media else None
+            mime = getattr(doc, "mime_type", "") if doc else ""
+            if mime and mime.startswith("image/"):
+                has_image = True
+                content_type = mime
+                ext = (mime.split("/")[-1] or "jpg").split(";")[0]
+
+        if not has_image:
+            return None
+
+        buf = io.BytesIO()
+        result = await client.download_media(message, file=buf)
+        if result is None:
+            return None
+        buf.seek(0)
+        if buf.getbuffer().nbytes == 0:
+            return None
+
+        return upload_file(
+            buf,
+            "userbot",
+            f"post_{channel_id}_{getattr(message, 'id', 0)}.{ext}",
+            content_type=content_type,
+        )
+    except Exception as e:
+        logger.warning(f"Post image download failed: {e}")
+        return None
+
+
+def _channel_url_prefix(channel: UserbotChannel, entity) -> str:
+    """The shared prefix of all post URLs for a channel (used for daily counts).
+
+    Mirrors _build_post_url so the prefix matches the source_url stored on
+    imported vacancies.
+    """
+    username = getattr(entity, "username", None) or channel.channel_username
+    if username:
+        return f"https://t.me/{username}/"
+    cid = abs(getattr(entity, "id", 0))
+    return f"https://t.me/c/{cid}/"
+
+
+async def _today_import_count(db: AsyncSession, url_prefix: str) -> int:
+    """Count channel vacancies imported TODAY (UTC) for the given URL prefix.
+
+    Reads straight from the vacancies table, so it transparently covers both
+    the real-time listener and the polling backstop. Returns 0 on any error so
+    importing is never blocked by a counting failure.
+    """
+    if not url_prefix:
+        return 0
+    try:
+        start_of_day = datetime.now(timezone.utc).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        result = await db.execute(
+            select(func.count(Vacancy.id)).where(
+                Vacancy.source_type == "channel",
+                Vacancy.source_url.like(f"{url_prefix}%"),
+                Vacancy.created_at >= start_of_day,
+            )
+        )
+        return int(result.scalar_one() or 0)
+    except Exception as e:
+        logger.warning(f"Daily import count failed for {url_prefix}: {e}")
+        return 0
+
+
 # ----------------------------------------------------------------------------
 # Polling
 # ----------------------------------------------------------------------------
@@ -324,8 +415,17 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                 channel.channel_username = getattr(entity, "username", None)
             photo_url = await _ensure_channel_photo(client, entity, channel, db)
 
+            # Daily per-channel cap (shared with the real-time listener).
+            url_prefix = _channel_url_prefix(channel, entity)
+            remaining_today = DAILY_CHANNEL_LIMIT - await _today_import_count(db, url_prefix)
+            if remaining_today <= 0:
+                logger.info(
+                    "Channel %s reached daily limit (%s); skipping until tomorrow.",
+                    channel.id, DAILY_CHANNEL_LIMIT,
+                )
+                continue
+
             min_id = channel.last_message_id or 0
-            new_max_id = min_id
             collected = []
             try:
                 async for msg in client.iter_messages(entity, limit=max_per_channel):
@@ -334,9 +434,7 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                     text = msg.message or ""
                     if not text:
                         continue
-                    collected.append((msg.id, text))
-                    if msg.id > new_max_id:
-                        new_max_id = msg.id
+                    collected.append((msg.id, text, msg))
             except FloodWaitError as fw:
                 logger.warning(f"FloodWait {fw.seconds}s on iter_messages; pausing account {account.id}.")
                 account.last_error = f"FloodWait {fw.seconds}s (kutilmoqda)"
@@ -346,13 +444,20 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                 logger.warning(f"iter_messages failed for {channel.channel_identifier}: {e}")
                 continue
 
-            # Process oldest -> newest, pacing AI calls
-            for msg_id, text in reversed(collected):
+            # Process oldest -> newest, pacing AI calls. Advance the pointer only
+            # up to the last message we actually handled, so that messages left
+            # unprocessed by the daily cap are picked up on a later poll.
+            last_done_id = min_id
+            for msg_id, text, msg in reversed(collected):
+                last_done_id = msg_id
                 if not _match_keywords(text, channel.keywords):
                     continue
                 parsed = await parser.parse_channel_post(text)
                 if not parsed:
                     continue
+                # Prefer the post's own image; fall back to the channel photo.
+                post_image = await _download_post_image(client, msg, channel.id)
+                image_url = post_image or photo_url
                 post_url = _build_post_url(channel, entity, msg_id)
                 created = await _save_vacancy(
                     db,
@@ -360,16 +465,23 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                     system_user_id=system_user_id,
                     post_url=post_url,
                     channel_title=channel.channel_title or channel.channel_identifier,
-                    image_url=photo_url,
+                    image_url=image_url,
                     contact_telegram=channel.channel_username,
                 )
                 if created:
                     imported += 1
+                    remaining_today -= 1
                     channel.imported_count = (channel.imported_count or 0) + 1
+                    if remaining_today <= 0:
+                        logger.info(
+                            "Channel %s hit daily limit (%s) during poll.",
+                            channel.id, DAILY_CHANNEL_LIMIT,
+                        )
+                        break
                 await _human_pause(MIN_DELAY_BETWEEN_MESSAGES)
 
-            if new_max_id > (channel.last_message_id or 0):
-                channel.last_message_id = new_max_id
+            if last_done_id > (channel.last_message_id or 0):
+                channel.last_message_id = last_done_id
             await db.commit()
 
         account.last_error = None

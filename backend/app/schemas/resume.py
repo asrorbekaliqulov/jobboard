@@ -1,10 +1,22 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 from datetime import datetime
 from app.models.resume import ResumeStatus, Gender
 from app.schemas.profession import ProfessionRead
 from app.schemas.location import RegionRead
 from app.schemas.user import UserRead
+
+
+def _empty_str_to_none(value):
+    """Treat empty/whitespace strings as None.
+
+    Legacy DB rows store email as "" (empty string) instead of NULL. Without this,
+    serializing such a row into an EmailStr field raises a Pydantic validation
+    error (HTTP 500), which the Mini App surfaces as "topilmadi".
+    """
+    if isinstance(value, str) and not value.strip():
+        return None
+    return value
 
 
 class ResumeBase(BaseModel):
@@ -23,6 +35,8 @@ class ResumeBase(BaseModel):
     portfolio: Optional[str] = None
     video: Optional[str] = None
     status: ResumeStatus = ResumeStatus.DRAFT
+
+    _normalize_email = field_validator("email", mode="before")(_empty_str_to_none)
 
 
 class ResumeCreate(ResumeBase):
@@ -45,6 +59,8 @@ class ResumeUpdate(BaseModel):
     portfolio: Optional[str] = None
     video: Optional[str] = None
     status: Optional[ResumeStatus] = None
+
+    _normalize_email = field_validator("email", mode="before")(_empty_str_to_none)
 
 
 class ResumeRead(ResumeBase):
