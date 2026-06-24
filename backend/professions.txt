@@ -1,0 +1,188 @@
+ id  |                       name_uz                       | parent_id | category_id 
+-----+-----------------------------------------------------+-----------+-------------
+ 135 | Klinik laboratoriya diagnostikasi shifokori         |       574 |           6
+ 136 | Umumiy amaliyot shifokori                           |       574 |           6
+ 137 | Ultratovush diagnostikasi shifokori                 |       574 |           6
+ 140 | Anesteziolog-reanimatolog                           |       574 |           6
+ 145 | Metodist shifokor/Tibbiy statistik                  |       574 |           6
+ 146 | Onkolog                                             |       574 |           6
+ 147 | Otorinolaringolog (LOR)                             |       574 |           6
+ 148 | Oftalmolog                                          |       574 |           6
+ 150 | Psixiatr                                            |       574 |           6
+ 151 | Rentgenolog                                         |       574 |           6
+ 153 | Travmatolog-ortoped                                 |       574 |           6
+ 154 | Fizioterapevt                                       |       574 |           6
+ 156 | Endokrinolog                                        |       574 |           6
+ 390 | Kardiolog                                           |       574 |           6
+ 394 | Urolog                                              |       574 |           6
+ 356 | O'qituvchi                                          |       575 |          21
+ 363 | Ta'lim muassasasi direktori/O'quv jarayoni mudiri   |       575 |           9
+  17 | Grafik dizayner                                     |       576 |           7
+  18 | Dizayner-sahifalo'vchi                              |       576 |           8
+  20 | Moushn-dizayner                                     |       576 |           7
+  21 | Taqdimot dizayneri                                  |       576 |           7
+  22 | Interyer dizayneri                                  |       576 |           7
+  23 | Veb-dizayner                                        |       576 |           7
+  24 | UX/UI dizayneri                                     |       576 |           7
+ 103 | Mebel dizayneri                                     |       576 |           7
+ 104 | Kiyim dizayneri                                     |       576 |           7
+ 106 | Kommunikatsiya dizayneri                            |       576 |           7
+ 107 | Sanoat dizayneri                                    |       576 |           7
+ 302 | Yuriskonsult                                        |       583 |          22
+ 303 | Yurist                                              |       583 |          22
+ 304 | Notarius yordamchisi                                |       583 |          20
+ 502 | Sud ijrochisi                                       |       583 |          22
+ 200 | Haydovchi                                           |       584 |           5
+ 227 | Kuryer                                              |       584 |           5
+ 367 | Logistika menejeri                                  |       584 |          13
+ 368 | Transport logistikasi menejeri                      |       584 |          13
+ 371 | Logistika direktori                                 |       584 |           9
+ 378 | Yuklovchi                                           |       584 |          11
+ 472 | Ekspeditor                                          |       584 |           5
+ 584 | Transport va Yuk tashish                            |           |            
+ 431 | Tozalovchi                                          |       586 |          23
+ 586 | Tozalash                                            |           |            
+ 596 | Tozalash va xo'jalik                                |       586 |            
+ 587 | Boshqa                                              |           |            
+ 590 | Boshqa xizmatlar                                    |       587 |            
+   2 | 1C tahlilchisi                                      |       588 |           3
+   3 | Biznes tahlilchi                                    |       588 |           3
+   4 | Mahsulot tahlilchisi                                |       588 |           3
+   5 | BI tahlilchi                                        |       588 |           3
+   6 | Ma'lumotlar tahlilchisi                             |       588 |           3
+   8 | Tizim tahlilchisi                                   |       588 |           3
+  10 | Veb-tahlilchi                                       |       588 |           3
+  15 | O'yin dizayneri                                     |       588 |           7
+  57 | Dasturchi-muhandis                                  |       588 |          10
+  61 | Ma'lumotlar bazasi administratori                   |       588 |           1
+  65 | Tarmoq administratori                               |       588 |           1
+  70 | Linux tizim administratori                          |       588 |           1
+ 109 | Sotuv tahlilchisi                                   |       588 |           3
+ 138 | Funksional diagnostika shifokori                    |       588 |           6
+ 261 | Kredit tahlilchisi                                  |       588 |           3
+ 263 | Investitsiya tahlilchisi                            |       588 |           3
+ 391 | Nevrolog                                            |       588 |           6
+  87 | Boshlang'ich hujjatlar bo'yicha buxgalter           |       589 |           4
+  88 | TMZ hisobi bo'yicha buxgalter                       |       589 |           4
+  89 | Bosh buxgalter                                      |       589 |           4
+ 112 | Moliyaviy tahlilchi                                 |       589 |           3
+ 309 | Buxgalter                                           |       589 |          19
+ 310 | Ish haqi hisob-kitobi bo'yicha buxgalter            |       589 |           4
+ 311 | Buxgalter-kassir                                    |       589 |           4
+ 313 | Bank-mijoz bo'yicha buxgalter                       |       589 |           4
+ 314 | Iqtisodchi                                          |       589 |          19
+ 579 | Buxgalteriya                                        |       589 |            
+  16 | Narrativ dizayner                                   |       590 |           7
+  62 | Servis muhandisi                                    |       590 |          10
+  67 | Tizim administratori                                |       590 |           1
+  76 | Kopirayter                                          |       590 |          12
+  77 | DWH tahlilchisi                                     |       590 |           3
+  78 | Axborot texnologiyalari direktori (CIO)             |       590 |           9
+  93 | Komplektlovchi                                      |       590 |          23
+  94 | Omborchi                                            |       590 |          11
+ 101 | Poligrafiya dizayneri                               |       590 |           7
+ 105 | Dizayner-dekorator                                  |       590 |           7
+ 113 | Tahlil bo'limi rahbari                              |       590 |           3
+ 116 | HR tahlilchi                                        |       590 |           3
+ 139 | Akusher-ginekolog                                   |       590 |           6
+ 152 | Terapevt                                            |       590 |           6
+ 155 | Xirurg                                              |       590 |           6
+ 163 | Kadrlar ish yuritish menejeri                       |       590 |          13
+ 166 | Xodimlarni tanlash menejeri                         |       590 |          13
+ 168 | Merchandayzer                                       |       590 |          14
+ 194 | Arxitektor-dizayner                                 |       590 |           7
+ 203 | Sifat bo'yicha direktor                             |       590 |           9
+ 230 | Landshaft me'mori                                   |       590 |           7
+ 238 | Ishlab chiqarish direktori / Texnik direktor        |       590 |           9
+ 257 | Administrator                                       |       590 |           1
+ 279 | PR direktori                                        |       590 |           9
+ 285 | Hamkorlar bilan ishlash menejeri                    |       590 |          13
+ 286 | Chakana savdo tarmog'i direktori                    |       590 |           9
+ 287 | Turizm menejeri                                     |       590 |          13
+ 298 | Do'kon direktori                                    |       590 |           9
+ 299 | Do'kon administratori                               |       590 |           1
+ 369 | Tashqi iqtisodiy faoliyat menejeri                  |       590 |          13
+ 385 | Tibbiyot markazi direktori                          |       590 |           9
+ 432 | Restoran menejeri                                   |       590 |          13
+ 433 | Restoran direktori                                  |       590 |           9
+ 481 | Ishlab chiqarish liniyasi operatori                 |       590 |          16
+ 484 | CHPU dastgohlari operatori                          |       590 |          16
+ 491 | Badiiy direktor                                     |       590 |           9
+ 495 | Filial direktori                                    |       590 |           9
+ 507 | OUPDS bo'yicha sud ijrochisi                        |       590 |          22
+ 562 | Mahsulot direktori                                  |       590 |           9
+ 574 | Tibbiyot                                            |       590 |            
+ 575 | Ta'lim                                              |       590 |            
+ 576 | Dizayn                                              |       590 |            
+ 578 | Muhandislik                                         |       590 |            
+ 581 | Logistika                                           |       590 |            
+ 582 | Xizmat ko'rsatish                                   |       590 |            
+ 583 | Yuridik                                             |       590 |            
+ 585 | Ishlab chiqarish                                    |       590 |            
+ 588 | IT va Dasturlash                                    |       590 |            
+ 589 | Moliya                                              |       590 |            
+ 592 | Savdo                                               |       590 |            
+ 597 | Xavfsizlik                                          |       590 |            
+ 598 | Yordamchi xodimlar                                  |       590 |            
+  59 | Loyiha administratori                               |       591 |           1
+  74 | Texnik direktor (CTO)                               |       591 |           9
+ 119 | Ichki kommunikatsiyalar menejeri                    |       591 |          13
+ 165 | Xodimlar bo'yicha menejer                           |       591 |          13
+ 182 | Xodimlarni o'qitish va rivojlantirish menejeri      |       591 |          13
+ 189 | Xodimlar bo'yicha direktor (HRD)                    |       591 |           9
+ 323 | Moliyaviy direktor (CFO)                            |       591 |           9
+ 348 | Tijorat direktori (CCO)                             |       591 |           9
+ 372 | Xaridlar va ta'minot menejeri                       |       591 |          13
+ 493 | Operatsion direktor (COO)                           |       591 |           9
+ 494 | Ijrochi direktor (CEO)                              |       591 |           9
+ 577 | Menejment                                           |       591 |            
+  29 | Marketpleys menejeri                                |       592 |          13
+  35 | Mahsulot menejeri                                   |       592 |          13
+ 122 | Sotuv menejeri                                      |       592 |          13
+ 123 | Mijozlar bilan ishlash menejeri                     |       592 |          13
+ 164 | Ulgurji savdo menejeri                              |       592 |          13
+ 167 | Muhim mijozlar bilan ishlash menejeri               |       592 |          13
+ 233 | Sifat menejeri                                      |       592 |          13
+ 580 | Savdo va Marketing                                  |       592 |            
+ 591 | Boshqaruv va Menejment                              |       592 |            
+  25 | Marketing tahlilchisi                               |       593 |           3
+ 275 | Marketing direktori                                 |       593 |           9
+ 280 | Marketing va PR menejeri                            |       593 |          13
+ 593 | Marketing                                           |           |            
+ 197 | Barmen                                              |       594 |          17
+ 241 | Ofitsiant                                           |       594 |          17
+ 425 | Oshpaz yordamchisi                                  |       594 |          20
+ 594 | Oshxona                                             |           |            
+  95 | Yuklama sinovlari muhandisi                         |       595 |          10
+ 206 | Nazorat-o'lchov asboblari muhandisi                 |       595 |          10
+ 207 | PTO muhandisi                                       |       595 |          10
+ 209 | Bino va inshootlardan foydalanish muhandisi         |       595 |          10
+ 212 | Qurilish nazorati muhandisi                         |       595 |          10
+ 213 | Konstruktor-muhandis                                |       595 |          10
+ 215 | Mexanik-muhandis                                    |       595 |          10
+ 216 | Loyiha muhandisi                                    |       595 |          10
+ 217 | HVAC loyiha muhandisi                               |       595 |          10
+ 218 | Elektr ta'minoti tizimlari loyiha muhandisi         |       595 |          10
+ 219 | Kuchsiz oqim tizimlari loyiha muhandisi             |       595 |          10
+ 220 | Smeta muhandisi                                     |       595 |          10
+ 221 | Kimyogar-muhandis                                   |       595 |          10
+ 222 | Ekolog-muhandis                                     |       595 |          10
+ 223 | Elektronika muhandisi                               |       595 |          10
+ 440 | O'rmon xo'jaligi muhandisi                          |       595 |          10
+ 509 | Mehnat muhofazasi va xavfsizlik texnikasi muhandisi |       595 |          10
+ 558 | Temir yo'l muhandisi                                |       595 |          10
+ 573 | Montajchi                                           |       595 |          15
+ 595 | Qurilish                                            |           |            
+ 464 | Qo'riqchi                                           |       597 |          18
+ 259 | Rahbar yordamchisi/Assistenti                       |       598 |          20
+ 305 | Advokat yordamchisi                                 |       598 |          20
+  64 | EKM operatori/Ma'lumotlar bazasi operatori          |       599 |          16
+ 170 | Call-markaz operatori                               |       599 |          16
+ 449 | Operator-yoqilg'i quyuvchi                          |       599 |          16
+ 452 | Attraksion operatori                                |       599 |          16
+ 461 | Pochta aloqasi operatori                            |       599 |          16
+ 463 | Kimyoviy tozalash operatori                         |       599 |          16
+ 570 | Olovchi/Qozonxona operatori                         |       599 |          16
+ 599 | Operatorlar                                         |           |            
+(184 rows)
+

@@ -1,0 +1,27 @@
+ id |        name_uz        
+----+-----------------------
+  1 | Administrator
+  2 | Restoran direktori
+  3 | Analitik
+  4 | Buxgalter
+  5 | Haydovchi
+  6 | Shifokor
+  7 | Dizayner
+  8 | Dizayner-verstalschik
+  9 | Direktor
+ 10 | Injinеr
+ 11 | Omborchi
+ 12 | Kopirayter
+ 13 | Menejer
+ 14 | Merchandiser
+ 15 | Montajchi
+ 16 | Operator
+ 17 | Ofitsiant
+ 18 | Soqchi
+ 19 | Iqtisodchi
+ 20 | Yordamchi
+ 21 | O'qituvchi
+ 22 | Yurist
+ 23 | Tozalovchi
+(23 rows)
+
