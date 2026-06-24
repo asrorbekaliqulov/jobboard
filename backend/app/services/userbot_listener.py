@@ -74,13 +74,30 @@ async def _handle_new_message(event, chat_map: dict):
                     photo_url = None
 
             url = _post_url(info, event.chat_id, event.id)
+
+            # Daily per-channel cap (shared with the polling backstop). The count
+            # is read from the vacancies table, so both paths respect one limit.
+            url_prefix = url.rsplit("/", 1)[0] + "/"
+            if await mgr._today_import_count(db, url_prefix) >= mgr.DAILY_CHANNEL_LIMIT:
+                if event.id > (channel.last_message_id or 0):
+                    channel.last_message_id = event.id
+                await db.commit()
+                logger.info(
+                    f"Real-time: channel {channel.id} daily limit reached; skipping post."
+                )
+                return
+
+            # Prefer the post's own image; fall back to the channel profile photo.
+            post_image = await mgr._download_post_image(event.client, event.message, channel.id)
+            image_url = post_image or photo_url
+
             created = await mgr._save_vacancy(
                 db,
                 parsed,
                 system_user_id=system_user_id,
                 post_url=url,
                 channel_title=info.get("title") or channel.channel_identifier,
-                image_url=photo_url,
+                image_url=image_url,
                 contact_telegram=info.get("username"),
             )
             if event.id > (channel.last_message_id or 0):
