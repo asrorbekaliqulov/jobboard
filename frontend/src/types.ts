@@ -122,6 +122,11 @@ export interface Vacancy {
   created_at: string;
   updated_at: string;
 
+  // Set when imported by the userbot from a Telegram channel
+  source_type?: string | null;
+  source_url?: string | null;
+  source_channel?: string | null;
+
   // Optional relations if joined
   profession?: Profession;
   region?: Region;

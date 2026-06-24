@@ -9,6 +9,7 @@ from app.models.favourite import FavouriteVacancy, FavouriteResume, FavouriteDai
 from app.models.channel_message import ChannelMessage, ChannelMessageEntity
 from app.models.like import Like
 from app.models.bot_user_profile import BotUserProfile
+from app.models.userbot import UserbotAccount, UserbotChannel, UserbotStatus
 from app.models.ai_models import (
     EmployerTrustRating,
     EmployerReview,
@@ -45,6 +46,11 @@ __all__ = [
     "FavouriteDailyJobSeeker",
     "ChannelMessage",
     "ChannelMessageEntity",
+    "Like",
+    "BotUserProfile",
+    "UserbotAccount",
+    "UserbotChannel",
+    "UserbotStatus",
     # AI Models
     "EmployerTrustRating",
     "EmployerReview",

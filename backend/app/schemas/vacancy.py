@@ -59,7 +59,12 @@ class VacancyRead(VacancyBase):
     viewed_count: int
     created_at: datetime
     updated_at: datetime
-    
+
+    # Source info (set when imported by userbot from a Telegram channel)
+    source_type: Optional[str] = None
+    source_url: Optional[str] = None
+    source_channel: Optional[str] = None
+
     profession: Optional[ProfessionRead] = None
     region: Optional[RegionRead] = None
     user: Optional[UserRead] = None
