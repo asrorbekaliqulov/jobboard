@@ -30,6 +30,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _schedule_listener_reload():
+    """Reload real-time listeners in the background after config changes."""
+    import asyncio
+    try:
+        from app.services.userbot_listener import reload_listeners
+        asyncio.create_task(reload_listeners())
+    except Exception as e:
+        logger.warning(f"Could not schedule listener reload: {e}")
+
+
 async def _get_account(db: AsyncSession, account_id: int) -> UserbotAccount:
     result = await db.execute(
         select(UserbotAccount).where(UserbotAccount.id == account_id)
@@ -73,6 +83,7 @@ async def update_account(
     for field, value in data.items():
         setattr(account, field, value)
     await db.commit()
+    _schedule_listener_reload()
     return await _get_account(db, account_id)
 
 
@@ -81,6 +92,7 @@ async def delete_account(account_id: int, db: AsyncSession = Depends(get_db)):
     account = await _get_account(db, account_id)
     await db.delete(account)
     await db.commit()
+    _schedule_listener_reload()
     return {"detail": "deleted"}
 
 
@@ -105,6 +117,8 @@ async def verify_code(
     try:
         from app.services.userbot_manager import verify_login_code
         result = await verify_login_code(db, account, payload.code, payload.password)
+        if result.get("success"):
+            _schedule_listener_reload()
         return ActionResult(**result)
     except Exception as e:
         logger.error(f"verify-code failed: {e}")
@@ -154,6 +168,7 @@ async def add_channel(
     db.add(channel)
     await db.commit()
     await db.refresh(channel)
+    _schedule_listener_reload()
     return channel
 
 
@@ -172,6 +187,7 @@ async def update_channel(
         setattr(channel, field, value)
     await db.commit()
     await db.refresh(channel)
+    _schedule_listener_reload()
     return channel
 
 
@@ -185,4 +201,17 @@ async def delete_channel(channel_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Channel not found")
     await db.delete(channel)
     await db.commit()
+    _schedule_listener_reload()
     return {"detail": "deleted"}
+
+
+@router.post("/reload", response_model=ActionResult)
+async def reload_listeners_endpoint():
+    """Manually restart real-time channel listeners."""
+    try:
+        from app.services.userbot_listener import reload_listeners
+        await reload_listeners()
+        return ActionResult(success=True, status="ok", message="Listenerlar qayta ishga tushirildi.")
+    except Exception as e:
+        logger.error(f"reload listeners failed: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
