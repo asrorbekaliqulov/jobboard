@@ -11,6 +11,8 @@ aiogram<3.25.0
 aiogram-i18n[gettext]>=1.4.0
 redis>=5.0.1
 apscheduler>=3.10.4
+# Userbot (reads vacancy posts from Telegram channels)
+telethon>=1.36.0
 
 # Database & Migrations
 sqlalchemy[asyncio]<2.1.0

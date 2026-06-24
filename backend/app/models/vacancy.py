@@ -56,6 +56,12 @@ class Vacancy(Base, TimestampMixin):
     channel_id: Mapped[str | None] = mapped_column(String(255))
     message_id: Mapped[int | None] = mapped_column(Integer)
 
+    # Source tracking (for vacancies imported by the userbot from TG channels).
+    # All nullable/additive — normal user-created vacancies leave these empty.
+    source_type: Mapped[str | None] = mapped_column(String(32))  # e.g. "channel"
+    source_url: Mapped[str | None] = mapped_column(String(1000))  # original post link
+    source_channel: Mapped[str | None] = mapped_column(String(255))  # channel title/@username
+
     user: Mapped["User"] = relationship()
     profession: Mapped["Profession"] = relationship()
     region: Mapped["Region"] = relationship()

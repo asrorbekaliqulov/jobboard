@@ -5,6 +5,7 @@ import { SearchableSelect, Pagination, ConfirmModal } from '../../components/Sha
 import { adminApi } from '../../services/adminApi.ts';
 import { professionService } from '../../services/professionService.ts';
 import AICategorizePanel from '../../components/AICategorizePanel.tsx';
+import UserbotPanel from '../../components/UserbotPanel.tsx';
 import { regionService } from '../../services/regionService.ts';
 import { vacancyService } from '../../services/vacancyService.ts';
 import { resumeService } from '../../services/resumeService.ts';
@@ -55,7 +56,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     return `${dd}.${mm}.${yyyy} ${HH}:${MM}:${SS}`;
   };
 
-  const [activeTab, setActiveTab] = useState<'users' | 'vacancies' | 'resumes' | 'professions' | 'regions' | 'districts' | 'works'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'vacancies' | 'resumes' | 'professions' | 'regions' | 'districts' | 'works' | 'userbot'>('users');
   const [localUsers, setLocalUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [page, setPage] = useState(1);
@@ -265,7 +266,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           </h1>
           <div className="flex p-1 rounded-2xl border overflow-x-auto max-w-[800px]" 
                style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
-            {(['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works'] as const).map(t_tab => (
+            {(['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works', 'userbot'] as const).map(t_tab => (
               <button 
                 key={t_tab} 
                 onClick={() => { setActiveTab(t_tab); setPage(1); }} 
@@ -280,7 +281,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   borderColor: activeTab === t_tab ? 'var(--border-primary)' : 'transparent'
                 }}
               >
-                {t(`admin_panel.tabs.${t_tab}`)}
+                {t_tab === 'userbot' ? 'Userbot' : t(`admin_panel.tabs.${t_tab}`)}
               </button>
             ))}
           </div>
@@ -320,6 +321,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       </nav>
 
       <main className="p-4 flex-1 flex flex-col gap-8 max-w-[1400px] mx-auto w-full">
+        {activeTab === 'userbot' ? <UserbotPanel /> : (<>
         {/* Search & Filters */}
         <div className="flex flex-wrap gap-4 items-end bg-slate-50/50 px-4 py-6 rounded-[2.5rem] border border-slate-100">
           <div className="flex-1 min-w-[300px]">
@@ -669,6 +671,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             />
           </div>
         </div>
+        </>)}
       </main >
 
       <ConfirmModal

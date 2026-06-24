@@ -344,13 +344,23 @@ export const ClientVacancyExplorerCard: React.FC<{
                 <span className="text-xs font-bold text-slate-800">{vacancy.telegram}</span>
               </a>
             )}
+            {vacancy.source_url && (
+              <a href={vacancy.source_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-blue-50 transition-colors group">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                  <i className="fa-solid fa-up-right-from-square text-xs" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">Kanaldagi e'lonni ko'rish</span>
+              </a>
+            )}
           </div>
 
-          {/* Apply button - opens employer contact */}
+          {/* Apply button - opens channel post (if imported) or employer contact */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (vacancy.telegram) {
+              if (vacancy.source_url) {
+                window.open(vacancy.source_url, "_blank");
+              } else if (vacancy.telegram) {
                 const tg = vacancy.telegram.replace("@", "");
                 window.open(`https://t.me/${tg}`, "_blank");
               } else if (vacancy.phone) {

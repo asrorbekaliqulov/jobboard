@@ -109,6 +109,15 @@ SYSTEM_PROMPTS = {
         "Faqat real baholar asosida xulosa ber. "
         "Javobni JSON formatda ber."
     ),
+    "channel_parser": (
+        "Sen Telegram kanallaridagi e'lonlarni tahlil qiluvchi AI san. "
+        "Berilgan post ISH VAKANSIYASI (ishchi/hodim kerak) ekanligini aniqlaysan. "
+        "Agar post vakansiya bo'lsa, undan ma'lumotlarni ajratib JSON qaytarasan. "
+        "Agar post vakansiya BO'LMASA (reklama, yangilik, oddiy xabar, rezyume/ish "
+        "qidiruvchi), {\"is_vacancy\": false} qaytarasan. "
+        "Hech narsa o'ylab topma — faqat postda bor ma'lumotni ol. "
+        "Javobni faqat JSON formatda ber."
+    ),
 }
 
 

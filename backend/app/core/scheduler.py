@@ -126,6 +126,38 @@ async def run_views_boost_3h():
             logger.error(f"3-hour views boost failed: {e}", exc_info=True)
 
 
+async def run_userbot_poll_job():
+    """
+    Scheduled job: poll all active userbot accounts for new channel posts,
+    AI-parse them into vacancies, and save. Runs every 15 minutes.
+    Safe no-op if telethon is not installed or no accounts are configured.
+    """
+    logger.info("Starting userbot poll job...")
+    async with async_session_maker() as db:
+        try:
+            from app.services.userbot_manager import poll_all_accounts
+            imported = await poll_all_accounts(db)
+            logger.info("Userbot poll job done: imported %s vacancies.", imported)
+        except Exception as e:
+            logger.error(f"Userbot poll job failed: {e}", exc_info=True)
+
+
+async def run_channel_delivery_job():
+    """
+    Scheduled job: deliver recent channel-sourced vacancies to engaged users.
+    Runs twice a day (12:00 and 20:00).
+    """
+    logger.info("Starting channel delivery job...")
+    async with async_session_maker() as db:
+        try:
+            from app.bot.factory import bot
+            from app.services.userbot_delivery import run_channel_delivery
+            sent = await run_channel_delivery(db, bot)
+            logger.info("Channel delivery job done: %s messages sent.", sent)
+        except Exception as e:
+            logger.error(f"Channel delivery job failed: {e}", exc_info=True)
+
+
 def start_scheduler():
     """
     Starts the scheduler and adds the jobs.
@@ -167,7 +199,26 @@ def start_scheduler():
             id='views_boost_3h',
             replace_existing=True
         )
-        
+
+        # Userbot: poll Telegram channels for new vacancy posts (every 15 min)
+        scheduler.add_job(
+            run_userbot_poll_job,
+            'interval',
+            minutes=15,
+            id='userbot_poll',
+            replace_existing=True
+        )
+
+        # Userbot: deliver channel vacancies to users at 12:00 and 20:00
+        scheduler.add_job(
+            run_channel_delivery_job,
+            'cron',
+            hour='12,20',
+            minute=0,
+            id='channel_delivery',
+            replace_existing=True
+        )
+
         scheduler.start()
         logger.info("Scheduler started with recurring jobs.")
 
