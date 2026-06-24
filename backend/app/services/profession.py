@@ -29,17 +29,60 @@ class ProfessionService:
         return result.scalars().all()
 
     @staticmethod
-    async def get_tree(db: AsyncSession, only_active: bool | None = None) -> List[Profession]:
-        """Get top-level professions with children loaded."""
-        query = select(Profession).where(Profession.parent_id.is_(None)).options(selectinload(Profession.children))
+    async def get_tree(db: AsyncSession, only_active: bool | None = None) -> List["ProfessionWithChildren"]:
+        """Build a robust 2-level tree from ALL professions.
+
+        Every profession is guaranteed to appear: each one is attached to its
+        top-most ancestor (walking up parent_id). Deeper hierarchies are
+        flattened to fit the 2-level schema, and orphans (parent missing or
+        inactive) become top-level. Builds plain schema objects so the ORM
+        relationship is never mutated (no accidental re-parenting on commit).
+        """
+        from app.schemas.profession import ProfessionRead, ProfessionWithChildren
+
+        query = select(Profession)
         if only_active is not None:
             query = query.where(Profession.is_active == only_active)
         result = await db.execute(query.order_by(Profession.id.asc()))
-        profs = result.scalars().all()
-        if only_active is not None:
-            for p in profs:
-                p.children = [c for c in p.children if c.is_active == only_active]
-        return profs
+        all_profs = result.scalars().all()
+
+        by_id = {p.id: p for p in all_profs}
+
+        def top_ancestor(prof):
+            seen = set()
+            cur = prof
+            while cur.parent_id and cur.parent_id in by_id and cur.id not in seen:
+                seen.add(cur.id)
+                cur = by_id[cur.parent_id]
+            return cur
+
+        def to_read(p) -> "ProfessionRead":
+            return ProfessionRead(
+                id=p.id, name_uz=p.name_uz, name_ru=p.name_ru,
+                name_en=p.name_en, is_active=p.is_active, parent_id=p.parent_id,
+            )
+
+        children_map: dict[int, list] = {}
+        top_ids: list[int] = []
+        for p in all_profs:
+            anc = top_ancestor(p)
+            if anc.id == p.id:
+                top_ids.append(p.id)
+            else:
+                children_map.setdefault(anc.id, []).append(p)
+
+        roots: List[ProfessionWithChildren] = []
+        for tid in top_ids:
+            top = by_id[tid]
+            kids = sorted(children_map.get(tid, []), key=lambda c: c.name_uz.lower())
+            node = ProfessionWithChildren(
+                id=top.id, name_uz=top.name_uz, name_ru=top.name_ru,
+                name_en=top.name_en, is_active=top.is_active,
+                parent_id=top.parent_id,
+                children=[to_read(c) for c in kids],
+            )
+            roots.append(node)
+        return roots
 
     @staticmethod
     async def count(db: AsyncSession, only_active: bool | None = None, search: Optional[str] = None, parent_id: Optional[int] = None, top_level_only: bool = False) -> int:

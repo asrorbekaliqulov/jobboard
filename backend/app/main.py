@@ -71,6 +71,13 @@ async def on_startup():
     # Start the scheduler
     start_scheduler()
 
+    # Start real-time userbot channel listeners (guarded; safe if telethon missing)
+    try:
+        from app.services.userbot_listener import start_all_listeners
+        await start_all_listeners()
+    except Exception as e:
+        logger.warning(f"Userbot real-time listener startup skipped: {e}")
+
 
 async def _start_polling():
     """Run the dispatcher polling in background."""
@@ -108,6 +115,13 @@ async def on_shutdown():
     
     # Stop the scheduler
     stop_scheduler()
+
+    # Stop real-time userbot listeners
+    try:
+        from app.services.userbot_listener import stop_all_listeners
+        await stop_all_listeners()
+    except Exception:
+        pass
 
 @app.post("/webhook")
 async def bot_webhook(update: dict):

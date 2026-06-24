@@ -12,8 +12,10 @@ Handles:
 telethon is imported LAZILY and guarded so the app still boots even if the
 dependency is not installed yet. Nothing here touches existing tables' schema.
 """
+import asyncio
 import io
 import logging
+import random
 from typing import Optional
 
 from sqlalchemy import select
@@ -29,6 +31,23 @@ from app.services.storage import upload_file
 logger = logging.getLogger(__name__)
 
 SYSTEM_USER_TELEGRAM_ID = "userbot_channel_import"
+
+# --- Telegram safety / anti-ban settings ---------------------------------
+# Look like a normal, stable desktop client (consistent across sessions so
+# Telegram does not flag the account for changing devices every connect).
+_DEVICE_MODEL = "ISHKOP Desktop"
+_SYSTEM_VERSION = "Windows 10"
+_APP_VERSION = "4.16.8 x64"
+# Gentle, human-like pacing to stay well within Telegram limits.
+MIN_DELAY_BETWEEN_CHANNELS = 4.0   # seconds
+MIN_DELAY_BETWEEN_MESSAGES = 1.2   # seconds
+# Never flood-wait the worker too long; if Telegram asks for more, skip.
+MAX_FLOOD_WAIT_SECONDS = 60
+
+
+async def _human_pause(base: float):
+    """Sleep a randomized, human-like amount to avoid rate-limit patterns."""
+    await asyncio.sleep(base + random.uniform(0.3, 1.5))
 
 
 class TelethonNotInstalled(RuntimeError):
@@ -50,10 +69,23 @@ def _import_telethon():
 
 
 async def _new_client(account: UserbotAccount, session_str: str = ""):
-    """Create and connect a telethon client for the given account."""
+    """Create and connect a telethon client for the given account.
+
+    Uses stable device/app identifiers and conservative retry settings so the
+    account behaves like a real, long-lived client (reduces ban risk).
+    """
     TelegramClient, StringSession, _ = _import_telethon()
     client = TelegramClient(
-        StringSession(session_str or ""), account.api_id, account.api_hash
+        StringSession(session_str or ""),
+        account.api_id,
+        account.api_hash,
+        device_model=_DEVICE_MODEL,
+        system_version=_SYSTEM_VERSION,
+        app_version=_APP_VERSION,
+        # telethon auto-sleeps for short flood waits instead of raising
+        flood_sleep_threshold=MAX_FLOOD_WAIT_SECONDS,
+        connection_retries=3,
+        retry_delay=2,
     )
     await client.connect()
     return client
@@ -264,12 +296,23 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
             return 0
 
         system_user_id = await _get_system_user_id(db)
+        _, _, tg_errors = _import_telethon()
+        FloodWaitError = tg_errors.FloodWaitError
 
-        for channel in list(account.channels):
+        for ch_index, channel in enumerate(list(account.channels)):
             if not channel.is_active:
                 continue
+            # Space out channels to look human and avoid rate limits
+            if ch_index > 0:
+                await _human_pause(MIN_DELAY_BETWEEN_CHANNELS)
             try:
                 entity = await client.get_entity(channel.channel_identifier)
+            except FloodWaitError as fw:
+                # Telegram asked us to wait; stop this account's poll politely.
+                logger.warning(f"FloodWait {fw.seconds}s on get_entity; pausing account {account.id}.")
+                account.last_error = f"FloodWait {fw.seconds}s (kutilmoqda)"
+                await db.commit()
+                break
             except Exception as e:
                 logger.warning(f"get_entity failed for {channel.channel_identifier}: {e}")
                 continue
@@ -294,11 +337,16 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                     collected.append((msg.id, text))
                     if msg.id > new_max_id:
                         new_max_id = msg.id
+            except FloodWaitError as fw:
+                logger.warning(f"FloodWait {fw.seconds}s on iter_messages; pausing account {account.id}.")
+                account.last_error = f"FloodWait {fw.seconds}s (kutilmoqda)"
+                await db.commit()
+                break
             except Exception as e:
                 logger.warning(f"iter_messages failed for {channel.channel_identifier}: {e}")
                 continue
 
-            # Process oldest -> newest
+            # Process oldest -> newest, pacing AI calls
             for msg_id, text in reversed(collected):
                 if not _match_keywords(text, channel.keywords):
                     continue
@@ -318,6 +366,7 @@ async def poll_account(db: AsyncSession, account: UserbotAccount, max_per_channe
                 if created:
                     imported += 1
                     channel.imported_count = (channel.imported_count or 0) + 1
+                await _human_pause(MIN_DELAY_BETWEEN_MESSAGES)
 
             if new_max_id > (channel.last_message_id or 0):
                 channel.last_message_id = new_max_id
@@ -347,7 +396,10 @@ async def poll_all_accounts(db: AsyncSession) -> int:
     )
     accounts = result.scalars().all()
     total = 0
-    for account in accounts:
+    for idx, account in enumerate(accounts):
+        # Space out accounts so multiple userbots don't hammer Telegram at once
+        if idx > 0:
+            await _human_pause(MIN_DELAY_BETWEEN_CHANNELS)
         try:
             total += await poll_account(db, account)
         except TelethonNotInstalled:
