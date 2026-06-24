@@ -264,7 +264,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           <h1 className="text-xl font-black uppercase tracking-normal">
             Admin<span style={{ color: 'var(--accent)' }}>{t('admin_panel.core')}</span>
           </h1>
-          <div className="flex p-1 rounded-2xl border overflow-x-auto max-w-[800px]" 
+          <div className="flex flex-wrap p-1 rounded-2xl border" 
                style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border-primary)' }}>
             {(['users', 'vacancies', 'resumes', 'professions', 'regions', 'districts', 'works', 'userbot'] as const).map(t_tab => (
               <button 
@@ -281,7 +281,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   borderColor: activeTab === t_tab ? 'var(--border-primary)' : 'transparent'
                 }}
               >
-                {t_tab === 'userbot' ? 'Userbot' : t(`admin_panel.tabs.${t_tab}`)}
+                {t_tab === 'userbot' ? <span><i className="fa-solid fa-robot mr-1.5"></i>Userbot</span> : t(`admin_panel.tabs.${t_tab}`)}
               </button>
             ))}
           </div>
