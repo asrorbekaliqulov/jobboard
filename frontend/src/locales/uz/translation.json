@@ -177,7 +177,8 @@
     "phone": "Telefon",
     "email": "Email",
     "apply_now": "Ariza topshirish",
-    "view_contacts": "Kontaktlarni ko'rish"
+    "view_contacts": "Kontaktlarni ko'rish",
+    "share": "Ulashish"
   },
   "resume_card": {
     "experience_years": "{{count}} yil tajriba",
@@ -479,5 +480,43 @@
     "desc_chars_count": "belgi",
     "desc_tip_title": "Taklif:",
     "desc_tip_text": "Tavsif qisqa ko'rinmoqda. Ko'proq ma'lumot qo'shish e'loningizni yanada jozibali qiladi."
+  },
+  "admin_userbot": {
+    "error_generic": "Xatolik",
+    "fill_all_fields": "Barcha maydonlarni to'ldiring",
+    "account_added": "Akkaunt qo'shildi",
+    "enter_code": "Kodni kiriting",
+    "checking": "Tekshirilmoqda...",
+    "delete_account_confirm": "Akkauntni o'chirasizmi?",
+    "enter_channel": "Kanal username yoki linkini kiriting",
+    "channel_added": "Kanal qo'shildi",
+    "delete_channel_confirm": "Kanalni o'chirasizmi?",
+    "new_account_title": "Yangi userbot akkaunt",
+    "api_hint": "api_id va api_hash ni my.telegram.org dan oling. Telefon raqamini xalqaro formatda kiriting (+998...).",
+    "placeholder_name": "Nomi (label)",
+    "add": "Qo'shish",
+    "send_code": "Kod yuborish",
+    "stop": "To'xtatish",
+    "enable": "Yoqish",
+    "check": "Tekshirish",
+    "placeholder_code": "Telegram kodi",
+    "placeholder_2fa": "2FA parol (agar bo'lsa)",
+    "confirm": "Tasdiqlash",
+    "channels": "Kanallar",
+    "no_channels": "Kanal qo'shilmagan",
+    "all_vacancies": "Barcha vakansiyalar",
+    "imported_suffix": "import",
+    "active": "Faol",
+    "inactive": "O'chiq",
+    "add_channel": "+ Kanal",
+    "placeholder_channel": "@kanal yoki t.me/kanal",
+    "placeholder_keywords": "kalit so'zlar: #ishJoyi, dasturchi",
+    "on": "ON",
+    "status": {
+      "new": "Yangi",
+      "code_sent": "Kod yuborildi",
+      "authorized": "Faollashtirilgan",
+      "error": "Xato"
+    }
   }
 }

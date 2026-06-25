@@ -68,7 +68,7 @@
     "view_vacancies": "View vacancies",
     "view_workers": "View workers",
     "categories": "Professions & Work types",
-    "categories_empty": "No data found",
+    "categories_empty": "No categories found",
     "more": "More",
     "professions_block": "Professions",
     "works_block": "Work types",
@@ -99,7 +99,6 @@
       "new": "Latest",
       "saved": "Saved"
     },
-    "categories_empty": "No categories found",
     "no_workers": "No workers yet",
     "no_workers_hint": "New workers will appear soon"
   },
@@ -176,7 +175,8 @@
     "phone": "Phone",
     "email": "Email",
     "apply_now": "Apply now",
-    "view_contacts": "View contacts"
+    "view_contacts": "View contacts",
+    "share": "Share"
   },
   "resume_card": {
     "experience_years": "{{count}} years experience",
@@ -471,5 +471,43 @@
     "desc_chars_count": "chars",
     "desc_tip_title": "Tip:",
     "desc_tip_text": "Description seems short. Adding more details makes your listing more attractive."
+  },
+  "admin_userbot": {
+    "error_generic": "Error",
+    "fill_all_fields": "Fill in all fields",
+    "account_added": "Account added",
+    "enter_code": "Enter the code",
+    "checking": "Checking...",
+    "delete_account_confirm": "Delete this account?",
+    "enter_channel": "Enter channel username or link",
+    "channel_added": "Channel added",
+    "delete_channel_confirm": "Delete this channel?",
+    "new_account_title": "New userbot account",
+    "api_hint": "Get api_id and api_hash from my.telegram.org. Enter the phone number in international format (+998...).",
+    "placeholder_name": "Name (label)",
+    "add": "Add",
+    "send_code": "Send code",
+    "stop": "Stop",
+    "enable": "Enable",
+    "check": "Check",
+    "placeholder_code": "Telegram code",
+    "placeholder_2fa": "2FA password (if any)",
+    "confirm": "Confirm",
+    "channels": "Channels",
+    "no_channels": "No channels added",
+    "all_vacancies": "All vacancies",
+    "imported_suffix": "imports",
+    "active": "Active",
+    "inactive": "Off",
+    "add_channel": "+ Channel",
+    "placeholder_channel": "@channel or t.me/channel",
+    "placeholder_keywords": "keywords: #job, developer",
+    "on": "ON",
+    "status": {
+      "new": "New",
+      "code_sent": "Code sent",
+      "authorized": "Authorized",
+      "error": "Error"
+    }
   }
 }

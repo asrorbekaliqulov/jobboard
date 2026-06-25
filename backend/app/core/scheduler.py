@@ -1,5 +1,6 @@
 import logging
 import random
+from zoneinfo import ZoneInfo
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -11,6 +12,10 @@ from app.models.vacancy import Vacancy
 from app.models.daily_job_seeker import DailyJobSeeker
 
 logger = logging.getLogger(__name__)
+
+# All user-facing delivery times are scheduled in Tashkent time regardless of
+# the server's system timezone.
+TASHKENT_TZ = ZoneInfo("Asia/Tashkent")
 
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
@@ -145,7 +150,7 @@ async def run_userbot_poll_job():
 async def run_channel_delivery_job():
     """
     Scheduled job: deliver recent channel-sourced vacancies to engaged users.
-    Runs twice a day (12:00 and 20:00).
+    Runs three times a day in Tashkent time: ~06:30, 12:30, 20:30.
     """
     logger.info("Starting channel delivery job...")
     async with async_session_maker() as db:
@@ -209,12 +214,14 @@ def start_scheduler():
             replace_existing=True
         )
 
-        # Userbot: deliver channel vacancies to users at 12:00 and 20:00
+        # Userbot: deliver channel vacancies to users 3x/day in Tashkent time
+        # (morning ~06:30, midday 12:30, evening 20:30).
         scheduler.add_job(
             run_channel_delivery_job,
             'cron',
-            hour='12,20',
-            minute=0,
+            hour='6,12,20',
+            minute=30,
+            timezone=TASHKENT_TZ,
             id='channel_delivery',
             replace_existing=True
         )

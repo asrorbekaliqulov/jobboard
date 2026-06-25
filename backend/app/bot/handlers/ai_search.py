@@ -24,6 +24,8 @@ from app.models.vacancy import Vacancy, VacancyStatus
 from app.models.resume import Resume, ResumeStatus
 from app.models.profession import Profession
 from app.bot import memory
+from app.services.deeplink import parse_entity_link, vacancy_deeplink, resume_deeplink
+from app.services.ai_link_analysis import analyze_entity
 
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
@@ -638,6 +640,31 @@ async def handle_text_message(message: types.Message, i18n: I18nContext):
 
     if not settings.ai_enabled:
         await message.answer("AI xizmati hozirda ishlamayapti.")
+        return
+
+    # If the user pasted a vacancy/resume link, analyze that record from the DB
+    # (reliability, salary vs market, conditions) instead of normal chat.
+    entity = parse_entity_link(message.text)
+    if entity:
+        kind, entity_id = entity
+        status_msg = await message.answer("🔎 Havola tahlil qilinmoqda...")
+        try:
+            async with async_session_maker() as session:
+                analysis = await analyze_entity(session, kind, entity_id)
+            if not analysis:
+                await status_msg.edit_text("❌ Bu havola bo'yicha ma'lumot topilmadi (e'lon o'chirilgan yoki mavjud emas).")
+                return
+            link = vacancy_deeplink(entity_id) if kind == "vacancy" else resume_deeplink(entity_id)
+            kb = types.InlineKeyboardMarkup(inline_keyboard=[[
+                types.InlineKeyboardButton(text="🔎 Batafsil ochish", url=link)
+            ]])
+            try:
+                await status_msg.edit_text(analysis[:4000], reply_markup=kb, parse_mode="HTML")
+            except Exception:
+                await status_msg.edit_text(analysis[:4000], reply_markup=kb)
+        except Exception as e:
+            logger.warning(f"Link analysis error: {e}")
+            await status_msg.edit_text("❌ Tahlil qilishda xatolik yuz berdi.")
         return
 
     tg_id = str(message.from_user.id)

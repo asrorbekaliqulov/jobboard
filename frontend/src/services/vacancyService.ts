@@ -62,6 +62,16 @@ class VacancyService {
         return response.json();
     }
 
+    async getShareLink(id: number): Promise<{ deeplink: string; share_url: string; text: string }> {
+        const response = await fetch(`${API_URL}/${id}/share`, {
+            headers: this.getHeaders()
+        });
+        if (!response.ok) {
+            throw new Error('Failed to get share link');
+        }
+        return response.json();
+    }
+
     private sanitizeVacancyData(data: Partial<Vacancy>) {
         const cleaned: any = { ...data };
 

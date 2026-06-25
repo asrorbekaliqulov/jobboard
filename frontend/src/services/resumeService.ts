@@ -65,6 +65,16 @@ class ResumeService {
         return response.json();
     }
 
+    async getShareLink(id: number): Promise<{ deeplink: string; share_url: string; text: string }> {
+        const response = await fetch(`${API_URL}/${id}/share`, {
+            headers: this.getHeaders()
+        });
+        if (!response.ok) {
+            throw new Error('Failed to get share link');
+        }
+        return response.json();
+    }
+
     async createResume(resume: Partial<Resume>): Promise<Resume> {
         const cleanedResume = this.sanitizeResumeData(resume);
         const response = await fetch(`${API_URL}`, {
