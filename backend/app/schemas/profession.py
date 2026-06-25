@@ -25,6 +25,11 @@ class ProfessionUpdate(BaseModel):
 
 class ProfessionRead(ProfessionBase):
     id: int
+    # On read, tolerate legacy/imported rows that only have name_uz set
+    # (channel-imported professions may lack RU/EN translations) so the
+    # detail endpoint doesn't 500 during serialization.
+    name_ru: Optional[str] = None
+    name_en: Optional[str] = None
 
     class Config:
         from_attributes = True

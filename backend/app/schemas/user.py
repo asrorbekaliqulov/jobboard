@@ -23,7 +23,7 @@ class UserUpdate(UserBase):
 
 class UserRead(UserBase):
     id: int
-    telegram_id: str
+    telegram_id: Optional[str] = None
     last_login: Optional[datetime] = None
 
     class Config:
