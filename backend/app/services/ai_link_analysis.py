@@ -13,9 +13,30 @@ from sqlalchemy.orm import selectinload
 from app.core.config import settings
 from app.models.vacancy import Vacancy, VacancyStatus
 from app.models.resume import Resume, ResumeStatus
-from app.services.ai_core import ai_chat_completion
+from app.services.ai_core import get_openai_client
 
 logger = logging.getLogger(__name__)
+
+
+async def _ai_text(system_prompt: str, user_prompt: str) -> Optional[str]:
+    """Free-text (NOT JSON) completion for human-friendly analysis."""
+    if not settings.ai_enabled:
+        return None
+    try:
+        client = get_openai_client()
+        resp = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.5,
+            max_tokens=700,
+        )
+        return (resp.choices[0].message.content or "").strip() or None
+    except Exception as e:
+        logger.warning(f"Link analysis AI call failed: {e}")
+        return None
 
 
 def _fmt_money(value: Optional[int]) -> str:
@@ -98,36 +119,33 @@ async def analyze_vacancy(db, vacancy_id: int) -> Optional[str]:
         f"Ishonchlilik signallari: {', '.join(signals)}"
     )
 
+    system_prompt = (
+        "Sen ISHKOP ish platformasining tahlilchisisan. Foydalanuvchiga vakansiya "
+        "haqida JONLI, o'qishga qulay TAHLIL yozasan. JSON YOZMA, kod bloki ishlatma. "
+        "Faqat Telegram HTML matni qaytar: sarlavhalarni <b>...</b> bilan ajrat, "
+        "har bo'limni yangi qatordan boshla. Yangi narsa o'ylab topma."
+    )
     user_prompt = (
-        "Quyidagi VAKANSIYA haqida foydalanuvchiga o'zbek tilida qisqa, aniq va "
-        "samimiy TAHLIL yoz. Tuzilma:\n"
-        "1) Qisqa xulosa (1-2 jumla)\n"
-        "2) 💰 Maosh bozorga nisbatan (yuqori/o'rtacha/past — bozor ma'lumotiga tayan)\n"
-        "3) 📋 Shartlar va talablar (qisqa)\n"
-        "4) ✅ Ishonchlilik bahosi: signallarga qarab 'Ishonchli', 'O'rtacha' yoki "
-        "'Ehtiyot bo'ling' deb belgila va sababini ayt\n"
-        "5) 💡 Maslahat (1 jumla)\n"
-        "Telegram HTML dan foydalan (<b> bilan ajrat). Yangi narsa O'YLAB TOPMA — "
-        "faqat berilgan ma'lumotdan foydalan.\n\n"
+        "Quyidagi vakansiyani tahlil qil va aynan shu tuzilmada yoz (har biri "
+        "alohida qatorda, orasida bo'sh qator):\n\n"
+        f"<b>💼 {profession} — {v.company_name}</b>\n"
+        "📝 <qisqa xulosa, 1-2 jumla>\n"
+        "💰 <b>Maosh:</b> <bozorga nisbatan baho: yuqori/o'rtacha/past va sababi>\n"
+        "📋 <b>Shartlar:</b> <qisqa talablar>\n"
+        "✅ <b>Ishonchlilik:</b> <Ishonchli/O'rtacha/Ehtiyot bo'ling — signallarga qarab + sabab>\n"
+        "💡 <b>Maslahat:</b> <1 jumla>\n\n"
         f"MA'LUMOT:\n{facts}"
     )
-
-    try:
-        return (await ai_chat_completion(
-            feature="career_advisor",
-            user_message=user_prompt,
-            temperature=0.5,
-            max_tokens=700,
-            response_format=None,
-        )).strip()
-    except Exception as e:
-        logger.warning(f"Vacancy link analysis failed: {e}")
-        # Safe non-AI fallback so the user still gets useful info
-        return (
-            f"<b>{profession}</b> — {v.company_name}\n"
-            f"📍 {region}\n💰 {_salary_text(v.salary_from, v.salary_till)}\n"
-            f"📊 Bozor: {market_text}"
-        )
+    ai = await _ai_text(system_prompt, user_prompt)
+    if ai:
+        return ai
+    # Safe non-AI fallback so the user still gets useful info
+    return (
+        f"<b>💼 {profession} — {v.company_name}</b>\n"
+        f"📍 {region}\n"
+        f"💰 {_salary_text(v.salary_from, v.salary_till)}\n"
+        f"📊 Bozor: {market_text}"
+    )
 
 
 async def analyze_resume(db, resume_id: int) -> Optional[str]:
@@ -159,31 +177,29 @@ async def analyze_resume(db, resume_id: int) -> Optional[str]:
         f"Ishonchlilik signallari: {', '.join(signals)}"
     )
 
+    system_prompt = (
+        "Sen ISHKOP ish platformasining tahlilchisisan. Ish beruvchiga nomzod "
+        "(rezyume) haqida JONLI, o'qishga qulay TAHLIL yozasan. JSON YOZMA, kod "
+        "bloki ishlatma. Faqat Telegram HTML matni: <b>...</b> bilan ajrat, har "
+        "bo'limni yangi qatordan boshla. Yangi narsa o'ylab topma."
+    )
     user_prompt = (
-        "Quyidagi REZYUME (nomzod) haqida ish beruvchi uchun o'zbek tilida qisqa "
-        "TAHLIL yoz. Tuzilma:\n"
-        "1) Qisqa xulosa (1-2 jumla)\n"
-        "2) 🧰 Kuchli tomonlari (tajriba, ko'nikma)\n"
-        "3) ✅ Ishonchlilik bahosi: signallarga qarab belgila va sababini ayt\n"
-        "4) 💡 Maslahat (1 jumla)\n"
-        "Telegram HTML dan foydalan. Yangi narsa O'YLAB TOPMA.\n\n"
+        "Quyidagi nomzodni tahlil qil va aynan shu tuzilmada yoz (har biri alohida "
+        "qatorda):\n\n"
+        f"<b>🧑‍💼 {r.first_name} {r.last_name} — {profession}</b>\n"
+        "📝 <qisqa xulosa, 1-2 jumla>\n"
+        "🧰 <b>Kuchli tomonlari:</b> <tajriba, ko'nikma>\n"
+        "✅ <b>Ishonchlilik:</b> <Ishonchli/O'rtacha/Ehtiyot bo'ling — signallarga qarab + sabab>\n"
+        "💡 <b>Maslahat:</b> <1 jumla>\n\n"
         f"MA'LUMOT:\n{facts}"
     )
-
-    try:
-        return (await ai_chat_completion(
-            feature="career_advisor",
-            user_message=user_prompt,
-            temperature=0.5,
-            max_tokens=700,
-            response_format=None,
-        )).strip()
-    except Exception as e:
-        logger.warning(f"Resume link analysis failed: {e}")
-        return (
-            f"<b>{r.first_name} {r.last_name}</b> — {profession}\n"
-            f"📍 {region} · {r.experience} yil tajriba"
-        )
+    ai = await _ai_text(system_prompt, user_prompt)
+    if ai:
+        return ai
+    return (
+        f"<b>🧑‍💼 {r.first_name} {r.last_name} — {profession}</b>\n"
+        f"📍 {region} · {r.experience} yil tajriba"
+    )
 
 
 async def analyze_entity(db, kind: str, entity_id: int) -> Optional[str]:

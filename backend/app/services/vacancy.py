@@ -233,12 +233,18 @@ class VacancyService:
         result = await db.execute(query)
         vacancy = result.scalar_one_or_none()
         if vacancy:
-            # Increment view count
-            vacancy.viewed_count += 1
-            await db.commit()
-            # Re-fetch to ensure relationships are loaded and timestamp fields are refreshed
-            result = await db.execute(query)
-            vacancy = result.scalar_one_or_none()
+            # Increment view count — must NEVER break the GET. Null-safe and
+            # wrapped so a counter/commit error doesn't turn into a 500
+            # (which the Mini App showed as "vakansiya topilmadi").
+            try:
+                vacancy.viewed_count = (vacancy.viewed_count or 0) + 1
+                await db.commit()
+                result = await db.execute(query)
+                vacancy = result.scalar_one_or_none()
+            except Exception:
+                await db.rollback()
+                result = await db.execute(query)
+                vacancy = result.scalar_one_or_none()
         return vacancy
 
     @staticmethod
