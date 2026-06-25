@@ -76,6 +76,10 @@ class VacancyRead(VacancyBase):
     created_at: datetime
     updated_at: datetime
 
+    # On read we only display stored data, so tolerate legacy/non-RFC values
+    # (e.g. a phone number typed into the email box) instead of raising a 500.
+    email: Optional[str] = None
+
     # Source info (set when imported by userbot from a Telegram channel)
     source_type: Optional[str] = None
     source_url: Optional[str] = None

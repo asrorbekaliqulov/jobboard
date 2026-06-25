@@ -70,6 +70,10 @@ class ResumeRead(ResumeBase):
     updated_at: datetime
     viewed_count: int = 0
 
+    # On read we only display stored data, so tolerate legacy/non-RFC values
+    # (e.g. a phone number typed into the email box) instead of raising a 500.
+    email: Optional[str] = None
+
     user: Optional[UserRead] = None
     profession: Optional[ProfessionRead] = None
     region: Optional[RegionRead] = None
