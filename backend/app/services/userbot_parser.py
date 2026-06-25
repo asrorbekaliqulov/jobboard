@@ -9,7 +9,7 @@ import logging
 import re
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.location import Region
@@ -128,31 +128,100 @@ async def parse_channel_post(text: str) -> Optional[dict]:
     }
 
 
+def _looks_like_profession(name: str) -> bool:
+    """Guard against junk so we only auto-create sensible profession names."""
+    n = (name or "").strip()
+    if not (2 <= len(n) <= 50):
+        return False
+    if any(ch.isdigit() for ch in n):
+        return False
+    if any(tok in n.lower() for tok in ("http", "@", "www", "+998", "т.ме", "t.me")):
+        return False
+    # require it to be mostly letters/spaces
+    letters = sum(1 for ch in n if ch.isalpha() or ch in " -'’")
+    return letters >= max(2, int(len(n) * 0.7))
+
+
+async def _create_profession(db: AsyncSession, name: str) -> Optional[int]:
+    """Create a new top-level profession (category) from an AI-extracted name.
+
+    Uses a SAVEPOINT so a failure here never breaks the surrounding vacancy
+    import transaction. Returns the new id or None.
+    """
+    clean = (name or "").strip()
+    if not _looks_like_profession(clean):
+        return None
+    title = clean[0].upper() + clean[1:]
+    try:
+        async with db.begin_nested():
+            prof = Profession(
+                name_uz=title[:255],
+                name_ru=title[:255],
+                name_en=title[:255],
+                is_active=True,
+                parent_id=None,
+            )
+            db.add(prof)
+            await db.flush()
+            return prof.id
+    except Exception as e:
+        logger.warning(f"Auto-create profession '{name}' failed: {e}")
+        return None
+
+
 async def resolve_profession_id(db: AsyncSession, name: Optional[str]) -> Optional[int]:
-    """Find best-matching profession id; fallback to 'Boshqa' or any profession."""
+    """Resolve a free-text profession to an id.
+
+    Order: exact (all locales) -> partial (all locales) -> per-word -> create a
+    new category from the name. Only when no name is given at all do we fall
+    back to "Boshqa"/any, so channel vacancies get a meaningful category derived
+    from the post context instead of being dumped into "Boshqa".
+    """
     if name:
         nm = name.strip().lower()
-        # exact-ish match on any locale
+        # exact match on any locale
         result = await db.execute(
             select(Profession.id).where(
-                func.lower(Profession.name_uz) == nm
+                or_(
+                    func.lower(Profession.name_uz) == nm,
+                    func.lower(Profession.name_ru) == nm,
+                    func.lower(Profession.name_en) == nm,
+                )
             ).limit(1)
         )
         pid = result.scalar_one_or_none()
         if pid:
             return pid
-        # partial match
+        # partial match on any locale
         like = f"%{nm}%"
         result = await db.execute(
             select(Profession.id).where(
-                func.lower(Profession.name_uz).like(like)
+                or_(
+                    func.lower(Profession.name_uz).like(like),
+                    func.lower(Profession.name_ru).like(like),
+                    func.lower(Profession.name_en).like(like),
+                )
             ).limit(1)
         )
         pid = result.scalar_one_or_none()
         if pid:
             return pid
+        # per-word match (e.g. "Python dasturchi" -> "Dasturchi")
+        for word in [w for w in re.split(r"[\s,/]+", nm) if len(w) >= 4]:
+            result = await db.execute(
+                select(Profession.id).where(
+                    func.lower(Profession.name_uz).like(f"%{word}%")
+                ).limit(1)
+            )
+            pid = result.scalar_one_or_none()
+            if pid:
+                return pid
+        # no match: create a new category from the AI-extracted name
+        new_id = await _create_profession(db, name)
+        if new_id:
+            return new_id
 
-    # fallback: "Boshqa"
+    # fallback only when we truly have nothing usable
     result = await db.execute(
         select(Profession.id).where(func.lower(Profession.name_uz) == "boshqa").limit(1)
     )

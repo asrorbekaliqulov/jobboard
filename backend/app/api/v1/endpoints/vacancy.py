@@ -1,17 +1,94 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, File, UploadFile
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from app.core.database import get_db
 from app.core.security import get_current_user
+from app.core.logging_config import logger
 from app.models.user import User, UserRole
 from app.models.vacancy import VacancyStatus
 from app.services.vacancy import VacancyService
 from app.services.storage import upload_file
 from app.schemas.vacancy import VacancyCreate, VacancyUpdate, VacancyRead, VacancyList
+from app.services.deeplink import vacancy_deeplink, telegram_share_url
 from typing import Optional, Literal
 from pathlib import Path
 
 router = APIRouter()
+
+
+def _enum_val(v):
+    return getattr(v, "value", v)
+
+
+def _safe_named(obj):
+    if obj is None:
+        return None
+    return {
+        "id": getattr(obj, "id", None),
+        "name_uz": getattr(obj, "name_uz", None),
+        "name_ru": getattr(obj, "name_ru", None),
+        "name_en": getattr(obj, "name_en", None),
+        "is_active": getattr(obj, "is_active", True),
+    }
+
+
+def _safe_vacancy_payload(v) -> dict:
+    """Best-effort, never-failing serialization of a vacancy ORM row.
+
+    Used as a fallback when strict VacancyRead validation fails on legacy/partial
+    data, so the Mini App detail page always opens instead of showing
+    'vakansiya topilmadi'.
+    """
+    prof = getattr(v, "profession", None)
+    region = getattr(v, "region", None)
+    user = getattr(v, "user", None)
+    region_payload = None
+    if region is not None:
+        region_payload = {**_safe_named(region), "districts_count": 0}
+    user_payload = None
+    if user is not None:
+        user_payload = {
+            "id": getattr(user, "id", None),
+            "telegram_id": (str(getattr(user, "telegram_id", "")) if getattr(user, "telegram_id", None) is not None else None),
+            "username": getattr(user, "username", None),
+            "first_name": getattr(user, "first_name", None),
+            "last_name": getattr(user, "last_name", None),
+            "photo_url": getattr(user, "photo_url", None),
+            "phone": getattr(user, "phone", None),
+        }
+    return {
+        "id": getattr(v, "id", None),
+        "company_name": getattr(v, "company_name", None),
+        "profession_id": getattr(v, "profession_id", None),
+        "region_id": getattr(v, "region_id", None),
+        "status": _enum_val(getattr(v, "status", None)),
+        "description": getattr(v, "description", None),
+        "work_format": _enum_val(getattr(v, "work_format", None)),
+        "work_type": _enum_val(getattr(v, "work_type", None)),
+        "work_hours": getattr(v, "work_hours", None),
+        "phone": getattr(v, "phone", None),
+        "telegram": getattr(v, "telegram", None),
+        "email": getattr(v, "email", None),
+        "schedule": _enum_val(getattr(v, "schedule", None)),
+        "exp_from": getattr(v, "exp_from", None),
+        "exp_till": getattr(v, "exp_till", None),
+        "salary_from": getattr(v, "salary_from", None),
+        "salary_till": getattr(v, "salary_till", None),
+        "image_url": getattr(v, "image_url", None),
+        "video_url": getattr(v, "video_url", None),
+        "user_id": getattr(v, "user_id", None),
+        "viewed_count": getattr(v, "viewed_count", 0),
+        "created_at": getattr(v, "created_at", None),
+        "updated_at": getattr(v, "updated_at", None),
+        "source_type": getattr(v, "source_type", None),
+        "source_url": getattr(v, "source_url", None),
+        "source_channel": getattr(v, "source_channel", None),
+        "profession": _safe_named(prof),
+        "region": region_payload,
+        "user": user_payload,
+    }
 
 @router.get("/", response_model=VacancyList)
 async def list_vacancies(
@@ -123,18 +200,48 @@ async def create_vacancy(
     """
     return await VacancyService.create(db, vacancy_in, user_id=current_user.id)
 
-@router.get("/{vacancy_id}", response_model=VacancyRead)
+@router.get("/{vacancy_id}")
 async def get_vacancy(
     vacancy_id: int,
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get vacancy by ID.
+
+    Serialization is defensive: if a legacy/partial row fails strict validation,
+    we log the exact error and return a best-effort payload instead of a 500
+    (which the Mini App surfaced as "vakansiya topilmadi").
     """
     vacancy = await VacancyService.get_by_id(db, vacancy_id)
     if not vacancy:
         raise HTTPException(status_code=404, detail="Vacancy not found")
-    return vacancy
+    try:
+        return JSONResponse(content=jsonable_encoder(VacancyRead.model_validate(vacancy)))
+    except Exception as e:
+        logger.error(f"Vacancy {vacancy_id} strict serialization failed, using fallback: {e}")
+        return JSONResponse(content=jsonable_encoder(_safe_vacancy_payload(vacancy)))
+
+
+@router.get("/{vacancy_id}/share")
+async def share_vacancy(
+    vacancy_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Return a shareable deep link for a vacancy (used by the Mini App share button)."""
+    from sqlalchemy import select as _select
+    from app.models.vacancy import Vacancy as _V
+    from app.models.profession import Profession as _P
+    row = (await db.execute(
+        _select(_V.company_name, _P.name_uz)
+        .join(_P, _V.profession_id == _P.id, isouter=True)
+        .where(_V.id == vacancy_id)
+    )).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    company, prof = row
+    title = " — ".join([x for x in [prof, company] if x]) or "Vakansiya"
+    link = vacancy_deeplink(vacancy_id)
+    return {"deeplink": link, "share_url": telegram_share_url(link, title), "text": title}
 
 @router.put("/{vacancy_id}", response_model=VacancyRead)
 async def update_vacancy(

@@ -60,7 +60,16 @@ class AICategorizeService:
             "- HAR BIR kasb 'id' si javobda AYNAN BIR MARTA bo'lishi shart "
             "(takrorlanmasin va tushib qolmasin).\n"
             "- Har bir kasb faqat BITTA guruhga tegishli bo'lishi kerak\n"
-            "- 'Boshqa' guruhida MAKSIMUM 2 ta kasb bo'lishi mumkin!\n\n"
+            "- HECH QACHON 'Boshqa', 'Boshqalar', 'Прочее', 'Прочие', 'Other' kabi "
+            "umumiy/aralash guruh YARATMANG!\n"
+            "- Agar biror kasb mavjud kategoriyalarga MANTIQAN to'g'ri kelmasa, uni "
+            "noto'g'ri kategoriyaga TIQISHTIRMANG. Buning o'rniga o'sha kasbning o'z "
+            "yo'nalishi bo'yicha alohida parent yarating (masalan 'Fotograf' uchun "
+            "'Foto va Video', 'Tarjimon' uchun 'Tarjima'). Bitta kasb bo'lsa ham "
+            "alohida yo'nalish sifatida qoldiring \u2014 o'sha kasbning o'zi parent bo'ladi "
+            "(parent_existing_id sifatida o'sha kasb id si beriladi, children_ids bo'sh).\n"
+            "- Faqat HAQIQATAN bir-biriga yaqin kasblarni bitta guruhga qo'shing. "
+            "Shubha bo'lsa, alohida yo'nalish yarating.\n\n"
             "TAVSIYA ETILGAN ASOSIY KATEGORIYALAR (parent).\n"
             "Iloji boricha kasblarni AYNAN shu kategoriyalarga moslab joylashtir. "
             "Faqat hech qaysi biriga to'g'ri kelmasa, yangi mantiqiy parent qo'sh:\n"
@@ -122,19 +131,26 @@ class AICategorizeService:
 
         groups = result_data.get("groups", [])
 
-        # Find uncategorized professions and add them to "Boshqa" group
+        # No "Boshqa" bucket. Any profession the AI didn't place becomes its OWN
+        # top-level category (it is its own parent), so nothing is dumped into a
+        # generic "Other" group.
         all_categorized_ids = set()
         for group in groups:
             all_categorized_ids.update(group.get("children_ids", []))
+            # A standalone group references the profession as its own parent.
+            pid = group.get("parent_existing_id")
+            if pid and not group.get("children_ids"):
+                all_categorized_ids.add(pid)
 
         uncategorized = [p for p in all_profs if p.id not in all_categorized_ids]
-        if uncategorized:
+        for p in uncategorized:
             groups.append({
-                "parent_name_uz": "Boshqa xizmatlar",
-                "parent_name_ru": "Прочие услуги",
-                "parent_name_en": "Other Services",
-                "parent_existing_id": None,
-                "children_ids": [p.id for p in uncategorized],
+                "parent_name_uz": p.name_uz,
+                "parent_name_ru": p.name_ru or p.name_uz,
+                "parent_name_en": p.name_en or p.name_uz,
+                "parent_existing_id": p.id,
+                "children_ids": [],
+                "standalone": True,
             })
 
         # Enrich with current profession names for preview
@@ -158,6 +174,7 @@ class AICategorizeService:
                 "parent_name_ru": group.get("parent_name_ru", ""),
                 "parent_name_en": group.get("parent_name_en", ""),
                 "parent_existing_id": group.get("parent_existing_id"),
+                "standalone": group.get("standalone", False),
                 "children": children_details,
                 "children_count": len(children_details),
             })
@@ -238,6 +255,16 @@ class AICategorizeService:
                         changes_made += len(valid_children)
                 except Exception as e:
                     errors.append(f"Children yangilashda xato: {e}")
+            elif parent_id and not children_ids:
+                # Standalone leftover: promote to a top-level category (no "Boshqa").
+                try:
+                    await db.execute(
+                        update(Profession)
+                        .where(Profession.id == parent_id, Profession.parent_id.isnot(None))
+                        .values(parent_id=None)
+                    )
+                except Exception as e:
+                    errors.append(f"Standalone yangilashda xato: {e}")
 
         try:
             await db.commit()

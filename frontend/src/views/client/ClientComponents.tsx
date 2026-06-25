@@ -86,6 +86,17 @@ export const ClientVacancyExplorerCard: React.FC<{
       .catch(() => {});
   };
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    vacancyService.getShareLink(vacancy.id)
+      .then(r => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg?.openTelegramLink) tg.openTelegramLink(r.share_url);
+        else window.open(r.share_url, "_blank");
+      })
+      .catch(() => {});
+  };
+
   const handleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
     setBookmarkAnim(true);
@@ -179,11 +190,16 @@ export const ClientVacancyExplorerCard: React.FC<{
                   : `${formatSalary(vacancy.salary_till)} so'mgacha`
               : t("vacancy_card.negotiable")}
           </span>
-          {/* Like button */}
-          <button onClick={handleLike} className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all active:scale-90">
-            <i className={`fa-${liked ? 'solid' : 'regular'} fa-heart text-sm ${liked ? 'text-red-500' : 'text-slate-300'}`} />
-            {likeCount > 0 && <span className="text-[10px] font-bold text-slate-400">{likeCount}</span>}
-          </button>
+          {/* Like + Share */}
+          <div className="flex items-center gap-1">
+            <button onClick={handleLike} className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all active:scale-90">
+              <i className={`fa-${liked ? 'solid' : 'regular'} fa-heart text-sm ${liked ? 'text-red-500' : 'text-slate-300'}`} />
+              {likeCount > 0 && <span className="text-[10px] font-bold text-slate-400">{likeCount}</span>}
+            </button>
+            <button onClick={handleShare} title={t("vacancy_card.share")} className="flex items-center px-2 py-1 rounded-lg transition-all active:scale-90">
+              <i className="fa-solid fa-share-nodes text-sm text-slate-300 hover:text-indigo-400" />
+            </button>
+          </div>
         </div>
 
         {/* Tags row */}
@@ -514,6 +530,17 @@ export const ClientResumeExplorerCard: React.FC<{
     onToggleSave?.(resume.id);
   };
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    resumeService.getShareLink(resume.id)
+      .then(r => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg?.openTelegramLink) tg.openTelegramLink(r.share_url);
+        else window.open(r.share_url, "_blank");
+      })
+      .catch(() => {});
+  };
+
   const itemIsNew = resume.created_at && isNew(resume.created_at);
 
   return (
@@ -556,6 +583,13 @@ export const ClientResumeExplorerCard: React.FC<{
               <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark text-sm`} />
             </button>
           )}
+          <button
+            onClick={handleShare}
+            title={t("vacancy_card.share")}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 bg-slate-50 text-slate-300 hover:text-indigo-400"
+          >
+            <i className="fa-solid fa-share-nodes text-sm" />
+          </button>
         </div>
 
         <div className="flex flex-wrap gap-2 mt-3">

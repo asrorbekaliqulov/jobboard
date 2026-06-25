@@ -68,7 +68,7 @@
     "view_vacancies": "Смотреть вакансии",
     "view_workers": "Смотреть работников",
     "categories": "Профессии и виды работ",
-    "categories_empty": "Данные не найдены",
+    "categories_empty": "Категории не найдены",
     "more": "Ещё",
     "professions_block": "Профессии",
     "works_block": "Виды работ",
@@ -99,7 +99,6 @@
       "new": "Новинки",
       "saved": "Избранное"
     },
-    "categories_empty": "Категории не найдены",
     "no_workers": "Работников пока нет",
     "no_workers_hint": "Скоро появятся новые специалисты"
   },
@@ -176,7 +175,8 @@
     "phone": "Телефон",
     "email": "Email",
     "apply_now": "Откликнуться",
-    "view_contacts": "Показать контакты"
+    "view_contacts": "Показать контакты",
+    "share": "Поделиться"
   },
   "resume_card": {
     "experience_years": "Опыт {{count}} лет",
@@ -472,5 +472,43 @@
     "desc_chars_count": "символов",
     "desc_tip_title": "Совет:",
     "desc_tip_text": "Описание слишком короткое. Больше деталей сделает объявление привлекательнее."
+  },
+  "admin_userbot": {
+    "error_generic": "Ошибка",
+    "fill_all_fields": "Заполните все поля",
+    "account_added": "Аккаунт добавлен",
+    "enter_code": "Введите код",
+    "checking": "Проверка...",
+    "delete_account_confirm": "Удалить аккаунт?",
+    "enter_channel": "Введите username или ссылку канала",
+    "channel_added": "Канал добавлен",
+    "delete_channel_confirm": "Удалить канал?",
+    "new_account_title": "Новый userbot аккаунт",
+    "api_hint": "api_id и api_hash получите на my.telegram.org. Номер телефона вводите в международном формате (+998...).",
+    "placeholder_name": "Название (метка)",
+    "add": "Добавить",
+    "send_code": "Отправить код",
+    "stop": "Остановить",
+    "enable": "Включить",
+    "check": "Проверить",
+    "placeholder_code": "Код Telegram",
+    "placeholder_2fa": "2FA пароль (если есть)",
+    "confirm": "Подтвердить",
+    "channels": "Каналы",
+    "no_channels": "Каналы не добавлены",
+    "all_vacancies": "Все вакансии",
+    "imported_suffix": "импорт",
+    "active": "Активен",
+    "inactive": "Выкл",
+    "add_channel": "+ Канал",
+    "placeholder_channel": "@канал или t.me/канал",
+    "placeholder_keywords": "ключевые слова: #работа, разработчик",
+    "on": "ВКЛ",
+    "status": {
+      "new": "Новый",
+      "code_sent": "Код отправлен",
+      "authorized": "Авторизован",
+      "error": "Ошибка"
+    }
   }
 }
