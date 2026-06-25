@@ -59,7 +59,9 @@ class ResumeService {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch resume');
+            let body = '';
+            try { body = await response.text(); } catch { /* ignore */ }
+            throw new Error(`HTTP ${response.status} ${response.statusText} @ ${API_URL}/${id} — ${body.slice(0, 400)}`);
         }
 
         return response.json();
