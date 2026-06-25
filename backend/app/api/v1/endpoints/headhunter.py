@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import get_current_user
+from app.core.config import settings
 from app.models.user import User
 from app.schemas.ai import HHVacancyItem, HHVacancyListResponse
 
@@ -37,6 +38,9 @@ async def get_hh_vacancies(
     Bu vakansiyalar tashqi manbadan olingan va qizg'ish border bilan ko'rsatiladi.
     Asosiy vakansiyalar bazadagi ichki vakansiyalar hisoblanadi.
     """
+    # Integration disabled: do not call the external HH API, return empty.
+    if not settings.HH_ENABLED:
+        return HHVacancyListResponse(items=[], total=0, page=page, per_page=per_page)
     try:
         from app.services.headhunter import HeadHunterService
         result = await HeadHunterService.search_vacancies(
@@ -63,6 +67,8 @@ async def get_hh_vacancy_detail(
     """
     HeadHunter.uz dan bitta vakansiya tafsilotlari.
     """
+    if not settings.HH_ENABLED:
+        raise HTTPException(status_code=404, detail="Vakansiya topilmadi")
     try:
         from app.services.headhunter import HeadHunterService
         detail = await HeadHunterService.get_vacancy_detail(vacancy_id)
@@ -85,6 +91,8 @@ async def search_similar_on_hh(
     Bazadagi vakansiyaga o'xshash HH vakansiyalarini qidirish.
     AI orqali foydalanuvchiga qo'shimcha variantlar taklif qilish uchun.
     """
+    if not settings.HH_ENABLED:
+        return HHVacancyListResponse(items=[], total=0, page=0, per_page=limit)
     try:
         from app.services.headhunter import HeadHunterService
         return await HeadHunterService.get_similar_vacancies(query, limit)

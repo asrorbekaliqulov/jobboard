@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     # HeadHunter API Configuration
     HH_API_BASE_URL: str = "https://api.hh.ru"  # HH API (works for Uzbekistan with area=97)
     HH_API_TOKEN: str = ""  # Optional HH API token for higher limits
+    # Master switch for the HeadHunter integration. Disabled for now: no external
+    # requests are made to hh.ru and the /hh endpoints return empty results.
+    # Re-enable by setting HH_ENABLED=true in the environment.
+    HH_ENABLED: bool = False
 
     @property
     def use_webhook(self) -> bool:
