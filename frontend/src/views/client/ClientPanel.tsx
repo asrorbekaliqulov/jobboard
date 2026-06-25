@@ -14,6 +14,8 @@ import {
 import { useTranslation } from "react-i18next";
 import Layout from "../../components/Layout.tsx";
 import { authService } from "../../services/auth.ts";
+import { vacancyService } from "../../services/vacancyService.ts";
+import { resumeService } from "../../services/resumeService.ts";
 import {
   SearchableSelect,
   Pagination,
