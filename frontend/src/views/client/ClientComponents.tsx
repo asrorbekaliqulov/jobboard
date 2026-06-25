@@ -132,10 +132,10 @@ export const ClientVacancyExplorerCard: React.FC<{
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
-                  {getLocalizedName(vacancy.profession)}
+                  {vacancy.company_name}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {vacancy.company_name}
+                  {getLocalizedName(vacancy.profession)}
                 </p>
               </div>
               {/* NEW badge */}
