@@ -63,6 +63,10 @@ class RegionUpdate(BaseModel):
 class RegionRead(RegionBase):
     id: int
     districts_count: int = 0
+    # On read, tolerate legacy rows missing RU/EN names so serialization
+    # never 500s on the vacancy/resume detail endpoints.
+    name_ru: Optional[str] = None
+    name_en: Optional[str] = None
 
     class Config:
         from_attributes = True
