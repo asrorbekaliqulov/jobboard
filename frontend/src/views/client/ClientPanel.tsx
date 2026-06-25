@@ -179,7 +179,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
         }
       } catch (e) {
         console.error("Deep link fetch failed", e);
-        setDeepLinkItem({ kind: "error" });
+        setDeepLinkItem({ kind: "error", message: String((e as any)?.message || e) });
       } finally {
         setDeepLinkLoading(false);
         onDeepLinkConsumed?.();
@@ -825,7 +825,7 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
                   setDeepLinkItem({ kind: "resume", data: r });
                 }
               } catch (e) {
-                setDeepLinkItem({ kind: "error" });
+                setDeepLinkItem({ kind: "error", message: String((e as any)?.message || e) });
               } finally {
                 setDeepLinkLoading(false);
               }
@@ -1267,10 +1267,21 @@ const ClientPanel: React.FC<ClientPanelProps> = ({
               index={0}
             />
           ) : deepLinkItem?.kind === "error" ? (
-            <div className="py-16 text-center">
+            <div className="py-16 text-center px-4">
               <i className="fa-solid fa-circle-exclamation text-3xl text-red-400 mb-3" />
               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Topilmadi</p>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Bu e'lon o'chirilgan yoki mavjud emas</p>
+              {deepLink && (
+                <p className="text-[11px] mt-2 font-mono" style={{ color: 'var(--text-muted)' }}>
+                  {deepLink.type} #{deepLink.id}
+                </p>
+              )}
+              {deepLinkItem?.message && (
+                <pre className="text-[10px] mt-3 p-3 rounded-lg text-left whitespace-pre-wrap break-words max-h-48 overflow-auto"
+                  style={{ background: 'var(--bg-secondary, #f1f5f9)', color: '#b91c1c' }}>
+                  {deepLinkItem.message}
+                </pre>
+              )}
             </div>
           ) : null}
         </div>
