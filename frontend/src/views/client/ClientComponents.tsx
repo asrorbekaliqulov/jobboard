@@ -135,7 +135,7 @@ export const ClientVacancyExplorerCard: React.FC<{
                   {vacancy.company_name}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {getLocalizedName(vacancy.profession)}
+                  {getLocalizedName(vacancy.profession)} <span className="text-[10px] text-slate-400">(vakansiya)</span>
                 </p>
               </div>
               {/* NEW badge */}
@@ -559,7 +559,7 @@ export const ClientResumeExplorerCard: React.FC<{
                   {resume.first_name} {resume.last_name}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {getLocalizedName(resume.profession)}
+                  {getLocalizedName(resume.profession)} <span className="text-[10px] text-slate-400">(resume)</span>
                 </p>
               </div>
               {itemIsNew && (
