@@ -210,7 +210,10 @@
     "partner_title": "Employer",
     "terms_agree": "By continuing, you agree to the",
     "terms_link": "terms",
-    "terms_suffix": "of the platform"
+    "terms_suffix": "of the platform",
+    "shows_vacancies": "Vacancies",
+    "shows_resumes": "Resumes",
+    "shows_daily": "Daily jobs"
   },
   "client_panel": {
     "switch_title": "Switch work mode",

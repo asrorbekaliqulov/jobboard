@@ -212,7 +212,10 @@
     "terms_agree": "Davom etish orqali siz",
     "terms_link": "qoidalar",
     "terms_suffix": "bilan rozilik bildirasiz",
-    "failed_role": "Rolni saqlab bo'lmadi. Iltimos, qaytadan urunib ko'ring."
+    "failed_role": "Rolni saqlab bo'lmadi. Iltimos, qaytadan urunib ko'ring.",
+    "shows_vacancies": "Vakansiyalar",
+    "shows_resumes": "Rezyumelar",
+    "shows_daily": "Kunlik ishlar"
   },
   "client_panel": {
     "switch_title": "Ish joyini almashtirish",

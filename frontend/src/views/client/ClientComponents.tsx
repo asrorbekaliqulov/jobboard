@@ -132,10 +132,10 @@ export const ClientVacancyExplorerCard: React.FC<{
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
-                  {vacancy.company_name}
+                  {getLocalizedName(vacancy.profession)}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {getLocalizedName(vacancy.profession)} <span className="text-[10px] text-slate-400">(vakansiya)</span>
+                <p className="text-xs text-slate-600 font-medium mt-0.5 truncate">
+                  {vacancy.company_name}
                 </p>
               </div>
               {/* NEW badge */}
@@ -556,10 +556,10 @@ export const ClientResumeExplorerCard: React.FC<{
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h3 className="font-bold text-[15px] text-slate-900 leading-tight truncate">
-                  {resume.first_name} {resume.last_name}
+                  {getLocalizedName(resume.profession)}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {getLocalizedName(resume.profession)} <span className="text-[10px] text-slate-400">(resume)</span>
+                <p className="text-xs text-slate-600 font-medium mt-0.5 truncate">
+                  {resume.first_name} {resume.last_name}
                 </p>
               </div>
               {itemIsNew && (

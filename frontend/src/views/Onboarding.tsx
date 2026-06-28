@@ -109,6 +109,9 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
               <div className="flex-1">
                 <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.candidate_title')}</h3>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.candidate_desc')}</p>
+                <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: 'var(--accent-lighter)', color: 'var(--accent)' }}>
+                  <i className="fa-solid fa-briefcase text-[8px]" /> {t('onboarding.shows_vacancies')}
+                </span>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
@@ -120,6 +123,9 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
               <div className="flex-1">
                 <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.partner_title')}</h3>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.partner_desc')}</p>
+                <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30">
+                  <i className="fa-solid fa-user text-[8px]" /> {t('onboarding.shows_resumes')}
+                </span>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
@@ -131,6 +137,9 @@ const Onboarding: React.FC<{ onComplete: (role: UserRole) => void; onAdmin: () =
               <div className="flex-1">
                 <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{t('onboarding.daily_job_seeker_title')}</h3>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('onboarding.daily_job_seeker_desc')}</p>
+                <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30">
+                  <i className="fa-solid fa-bolt text-[8px]" /> {t('onboarding.shows_daily')}
+                </span>
               </div>
               <i className="fa-solid fa-chevron-right text-sm" style={{ color: 'var(--text-muted)' }} />
             </button>
