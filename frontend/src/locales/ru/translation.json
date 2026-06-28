@@ -210,7 +210,10 @@
     "partner_title": "Работодатель",
     "terms_agree": "Продолжая, вы соглашаетесь с",
     "terms_link": "правилами",
-    "terms_suffix": "платформы"
+    "terms_suffix": "платформы",
+    "shows_vacancies": "Вакансии",
+    "shows_resumes": "Резюме",
+    "shows_daily": "Ежедневная работа"
   },
   "client_panel": {
     "switch_title": "Смена рабочего режима",
